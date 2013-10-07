@@ -1,0 +1,2 @@
+supervisor==3.0
+-e .

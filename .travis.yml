@@ -1,0 +1,7 @@
+
+install:
+  - sudo apt-get install libpq-dev
+  - pip install -e .
+
+script: manage.py test main
+
