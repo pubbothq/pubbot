@@ -1,4 +1,4 @@
-from celery import current_app
+from celery import current_app, group, chord
 
 from match import Subscriptions
 
@@ -14,10 +14,13 @@ def get_tasks_with_subscription(subscription):
             yield task
 
 
+def get_group_for_subscriptions(subscription):
+    return group(t.subtask(kwargs) for t in get_tasks_with_subscription(kwargs['kind']))
+
+
 def broadcast(**kwargs):
     """
     Invoke all tasks that subscribe to channels matching the channel on msg
     """
-    for task in get_tasks_with_subscription(kwargs['kind']):
-        task.delay(kwargs)
+    return get_group_for_subscriptions(**kwargs).apply_async()
 
