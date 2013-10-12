@@ -117,8 +117,6 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'zap',
     'south',
-    'kombu.transport.django',
-    'djcelery',
     'gunicorn',
     'pubbot.main',
     'pubbot.irc',
@@ -160,14 +158,7 @@ LOGGING = {
     }
 }
 
-BROKER_URL = 'django://'
-CELERY_RESULT_BACKEND = 'database'
+BROKER_URL = 'amqp://'
+CELERY_RESULT_BACKEND = 'cache+memcached://127.0.0.1:11211/'
 CELERYD_POOL = 'gevent'
-# CELERY_IMPORTS = ("pubbot.main.tasks", )
 
-import djcelery
-djcelery.setup_loader()
-
-from celery import current_app
-current_app.loader.import_default_modules()
-del current_app

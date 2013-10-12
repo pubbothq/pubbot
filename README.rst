@@ -4,6 +4,15 @@ pubbot
 
 I am a rewrite of an old and slightly broken Twisted IRC bot.
 
+Service
+irc            <-  ->
+kismet             ->
+squeezecenter  <-  ->
+bonjour            ->
+gunicorn       <-  ->
+other workers  <-  ->
+
+
 Running me
 ==========
 

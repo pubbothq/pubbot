@@ -1,8 +1,10 @@
 from functools import wraps
 import re
 
-from celery import task
 import requests
+
+from pubbot.main.celery import app
+
 
 def parse_chat_text(regex, subscribe=None):
     """
@@ -21,7 +23,7 @@ def parse_chat_text(regex, subscribe=None):
         new_func.__name__ = func.__name__
         new_func.__doc__ = func.__doc__
         new_func.__dict__.update(func.__dict__)
-        new_func = task(new_func, subscribe=subscribe or ['chat.#.chat'])
+        new_func = app.task(new_func, subscribe=subscribe or ['chat.#.chat'])
         return new_func
     return decorator
 
@@ -32,11 +34,10 @@ def twitter_link(msg, user, repo, id):
     tweet = s['text'].encode('ascii', 'replace')
     screen_name = s['user']['screen_name']
 
-    msg = {
-        'channel': 'mouth',
+    return {
         'text': '[ %s: %s ]' % (screen_name, tweet),
+        'useful': True,
         }
-    # request.send(*msg)
 
 
 @parse_chat_text(r'https://github.com/(?P<user>[\d\w]+)/(?P<repo>[\d\w]+)/pull/(?P<id>[\d]+)')
@@ -47,11 +48,10 @@ def pull_request(msg, user, repo, id):
     title = pull['title'].encode('ascii', 'replace')
     name = pull['user']['login']
 
-    msg = {
-        'channel': 'mouth',
+    return {
         'text': '[ %s: %s ]' % (name, title),
+        'useful': True,
         }
-    # request.send(*msg)
 
 
 @parse_chat_text(r'https://alpha.app.net/(?P<account>[\d\w]+)/post/(?P<id>[\d]+)')
@@ -59,7 +59,10 @@ def on_appdotnet_link(msg, account, id):
     res = requests.get('https://alpha-api.app.net/stream/0/posts/%s' % id).json()
     tweet = res['data']['text'].encode('ascii', 'replace')
     screen_name = res['data']['user']['username']
-    message.reply('[ ' + screen_name +': ' + tweet + ' ]')
+    return {
+        'text': '[ %s: %s ]' % (screen_name, tweet),
+        'useful': True,
+        }
 
 
 @parse_chat_text(r'^(image|img) me (?P<query>[\s\w]+)')
@@ -75,9 +78,14 @@ def image_search(msg, query):
     if images:
         def_image = 'https://is0.4sqi.net/userpix/FFUB3WWFGXUNFYDP.gif'
         image = random.choice(images).get('url', def_image)
-        message.reply(image)
-    else:
-        message.reply("There are no images matching '%s'" % query)
+        return {
+            'text': image,
+            }
+
+    return {
+        'text': "There are no images matching '%s'" % query,
+        }
+
 
 
 @parse_chat_text(r'^udefine: (?P<term>[\w]+)')
