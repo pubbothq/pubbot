@@ -28,16 +28,22 @@ def parse_chat_text(regex, subscribe=None):
     return decorator
 
 
+"""
 @parse_chat_text(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
-def twitter_link(msg, user, repo, id):
+def twitter_link(msg, account, id):
+    # See https://dev.twitter.com/docs/auth/application-only-auth
+    # and https://dev.twitter.com/docs/api/1.1/post/oauth2/token
+    bearer_token = requests.post('https://api.twitter.com/oauth2/token')
+
     s = requests.get('https://api.twitter.com/1/statuses/show.json?id=%s' % id).json()
     tweet = s['text'].encode('ascii', 'replace')
     screen_name = s['user']['screen_name']
 
     return {
-        'text': '[ %s: %s ]' % (screen_name, tweet),
+        'content': '[ %s: %s ]' % (screen_name, tweet),
         'useful': True,
         }
+"""
 
 
 @parse_chat_text(r'https://github.com/(?P<user>[\d\w]+)/(?P<repo>[\d\w]+)/pull/(?P<id>[\d]+)')
@@ -49,7 +55,7 @@ def pull_request(msg, user, repo, id):
     name = pull['user']['login']
 
     return {
-        'text': '[ %s: %s ]' % (name, title),
+        'content': '[ %s: %s ]' % (name, title),
         'useful': True,
         }
 
@@ -60,7 +66,7 @@ def on_appdotnet_link(msg, account, id):
     tweet = res['data']['text'].encode('ascii', 'replace')
     screen_name = res['data']['user']['username']
     return {
-        'text': '[ %s: %s ]' % (screen_name, tweet),
+        'content': '[ %s: %s ]' % (screen_name, tweet),
         'useful': True,
         }
 
@@ -79,11 +85,11 @@ def image_search(msg, query):
         def_image = 'https://is0.4sqi.net/userpix/FFUB3WWFGXUNFYDP.gif'
         image = random.choice(images).get('url', def_image)
         return {
-            'text': image,
+            'content': image,
             }
 
     return {
-        'text': "There are no images matching '%s'" % query,
+        'content': "There are no images matching '%s'" % query,
         }
 
 
@@ -114,9 +120,14 @@ def udefine(msg, term):
         definitions.append(unicode(definition))
 
     if not definitions:
-        client.msg(channel, "No matches found for '%s'" % term)
-        return
+        return {
+            'content': "No matches found for '%s'" % term,
+            }
 
-    for d in definitions[:4]:
-        message.reply("\x031,1 " + d)
+    return {
+        'content': definitions[:4],
+        'offensive': True,
+        }
+
+    # message.reply("\x031,1 " + d)
 

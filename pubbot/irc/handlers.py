@@ -1,15 +1,10 @@
-from django.core.management.base import BaseCommand, CommandError
+import re
 
-from gevent.pool import Group
-
-from geventirc import Client
 from geventirc.irc import Client, IRC_PORT
 from geventirc import handlers, replycode, message
 
-import re
-
-from pubbot.irc.models import Network
-from pubbot.main.utils import broadcast
+from pubbot.main.utils import broadcast, get_broadcast_group_for_message
+from pubbot.irc.tasks import mouth
 
 
 class BotInterfaceHandler(object):
@@ -117,39 +112,11 @@ class ConversationHandler(object):
         channel, content = msg.params[0], " ".join(msg.params[1:])
         user = msg.prefix.split("!")[0]
 
-        broadcast(
+        handlers = get_broadcast_group_for_message(
             kind = "chat.irc.%s.chat" % channel,
             user = user,
             channel = channel,
             content = content,
             )
-
-
-class Command(BaseCommand):
-    args = ''
-    help = 'Start irc client in foreground'
-
-    def handle(self, *args, **options):
-        group = Group()
-        for network in Network.objects.all():
-            print "Connecting to '%s' on port '%d'" % (network.server, int(network.port))
-
-            client = Client(network.server, 'pubbot2', port=str(network.port))
-
-            # House keeping handlers
-            client.add_handler(handlers.ping_handler, 'PING')
-            client.add_handler(handlers.nick_in_use_handler, replycode.ERR_NICKNAMEINUSE)
-            client.add_handler(UserListHandler())
-            client.add_handler(InviteProcessor())
-
-            # Channels to join
-            for room in network.rooms.all():
-                client.add_handler(handlers.JoinHandler(room.room, False))
-
-            # Inject conversation data into queue
-            client.add_handler(ConversationHandler())
-
-            group.start(client)
-
-        group.join()
+        (handlers | mouth.s(server=client.hostname, channel=channel)).apply_async()
 
