@@ -22,7 +22,7 @@ setup(
         'kombu==3.0.0',
         'celery[memcache,librabbitmq]==3.1rc4',
         'django-celery==3.1b2',
-        'gevent==1.0rc2',
+        'gevent==1.0rc3',
         'greenlet==0.4.1',
         'gevent-psycopg2==0.0.3',
         'geventirc==0.1dev',
