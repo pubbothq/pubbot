@@ -1,7 +1,7 @@
 from pubbot.main.celery import app
 
 
-@app.task
+@app.task(queue='irc')
 def mouth(results, server, channel):
     results = [r for r in results if r]
     if not results:
@@ -13,7 +13,7 @@ def mouth(results, server, channel):
     clients[server].msg(channel, msg['content'])
 
 
-@app.task
+@app.task(queue='irc')
 def say(msg):
     clients[msg['server']].msg(msg['channel'], msg['content'])
 

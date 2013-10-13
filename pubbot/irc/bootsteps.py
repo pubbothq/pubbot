@@ -1,5 +1,5 @@
 from celery import bootsteps
-
+from django.conf import settings
 from geventirc.irc import Client
 from geventirc import handlers, replycode
 
@@ -12,7 +12,13 @@ clients = {}
 
 class IrcStep(bootsteps.StartStopStep):
 
+    running = False
+
     def start(self, worker):
+        if not 'irc' in worker.app.amqp.queues:
+            return
+        self.running = True
+
         print "Starting irc services"
         self.group = []
         for network in Network.objects.all():
@@ -39,6 +45,7 @@ class IrcStep(bootsteps.StartStopStep):
             self.group.append(client)
 
     def stop(self, worker):
-        print "Stopping irc services"
-        [c.stop() for c in self.group]
+        if self.running:
+            print "Stopping irc services"
+            [c.stop() for c in self.group]
 
