@@ -1,5 +1,4 @@
 from celery import bootsteps
-from django.conf import settings
 from geventirc.irc import Client
 from geventirc import handlers, replycode
 

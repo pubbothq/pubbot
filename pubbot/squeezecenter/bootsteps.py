@@ -1,58 +1,12 @@
 
 from urllib import unquote_plus
-from django.core.management.base import BaseCommand, CommandError
+from celery import bootsteps
 import gevent.queue
 import gevent.pool
 from gevent import socket
 
 from pubbot.main.utils import broadcast
-
-
-class DebugHandler(object):
-
-    def __call__(self, conn, message):
-        # print message
-        pass
-
-
-class CurrentSongHandler(object):
-
-    def __init__(self):
-        self.title = self.album = self.artist = None
-
-    def start(self, conn):
-        self.request_track_details(conn)
-
-    def request_track_details(self, conn):
-        self.title = self.artist = self.title = None
-        conn.send('title ?')
-        conn.send('album ?')
-        conn.send('artist ?')
-
-    def __call__(self, conn, message):
-        if message[0] in ('artist', 'album', 'title'):
-            setattr(self, message[0], message[1])
-
-            if self.title and self.album and self.artist:
-                broadcast(
-                    kind="music.start",
-                    artist=self.artist,
-                    album=self.album,
-                    title=self.title
-                    )
-                self.title = self.artist = self.title = None
-
-        elif message[0] =='playlist' and message[1].startswith('newsong '):
-            self.request_track_details(conn)
-
-
-class StopHandler(object):
-
-    def __call__(self, conn, message):
-        if message[0] == 'playlist' and message[1] == 'stop':
-            broadcast(
-                kind='music.stop',
-                )
+from pubbot.squeezecenter import handlers
 
 
 class SqueezeCenterConnection(object):
@@ -67,9 +21,6 @@ class SqueezeCenterConnection(object):
         self._group = gevent.pool.Group()
 
         self.handlers = []
-        self.add_handler(CurrentSongHandler())
-        self.add_handler(StopHandler())
-        self.add_handler(DebugHandler())
 
     def start(self):
         address = (socket.gethostbyname(self.hostname), self.port)
@@ -160,12 +111,25 @@ class SqueezeCenterConnection(object):
                 self._group.spawn(handler, self, data)
 
 
-class Command(BaseCommand):
-    args = ''
-    help = 'Connect to a squeeze center an emit events about its doings'
+class SqueezeCenterStep(bootsteps.StartStopStep):
 
-    def handle(self, hostname, port, **options):
-        c = SqueezeCenterConnection(hostname, port)
-        c.start()
-        c.join()
+    client = None
+
+    def start(self, worker):
+        if not 'squeeze' in worker.app.amqp.queues:
+            return
+
+        print "Connecting to SqueezeCenter"
+        self.client = SqueezeCenterConnection('music', 9090)
+
+        self.client.add_handler(handlers.CurrentSongHandler())
+        self.client.add_handler(handlers.StopHandler())
+        # self.client.add_handler(handlers.DebugHandler())
+
+        self.client.start()
+
+    def stop(self, worker):
+        if self.client:
+            print "Disconnecting from SqueezeCenter"
+            self.client.stop()
 
