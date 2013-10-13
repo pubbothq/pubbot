@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'pubbot.markov',
     'pubbot.conversation',
     'pubbot.bonjour',
+    'pubbot.education',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

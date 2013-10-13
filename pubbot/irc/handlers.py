@@ -114,7 +114,7 @@ class ConversationHandler(object):
 
         handlers = get_broadcast_group_for_message(
             kind = "chat.irc.%s.chat" % channel,
-            user = user,
+            source = user,
             channel = channel,
             content = content,
             )
