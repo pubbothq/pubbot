@@ -8,6 +8,9 @@ I am a rewrite of an old and slightly broken Twisted IRC bot. I'm still very rou
 Development environment
 =======================
 
+Dependencies:
+    sudo apt-get libavahi-compat-libdnssd-dev libmemcached-dev
+
 To build me::
 
     git clone git://github.com/pubbothq/pubbot
