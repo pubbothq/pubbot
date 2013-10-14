@@ -20,5 +20,5 @@ class Command(BaseCommand):
     help = 'Run a python script'
 
     def handle(self, script, *args, **options):
-        execfile(script)
+        execfile(script, {}, {})
 

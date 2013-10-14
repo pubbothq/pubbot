@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.core.management.base import BaseCommand, CommandError
+from celery import bootsteps
+from pubbot.main.protocols.line_protocol import LineProtocol
 
 
 class KismetConnection(LineProtocol):
@@ -117,10 +118,14 @@ class KismetConnection(LineProtocol):
         self.capabilities[capability] = fields
 
 
-class Command(BaseCommand):
-    args = ''
-    help = 'Start irc client in foreground'
+class Bootstep(celery.StartStopStep):
 
-    def handle(self, *args, **options):
-        pass
+    def start(self, worker):
+        if not 'kismet' in worker.app.amqp.queues:
+            return
+        self.connection = Kismet()
+        self.connection.start()
+
+    def stop(self, worker):
+        self.connection.stop()
 
