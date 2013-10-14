@@ -9,6 +9,9 @@
 # Install our main egg
 -e .
 
+# Test dependencies
+django-discover-runner
+
 # These aren't part of the project, but are useful for dev/deployment
 supervisor==3.0
 

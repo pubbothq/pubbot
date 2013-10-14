@@ -17,7 +17,7 @@ from __future__ import absolute_import
 from celery import group, chord
 
 from pubbot.main.celery import app
-from pubbot.main.match import Subscriptions
+from pubbot.main.match import match
 
 
 def get_tasks_with_subscription(subscription):
@@ -26,8 +26,8 @@ def get_tasks_with_subscription(subscription):
     """
     for task in app.tasks.values():
         # FIXME: The intention is to create a differet default task that
-        # precompiles channels to a Subscriptions object for us
-        if Subscriptions(getattr(task, 'subscribe', [])).match(subscription):
+        # precompiles channels to a regex ahead of time
+        if match(getattr(task, 'subscribe', []), subscription):
             yield task
 
 
