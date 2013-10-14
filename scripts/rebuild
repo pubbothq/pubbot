@@ -1,6 +1,0 @@
-#! /bin/sh
-manage.py zap_and_create_db
-manage.py syncdb --noinput
-manage.py migrate --noinput
-manage.py collectstatic --noinput
-

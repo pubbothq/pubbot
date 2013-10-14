@@ -30,13 +30,9 @@ setup(
         'requests==2.0.0',
         'pybonjour',
         ],
-    dependency_links = [
-        'https://gevent.googlecode.com/files/gevent-1.0rc2.tar.gz#egg=gevent-1.0rc2',
-        'https://github.com/pubbothq/geventirc/archive/master.zip#egg=geventirc-0.1dev',
-        ],
-    scripts=[
-        'manage.py',
-        'scripts/rebuild',
-        ],
+    entry_points="""
+    [console_scripts]
+    pubbot = pubbot.manage:main
+    """,
     )
 
