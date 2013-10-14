@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.core.management.base import BaseCommand, CommandError
+from celery import bootsteps
 from gevent.socket import wait_read, timeout
 from gevent.queue import Queue
 from gevent.pool import Group
@@ -21,17 +21,21 @@ import pybonjour
 from pubbot.main.utils import broadcast
 
 
-class Command(BaseCommand):
-    args = ''
-    help = 'Listen to bonjour announcements on the network'
+class Bootstep(bootsteps.StartStopStep):
 
-    def handle(self, *args, **options):
+    queue = 'bonjour'
+
+    def start(self, worker):
+        print "Starting bonjour..."
         self._to_resolve = Queue()
 
-        group = Group()
-        group.spawn(self._browse_loop)
-        group.spawn(self._resolve_loop)
-        group.join()
+        self.group = Group()
+        self.group.spawn(self._browse_loop)
+        self.group.spawn(self._resolve_loop)
+
+    def stop(self, worker):
+        print "Stopping bonjour..."
+        self.group.kill()
 
     def _browse_loop(self):
         # FIXME: Would be nice to detect more than just airplay...

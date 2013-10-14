@@ -118,12 +118,12 @@ class KismetConnection(LineProtocol):
         self.capabilities[capability] = fields
 
 
-class Bootstep(celery.StartStopStep):
+class Bootstep(bootsteps.StartStopStep):
+
+    queue = 'kismet'
 
     def start(self, worker):
-        if not 'kismet' in worker.app.amqp.queues:
-            return
-        self.connection = Kismet()
+        self.connection = KismetConnection('192.168.0.142', 2501)
         self.connection.start()
 
     def stop(self, worker):

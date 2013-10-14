@@ -124,14 +124,11 @@ class SqueezeCenterConnection(object):
                 self._group.spawn(handler, self, data)
 
 
-class SqueezeCenterStep(bootsteps.StartStopStep):
+class Bootstep(bootsteps.StartStopStep):
 
-    client = None
+    queue = 'squeeze'
 
     def start(self, worker):
-        if not 'squeeze' in worker.app.amqp.queues:
-            return
-
         print "Connecting to SqueezeCenter"
         self.client = SqueezeCenterConnection('music', 9090)
 
@@ -142,7 +139,6 @@ class SqueezeCenterStep(bootsteps.StartStopStep):
         self.client.start()
 
     def stop(self, worker):
-        if self.client:
-            print "Disconnecting from SqueezeCenter"
-            self.client.stop()
+        print "Disconnecting from SqueezeCenter"
+        self.client.stop()
 

@@ -23,15 +23,12 @@ from pubbot.irc.handlers import *
 # FIXME: It would be nice if this global didn't exist..
 clients = {}
 
-class IrcStep(bootsteps.StartStopStep):
+class Bootstep(bootsteps.StartStopStep):
 
+    queue = 'irc'
     running = False
 
     def start(self, worker):
-        if not 'irc' in worker.app.amqp.queues:
-            return
-        self.running = True
-
         print "Starting irc services"
         self.group = []
         for network in Network.objects.all():
@@ -58,7 +55,6 @@ class IrcStep(bootsteps.StartStopStep):
             self.group.append(client)
 
     def stop(self, worker):
-        if self.running:
-            print "Stopping irc services"
-            [c.stop() for c in self.group]
+        print "Stopping irc services"
+        [c.stop() for c in self.group]
 

@@ -16,14 +16,35 @@ from __future__ import absolute_import
 
 from celery import Celery
 from django.conf import settings
+from django.utils.importlib import import_module
+
 
 app = Celery('pubbot.main')
 app.config_from_object(settings)
 app.autodiscover_tasks(settings.INSTALLED_APPS, related_name='tasks')
 
-from pubbot.irc.bootsteps import IrcStep
-app.steps['worker'].add(IrcStep)
 
-from pubbot.squeezecenter.bootsteps import SqueezeCenterStep
-app.steps['worker'].add(SqueezeCenterStep)
+class Bootstep(object):
+    def start(self, worker):
+        if not self.queue in worker.app.amqp.queues:
+            return
+        return super(Bootstep, self).start(worker)
+    def stop(self, worker):
+        if not self.queue in worker.app.amqp.queues:
+            return
+        return super(Bootstep, self).stop(worker)
+
+
+# Find all custom bootsteps and register them with the worker boot process
+for installed_app in settings.INSTALLED_APPS:
+    try:
+        module = import_module('%s.bootsteps' % installed_app)
+    except ImportError:
+        continue
+
+    # If an app defines .bootsteps.Bootstep then register it against a worker.
+    # We adapt it so that its inert unless the queue it is interested in is active
+    if hasattr(module, 'Bootstep'):
+        t = type('%s.bootsteps.Bootstep' % installed_app, (Bootstep, getattr(module, 'Bootstep')), {})
+        app.steps['worker'].add(t)
 
