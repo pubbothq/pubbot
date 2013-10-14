@@ -13,19 +13,19 @@
 # limitations under the License.
 
 from django.contrib import admin
-from pubbot.irc.models import Network, Channel
+from pubbot.irc.models import Network, Room
 
 
-class ChannelInline(admin.TabularInline):
-    model = Channel
+class RoomInline(admin.TabularInline):
+    model = Room
 
 
 class NetworkAdmin(admin.ModelAdmin):
     inlines = [
-        ChannelInline,
+        RoomInline,
         ]
 
 
 admin.site.register(Network, NetworkAdmin)
-admin.site.register(Channel)
+admin.site.register(Room)
 

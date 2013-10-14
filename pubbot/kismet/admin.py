@@ -13,19 +13,19 @@
 # limitations under the License.
 
 from django.contrib import admin
-from pubbot.irc.models import Network, Channel
+from pubbot.kismet.models import Device, Times
 
 
-class ChannelInline(admin.TabularInline):
-    model = Channel
+class TimesInline(admin.TabularInline):
+    model = Times
 
 
-class NetworkAdmin(admin.ModelAdmin):
+class DeviceAdmin(admin.ModelAdmin):
     inlines = [
-        ChannelInline,
+        TimesInline,
         ]
 
 
-admin.site.register(Network, NetworkAdmin)
-admin.site.register(Channel)
+admin.site.register(Device, DeviceAdmin)
+admin.site.register(Times)
 

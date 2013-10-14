@@ -36,3 +36,6 @@ class Education(models.Model):
             except:
                 raise ValidationError('Trigger must be a regex if regex checked')
 
+    def __unicode__(self):
+       return '%r -> %r' % (self.trigger, self.response)
+
