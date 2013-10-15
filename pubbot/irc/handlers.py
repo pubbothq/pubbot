@@ -159,8 +159,12 @@ class ConversationHandler(object):
         channel, content = msg.params[0], " ".join(msg.params[1:])
         user = msg.prefix.split("!")[0]
 
+        # cache this with tuple of (hostname, room, nick) ?
+        profile = Room.objects.get(server__server=client.hostname, room=channel).users.get(nick=user).profile
+
         handlers = get_broadcast_group_for_message(
             kind = "chat.irc.%s.chat" % channel,
+            source_id = getattr(profile, "id", None),
             source = user,
             channel = channel,
             content = content,
