@@ -104,6 +104,17 @@ class UserListHandler(object):
             user = msg.prefix.split("!")[0]
             channel = msg.params[0]
 
+            room = self.get_room(client, channel)
+            if not room.users.filter(nick=user).exists():
+                print "Adding %s" % user
+                try:
+                    u = room.server.users.get(nick=user)
+                except User.DoesNotExist:
+                    u = User(nick=user, network=room.server)
+                    u.save()
+                room.users.add(u)
+                room.save()
+
             broadcast(
                 kind="chat.irc.%s.join" % channel,
                 user = user,
@@ -113,6 +124,10 @@ class UserListHandler(object):
         elif msg.command == 'PART':
             user = msg.prefix.split("!")[0]
             channel = msg.params[0]
+
+            print "Removing %s" % user
+            room = self.get_room(client, channel)
+            room.users.remove(*room.users.filter(nick=user))
 
             broadcast(
                 kind ="chat.irc.%s.leave" % channel,
