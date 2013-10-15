@@ -18,6 +18,7 @@ from geventirc.irc import Client, IRC_PORT
 from geventirc import handlers, replycode, message
 
 from pubbot.main.utils import broadcast, get_broadcast_group_for_message
+from pubbot.irc.models import *
 from pubbot.irc.tasks import mouth
 
 
@@ -59,8 +60,10 @@ class UserListHandler(object):
     commands = ['353', '366', 'JOIN', 'PART']
 
     def __init__(self):
-        self.users = {}
         self.incoming = {}
+
+    def get_room(self, client, channel):
+        return Room.objects.get(server__server=client.hostname, room=channel)
 
     def __call__(self, client, msg):
         if msg.command == '353':
@@ -70,18 +73,36 @@ class UserListHandler(object):
 
         elif msg.command == '366':
             channel = msg.params[1]
-            if channel in self.incoming:
-                self.users[channel] = self.incoming[channel]
-                del self.incoming[channel]
-            else:
-                self.users[channel] = []
+
+            room = self.get_room(client, channel)
+
+            if not channel in self.incoming:
+                room.users.clear()
+                return
+
+            users = self.incoming[channel]
+
+            # Eject user not present
+            room.users.remove(*room.users.exclude(nick__in=users))
+
+            # Record user presence
+            users_from_db = [user.nick for user in room.users.all()]
+            for user in users:
+                if not user in users_from_db:
+                    print "Adding %s to %s" % (user, room)
+                    try:
+                        u = room.server.users.get(nick=user)
+                    except User.DoesNotExist:
+                        u = User(nick=user, network=room.server)
+                        u.save()
+                    room.users.add(u)
+                    room.save()
+
+            del self.incoming[channel]
 
         elif msg.command == 'JOIN':
             user = msg.prefix.split("!")[0]
             channel = msg.params[0]
-            chan = self.users.setdefault(channel, [])
-            if not user in chan:
-                chan.append(user)
 
             broadcast(
                 kind="chat.irc.%s.join" % channel,
@@ -92,9 +113,6 @@ class UserListHandler(object):
         elif msg.command == 'PART':
             user = msg.prefix.split("!")[0]
             channel = msg.params[0]
-            chan = self.users.setdefault(channel, [])
-            if user in chan:
-                chan.remove(user)
 
             broadcast(
                 kind ="chat.irc.%s.leave" % channel,

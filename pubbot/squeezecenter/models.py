@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 from django.db import models
+
+from pubbot.main.models import UserProfile
 
 
 class Artist(models.Model):
@@ -38,10 +41,10 @@ class Skip(models.Model):
 
     vote_started = models.DateTimeField(auto_now_add=True)
     vote_ended = models.DateTimeField(blank=True)
-    songs = models.ManyToMany(Song, related_name="skips")
+    songs = models.ManyToManyField(Song, related_name="skips")
 
-    skip = models.ManyToMany(User)
-    noskip = models.ManyToMany(User)
+    skip = models.ManyToManyField(UserProfile)
+    noskip = models.ManyToManyField(UserProfile)
 
     @property
     def count(self):

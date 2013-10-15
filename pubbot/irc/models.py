@@ -31,7 +31,7 @@ class Room(models.Model):
 class User(models.Model):
 
     nick = models.CharField(max_length=128)
-    profile = models.ForeignKey(UserProfile, related_name='irc_accounts')
+    profile = models.ForeignKey(UserProfile, related_name='irc_accounts', blank=True, null=True)
     network = models.ForeignKey(Network, related_name='users')
-    rooms = models.ManyToManyField(Room)
+    rooms = models.ManyToManyField(Room, related_name='users')
 
