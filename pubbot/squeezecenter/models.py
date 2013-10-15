@@ -31,3 +31,35 @@ class Song(models.Model):
     name = models.CharField(max_length=1024)
     album = models.ForeignKey(Album, related_name="tracks")
 
+
+class Skip(models.Model):
+
+    VOTE_DURATION = datetime.timedelta(seconds=30)
+
+    vote_started = models.DateTimeField(auto_now_add=True)
+    vote_ended = models.DateTimeField(blank=True)
+    songs = models.ManyToMany(Song, related_name="skips")
+
+    skip = models.ManyToMany(User)
+    noskip = models.ManyToMany(User)
+
+    @property
+    def count(self):
+        return self.skip.count() - self.noskip.count()
+
+    @property
+    def passed(self):
+        return self.count >= 3
+
+    def noskip(self, user):
+        if datetime.datetime.now >= self.vote_started + VOTE_DURATION:
+            return
+        self.noskip.add(user)
+        self.save()
+
+    def skip(self, user):
+        if datetime.datetime.now >= self.vote_started + VOTE_DURATION:
+            return
+        self.skip.add(user)
+        self.save()
+

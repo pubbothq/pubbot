@@ -12,26 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.db import models
-from pubbot.main.models import UserProfile
+from pubbot.main.celery import app
+
+@app.task()
+def skip(num_tracks):
+    if num_tracks == 0:
+        return
+    sign = "+" if num_tracks > 0 else "-"
+    message_squeezebox.apply("playlist index %s%d" % (sign, num_tracks))
 
 
-class Network(models.Model):
-
-    server = models.CharField(max_length=128)
-    port = models.CharField(max_length=5)
-
-
-class Room(models.Model):
-
-    server = models.ForeignKey(Network, related_name="rooms")
-    room = models.CharField(max_length=128)
-
-
-class User(models.Model):
-
-    nick = models.CharField(max_length=128)
-    profile = models.ForeignKey(UserProfile, related_name='irc_accounts')
-    network = models.ForeignKey(Network, related_name='users')
-    rooms = models.ManyToManyField(Room)
+@app.task(queue='squeeze')
+def message_squeezebox(command):
+    app.squeezecenter.send(command)
 

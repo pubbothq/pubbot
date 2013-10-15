@@ -138,6 +138,8 @@ class Bootstep(bootsteps.StartStopStep):
 
         self.client.start()
 
+        worker.app.squeezecenter = self.client
+
     def stop(self, worker):
         print "Disconnecting from SqueezeCenter"
         self.client.stop()
