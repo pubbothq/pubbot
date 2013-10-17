@@ -160,7 +160,11 @@ class ConversationHandler(object):
         user = msg.prefix.split("!")[0]
 
         # cache this with tuple of (hostname, room, nick) ?
-        profile = Room.objects.get(server__server=client.hostname, room=channel).users.get(nick=user).profile
+        try:
+            profile = Room.objects.get(server__server=client.hostname, room=channel).users.get(nick=user).profile
+        except User.DoesNotExist:
+            print "User '%s' not in roster" % user
+            profile = None
 
         handlers = get_broadcast_group_for_message(
             kind = "chat.irc.%s.chat" % channel,
