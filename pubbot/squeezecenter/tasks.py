@@ -13,9 +13,10 @@
 # limitations under the License.
 
 from pubbot.main.celery import app
-from pubbot.conversation.tasks import listen
+from pubbot.conversation.tasks import parse_chat_text
 
-@listen(r'^skip(\s(?P<number>\d+))?$')
+
+@parse_chat_text(r'^skip(\s(?P<number>\d+))?$')
 def requested_skip(msg, number):
     from .models import Skip
 
