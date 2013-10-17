@@ -16,6 +16,7 @@ import datetime
 from django.db import models
 
 from pubbot.main.models import UserProfile
+from pubbot.squeezecenter.tasks import skip
 
 
 class Artist(models.Model):
@@ -41,6 +42,7 @@ class Skip(models.Model):
 
     vote_started = models.DateTimeField(auto_now_add=True)
     vote_ended = models.DateTimeField(blank=True)
+    number = models.IntegerField(default=0)
     songs = models.ManyToManyField(Song, related_name="skips")
 
     skip = models.ManyToManyField(UserProfile)
@@ -51,18 +53,24 @@ class Skip(models.Model):
         return self.skip.count() - self.noskip.count()
 
     @property
-    def passed(self):
+    def should_skip(self):
         return self.count >= 3
 
     def noskip(self, user):
-        if datetime.datetime.now >= self.vote_started + VOTE_DURATION:
+        if self.vote_ended or datetime.datetime.now >= self.vote_started + VOTE_DURATION:
             return
+        self.skip.remove(user)
         self.noskip.add(user)
-        self.save()
 
     def skip(self, user):
-        if datetime.datetime.now >= self.vote_started + VOTE_DURATION:
+        if self.vote_ended or datetime.datetime.now >= self.vote_started + VOTE_DURATION:
             return
+        self.noskip.remove(user)
         self.skip.add(user)
-        self.save()
+
+        if self.should_skip:
+            self.vote_ended = datetime.datetime.now()
+            self.save()
+
+            skip.delay(self.number)
 

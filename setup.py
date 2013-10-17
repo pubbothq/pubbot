@@ -18,10 +18,9 @@ setup(
         'South==0.8.2',
         'django-zap==0.0.1',
         'amqp==1.3.0',
-        'billiard==3.3.0.0rc2',
+        'billiard==3.3.0.0',
         'kombu==3.0.0',
         'celery[memcache,librabbitmq]==3.1rc4',
-        'django-celery==3.1b2',
         'gevent==1.0rc3',
         'greenlet==0.4.1',
         'gevent-psycopg2==0.0.3',
@@ -30,9 +29,5 @@ setup(
         'requests==2.0.0',
         'pybonjour',
         ],
-    entry_points="""
-    [console_scripts]
-    pubbot = pubbot.manage:main
-    """,
     )
 

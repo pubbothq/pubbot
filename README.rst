@@ -43,14 +43,6 @@ Responding to an irc message
 
 All incoming irc messages get broadcast to any task that subcribes to ``chat.<type>.<channel>.irc``. In ``tasks.py``::
 
-    from pubbot.main.celery import app
-
-    @app.task(subscribe=['chat.irc.#.chat'])
-    def my_chat_handler(msg):
-        return {
-            'content': 'You set something in irc',
-            }
-
 There is a helper if you want to respond to a trigger that can be matched by a regex. In tasks.py::
 
     from pubbot.conversation.tasks import parse_chat_text
@@ -60,6 +52,72 @@ There is a helper if you want to respond to a trigger that can be matched by a r
         return {
             'content': 'Foo was "%s", bar was "%s"' % (foo, bar),
             }
+
+
+Messages
+========
+
+You can subscribe to a message by setting the ``subscribe`` option on a ``task`` decorator::
+
+    from pubbot.main.celery import app
+
+    @app.task(subscribe=['chat.irc.#.chat'])
+    def my_chat_handler(msg):
+        return {
+            'content': 'You set something in irc',
+            }
+
+Messages can be matched in a similar way to RabbitMQ routing keys:
+
+ * ``*`` matches a single word
+ * ``#`` matches one or more words
+
+
+``chat.<protocol>.<#channel>.chat``
+-----------------------------------
+
+This message is sent when a new line of chat has arrived.
+
+source
+channel
+content
+source_id
+    The pk of a UserProfile object for the user that sent this chat. ``None`` if no UserProfile available.
+
+
+``chat.<protocol>.<#channel>.join``
+-----------------------------------
+
+``chat.<protocol>.<#channel>.leave``
+------------------------------------
+
+
+
+``music.track``
+---------------
+
+This message is sent when the current track changes.
+
+title
+    The title of the current track.
+album
+    The album that the current track is part of.
+artist
+    The artist of the current track.
+
+``music.stop``
+--------------
+
+This message is sent when the music stops. It doesn't have any arguments.
+
+
+FAQ
+===
+
+Where is manage.py?
+-------------------
+
+The source is in ``pubbot/manage.py``. But it's installed as ``bin/pubbot``, so when your virtualenv is active you can just run ``pubbot syncdb`` etc.
 
 
 Rules
