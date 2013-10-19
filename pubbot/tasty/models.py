@@ -10,3 +10,5 @@ class Link(models.Model):
     content_type = models.CharField(max_length=1024, blank=True, null=True)
     content_length = models.CharField(max_length=1024, blank=True, null=True)
 
+    first_seen = models.DateTimeField(auto_now_add=True)
+

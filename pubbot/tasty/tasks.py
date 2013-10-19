@@ -16,6 +16,14 @@ def got_chat_link(msg, url):
     process_link.delay(url)
 
 
+@parse_chat_text(r'^(lastlink)|(last link)')
+def last_link_details(msg):
+    link = Link.objects.order_by('-first_seen')[0]
+    return {
+        'content': link.title or "URL isn't HTML or doesn't have a title tag",
+        }
+
+
 @app.task
 def process_link(url):
     r = requests.head(url, allow_redirects=True)
