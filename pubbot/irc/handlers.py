@@ -80,14 +80,20 @@ class UserListHandler(object):
                 room.users.clear()
                 return
 
-            users = self.incoming[channel]
-
             # Eject user not present
+            users = [u.lstrip("@").lstrip("+") for u in self.incoming[channel]]
             room.users.remove(*room.users.exclude(nick__in=users))
 
             # Record user presence
             users_from_db = [user.nick for user in room.users.all()]
-            for user in users:
+            for user in self.incoming[channel]:
+                if user.startswith("@"):
+                    user = user[1:]
+                    has_op = True
+                if user.startswith("+"):
+                    user = user[1:]
+                    has_voice = True
+
                 if not user in users_from_db:
                     print "Adding %s to %s" % (user, room)
                     try:
