@@ -20,7 +20,7 @@ setup(
         'amqp==1.3.0',
         'billiard==3.3.0.0',
         'kombu==3.0.0',
-        'celery[memcache,librabbitmq]==3.1rc4',
+        'celery[redis]==3.1rc4',
         'gevent==1.0rc3',
         'greenlet==0.4.1',
         'gevent-psycopg2==0.0.3',
@@ -29,6 +29,7 @@ setup(
         'requests==2.0.0',
         'pybonjour',
         'beautifulsoup4',
+        'django-discover-runner',
         ],
     )
 
