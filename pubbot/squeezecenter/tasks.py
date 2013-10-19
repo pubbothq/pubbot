@@ -50,10 +50,10 @@ def skip(num_tracks):
     if num_tracks == 0:
         return
     sign = "+" if num_tracks > 0 else "-"
-    message_squeezebox.apply("playlist index %s%d" % (sign, num_tracks))
+    command.apply("playlist index %s%d" % (sign, num_tracks))
 
 
 @app.task(queue='squeeze')
-def message_squeezebox(command):
+def command(command):
     app.squeezecenter.send(command)
 

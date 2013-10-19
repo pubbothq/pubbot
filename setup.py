@@ -28,6 +28,7 @@ setup(
         'gunicorn==18.0',
         'requests==2.0.0',
         'pybonjour',
+        'beautifulsoup4',
         ],
     )
 
