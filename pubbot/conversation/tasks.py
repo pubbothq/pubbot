@@ -16,6 +16,7 @@ from functools import wraps
 import random
 import re
 
+from bs4 import BeautifulSoup
 import requests
 
 from pubbot.main.celery import app
@@ -145,4 +146,22 @@ def udefine(msg, term):
         }
 
     # message.reply("\x031,1 " + d)
+
+
+@parse_chat_text(r'^fight:[\s]*(?P<word1>.*)(?:[;,]| vs\.? | v\.? )[\s]*(?P<word2>.*)')
+def fight(msg, word1, word2):
+    def _score(word):
+        r = requests.get('http://www.google.co.uk/search', params={'q': word, 'safe': 'off'})
+        soup = BeautifulSoup(r.text)
+        score_string = soup.find(id='resultStats').string
+        return int(''.join(re.findall('\d+', score_string)))
+
+    score1 = _score(word1)
+    score2 = _score(word2)
+
+    winner = word1 if score1 > score2 else word2
+
+    return {
+        'content': '%(word1)s (%(score1)s) vs %(word2)s (%(score2)s) -- %(winner)s wins!' % locals(),
+        }
 
