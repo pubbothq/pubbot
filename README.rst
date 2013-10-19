@@ -2,6 +2,9 @@
 pubbot
 ======
 
+.. image:: https://travis-ci.org/pubbothq/pubbot.png?branch=master
+   :target: https://travis-ci.org/#!/pubbothq/pubbot
+
 I am a rewrite of an old and slightly broken Twisted IRC bot. I'm still very rough.
 
 
