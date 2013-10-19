@@ -16,7 +16,6 @@ import datetime
 from django.db import models
 
 from pubbot.main.models import UserProfile
-from pubbot.squeezecenter.tasks import skip
 
 
 class Artist(models.Model):
@@ -72,5 +71,6 @@ class Skip(models.Model):
             self.vote_ended = datetime.datetime.now()
             self.save()
 
+            from pubbot.squeezecenter.tasks import skip
             skip.delay(self.number)
 

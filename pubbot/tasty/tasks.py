@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import urlparse
 
 from bs4 import BeautifulSoup
@@ -5,12 +7,13 @@ import requests
 
 from pubbot.conversation.tasks import parse_chat_text
 from pubbot.main.celery import app
+from pubbot.tasty.models import Link
 
 
 @parse_chat_text(r"""(?i)\b(?P<url>(?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))""")
-def got_chat_link(msg, link):
+def got_chat_link(msg, url):
     # Once we have identified a URL we immediately re-queue it - we don't want to block the chatting processes
-    process_link.delay(link)
+    process_link.delay(url)
 
 
 @app.task
@@ -25,7 +28,7 @@ def process_link(url):
 
     l.content_type = r.headers.get("content-type", "")
     l.content_size = r.headers.get("content-type", -1)
-    l.hostname = urlparse(r.url).hostname
+    l.hostname = urlparse.urlparse(r.url).hostname
 
     if l.content_type.startswith("text/html"):
         soup = BeautifulSoup(requests.get(r.url).text)
