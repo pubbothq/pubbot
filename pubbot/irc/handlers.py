@@ -77,15 +77,15 @@ class UserListHandler(object):
             room = self.get_room(client, channel)
 
             if not channel in self.incoming:
-                room.users.clear()
+                room.participants.clear()
                 return
 
             # Eject user not present
             users = [u.lstrip("@").lstrip("+") for u in self.incoming[channel]]
-            room.users.remove(*room.users.exclude(name__in=users))
+            room.participants.remove(*room.participants.exclude(name__in=users))
 
             # Record user presence
-            users_from_db = [user.name for user in room.users.all()]
+            users_from_db = [user.name for user in room.participants.all()]
             for user in self.incoming[channel]:
                 if user.startswith("@"):
                     user = user[1:]
@@ -101,7 +101,7 @@ class UserListHandler(object):
                     except User.DoesNotExist:
                         u = User(name=user, network=room.server)
                         u.save()
-                    room.users.add(u)
+                    room.participants.add(u)
                     room.save()
 
             del self.incoming[channel]
@@ -111,14 +111,14 @@ class UserListHandler(object):
             channel = msg.params[0]
 
             room = self.get_room(client, channel)
-            if not room.users.filter(name=user).exists():
+            if not room.participants.filter(name=user).exists():
                 print "Adding %s" % user
                 try:
                     u = room.server.users.get(name=user)
                 except User.DoesNotExist:
                     u = User(name=user, network=room.server)
                     u.save()
-                room.users.add(u)
+                room.participants.add(u)
                 room.save()
 
             broadcast(
@@ -133,7 +133,7 @@ class UserListHandler(object):
 
             print "Removing %s" % user
             room = self.get_room(client, channel)
-            room.users.remove(*room.users.filter(name=user))
+            room.participants.remove(*room.participants.filter(name=user))
 
             broadcast(
                 kind ="chat.irc.%s.leave" % channel,
@@ -165,7 +165,7 @@ class ConversationHandler(object):
         channel, content = msg.params[0], " ".join(msg.params[1:])
         user = msg.prefix.split("!")[0]
 
-        scene = Room.objects.get(server__server=clienthostname, name=channel)
+        scene = Room.objects.get(server__server=client.hostname, name=channel)
 
         # cache this with tuple of (hostname, room, name) ?
         try:
@@ -176,7 +176,7 @@ class ConversationHandler(object):
 
         handlers = get_broadcast_group_for_message(
             kind = "chat.irc.%s.chat" % channel,
-            scene_id = getattr(scene, "pk", None)
+            scene_id = getattr(scene, "pk", None),
             participant_id = getattr(participant, "pk", None),
             source = user,
             channel = channel,

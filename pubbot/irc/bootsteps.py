@@ -45,7 +45,7 @@ class Bootstep(bootsteps.StartStopStep):
 
             # Channels to join
             for room in network.rooms.all():
-                client.add_handler(handlers.JoinHandler(room.room, False))
+                client.add_handler(handlers.JoinHandler(room.name, False))
 
             # Inject conversation data into queue
             client.add_handler(ConversationHandler())
