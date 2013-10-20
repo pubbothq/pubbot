@@ -28,3 +28,7 @@ class Participant(PolymorphicModel):
     profile = models.ForeignKey(UserProfile, related_name='chat_accounts', blank=True, null=True)
     scenes = models.ManyToManyField(Scene, related_name='participants')
 
+    @property
+    def is_me(self):
+        return False
+
