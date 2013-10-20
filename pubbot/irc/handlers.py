@@ -59,7 +59,7 @@ class BotInterfaceHandler(object):
 
 class UserListHandler(object):
 
-    commands = ['353', '366', 'JOIN', 'PART']
+    commands = ['353', '366', 'JOIN', 'PART', 'KICK', 'QUIT']
 
     def __init__(self):
         self.incoming = {}
@@ -133,17 +133,35 @@ class UserListHandler(object):
         elif msg.command == 'PART':
             user = msg.prefix.split("!")[0]
             channel = msg.params[0]
+            self.remove(client, channel, user, "leave")
 
-            print "Removing %s" % user
-            scene = self.get_scene(client, channel)
-            scene.participants.remove(*scene.participants.filter(name=user))
+        elif msg.command == 'KICK':
+            kicker = msg.prefix.split("!")[0]
+            channel = msg.params[0]
+            kicked = msg.params[1]
+            self.remove(client, channel, kicked, 'kicked', kicker=kicker)
 
-            broadcast(
-                kind ="chat.irc.%s.leave" % channel,
-                scene_id = scene.pk,
-                user = user,
-                channel = channel,
-                )
+        elif msg.command == 'QUIT':
+            user = msg.prefix.split("!")[0]
+
+            u = Network.objects.get(server=client.hostname).users.get(name=user)
+            for scene in u.scenes:
+                self.remove(client, scene.name, user, "quit")
+
+    def remove(self, client, channel, user, type, **kwargs):
+        print "Removing %s" % user
+
+        scene = self.get_scene(client, channel)
+        scene.participants.remove(*scene.participants.filter(name=user))
+
+        broadcast(
+            kind ="chat.irc.%s.leave" % channel,
+            type = type,
+            scene_id = scene.pk,
+            user = user,
+            channel = channel,
+            **kwargs
+            )
 
 
 class InviteProcessor(object):
