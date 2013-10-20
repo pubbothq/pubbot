@@ -63,7 +63,7 @@ class UserListHandler(object):
         self.incoming = {}
 
     def get_room(self, client, channel):
-        return Room.objects.get(server__server=client.hostname, room=channel)
+        return Room.objects.get(server__server=client.hostname, name=channel)
 
     def __call__(self, client, msg):
         if msg.command == '353':
@@ -82,10 +82,10 @@ class UserListHandler(object):
 
             # Eject user not present
             users = [u.lstrip("@").lstrip("+") for u in self.incoming[channel]]
-            room.users.remove(*room.users.exclude(nick__in=users))
+            room.users.remove(*room.users.exclude(name__in=users))
 
             # Record user presence
-            users_from_db = [user.nick for user in room.users.all()]
+            users_from_db = [user.name for user in room.users.all()]
             for user in self.incoming[channel]:
                 if user.startswith("@"):
                     user = user[1:]
@@ -97,9 +97,9 @@ class UserListHandler(object):
                 if not user in users_from_db:
                     print "Adding %s to %s" % (user, room)
                     try:
-                        u = room.server.users.get(nick=user)
+                        u = room.server.users.get(name=user)
                     except User.DoesNotExist:
-                        u = User(nick=user, network=room.server)
+                        u = User(name=user, network=room.server)
                         u.save()
                     room.users.add(u)
                     room.save()
@@ -111,12 +111,12 @@ class UserListHandler(object):
             channel = msg.params[0]
 
             room = self.get_room(client, channel)
-            if not room.users.filter(nick=user).exists():
+            if not room.users.filter(name=user).exists():
                 print "Adding %s" % user
                 try:
-                    u = room.server.users.get(nick=user)
+                    u = room.server.users.get(name=user)
                 except User.DoesNotExist:
-                    u = User(nick=user, network=room.server)
+                    u = User(name=user, network=room.server)
                     u.save()
                 room.users.add(u)
                 room.save()
@@ -133,7 +133,7 @@ class UserListHandler(object):
 
             print "Removing %s" % user
             room = self.get_room(client, channel)
-            room.users.remove(*room.users.filter(nick=user))
+            room.users.remove(*room.users.filter(name=user))
 
             broadcast(
                 kind ="chat.irc.%s.leave" % channel,
@@ -165,19 +165,23 @@ class ConversationHandler(object):
         channel, content = msg.params[0], " ".join(msg.params[1:])
         user = msg.prefix.split("!")[0]
 
-        # cache this with tuple of (hostname, room, nick) ?
+        scene = Room.objects.get(server__server=clienthostname, name=channel)
+
+        # cache this with tuple of (hostname, room, name) ?
         try:
-            profile = Room.objects.get(server__server=client.hostname, room=channel).users.get(nick=user).profile
+            participant = scene.participants.get(name=user)
         except User.DoesNotExist:
             print "User '%s' not in roster" % user
-            profile = None
+            participant = None
 
         handlers = get_broadcast_group_for_message(
             kind = "chat.irc.%s.chat" % channel,
-            source_id = getattr(profile, "id", None),
+            scene_id = getattr(scene, "pk", None)
+            participant_id = getattr(participant, "pk", None),
             source = user,
             channel = channel,
             content = content,
             )
+
         (handlers | mouth.s(server=client.hostname, channel=channel)).apply_async()
 

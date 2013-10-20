@@ -11,3 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from django.db import models
+from polymorphic import PolymorphicModel
+from pubbot.main.models import UserProfile
+
+
+class Scene(PolymorphicModel):
+
+    name = models.CharField(max_length=128)
+
+
+class Participant(PolymorphicModel):
+
+    name = models.CharField(max_length=128)
+    profile = models.ForeignKey(UserProfile, related_name='chat_accounts', blank=True, null=True)
+    scenes = models.ManyToManyField(Scene, related_name='participants')
+

@@ -30,6 +30,7 @@ setup(
         'pybonjour',
         'beautifulsoup4',
         'django-discover-runner',
+        'django_polymorphic',
         ],
     )
 
