@@ -34,7 +34,7 @@ class Bootstep(bootsteps.StartStopStep):
         for network in Network.objects.all():
             print "Connecting to '%s' on port '%d'" % (network.server, int(network.port))
 
-            client = Client(network.server, 'pubbot2', port=str(network.port))
+            client = Client(network.server, network.nick, port=str(network.port), ssl=network.ssl)
             clients[network.server] = client
 
             # House keeping handlers

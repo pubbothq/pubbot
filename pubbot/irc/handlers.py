@@ -97,11 +97,11 @@ class UserListHandler(object):
                     has_voice = True
 
                 if not user in users_from_db:
-                    print "Adding %s to %s" % (user, room)
+                    print "Adding %s to %s" % (user, scene)
                     try:
                         u = scene.server.users.get(name=user)
                     except User.DoesNotExist:
-                        u = User(name=user, network=room.server)
+                        u = User(name=user, network=scene.server)
                         u.save()
                     scene.participants.add(u)
                     scene.save()
@@ -118,7 +118,7 @@ class UserListHandler(object):
                 try:
                     u = scene.server.users.get(name=user)
                 except User.DoesNotExist:
-                    u = User(name=user, network=room.server)
+                    u = User(name=user, network=scene.server)
                     u.save()
                 scene.participants.add(u)
                 scene.save()

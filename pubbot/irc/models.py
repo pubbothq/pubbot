@@ -18,8 +18,11 @@ from pubbot.conversation.models import Scene, Participant
 
 
 class Network(models.Model):
+
+    nick = models.CharField(max_length=128)
     server = models.CharField(max_length=128)
     port = models.CharField(max_length=5)
+    ssl = models.BooleanField()
 
 
 class Room(Scene):
