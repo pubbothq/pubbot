@@ -14,6 +14,8 @@
 
 import re
 
+from django.db.models import Q
+
 from geventirc.irc import Client, IRC_PORT
 from geventirc import handlers, replycode, message
 
@@ -62,7 +64,7 @@ class UserListHandler(object):
     def __init__(self):
         self.incoming = {}
 
-    def get_room(self, client, channel):
+    def get_scene(self, client, channel):
         return Room.objects.get(server__server=client.hostname, name=channel)
 
     def __call__(self, client, msg):
@@ -74,18 +76,18 @@ class UserListHandler(object):
         elif msg.command == '366':
             channel = msg.params[1]
 
-            room = self.get_room(client, channel)
+            scene = self.get_scene(client, channel)
 
             if not channel in self.incoming:
-                room.participants.clear()
+                scene.participants.clear()
                 return
 
             # Eject user not present
             users = [u.lstrip("@").lstrip("+") for u in self.incoming[channel]]
-            room.participants.remove(*room.participants.exclude(name__in=users))
+            scene.participants.remove(*scene.participants.exclude(name__in=users))
 
             # Record user presence
-            users_from_db = [user.name for user in room.participants.all()]
+            users_from_db = [user.name for user in scene.participants.all()]
             for user in self.incoming[channel]:
                 if user.startswith("@"):
                     user = user[1:]
@@ -97,12 +99,12 @@ class UserListHandler(object):
                 if not user in users_from_db:
                     print "Adding %s to %s" % (user, room)
                     try:
-                        u = room.server.users.get(name=user)
+                        u = scene.server.users.get(name=user)
                     except User.DoesNotExist:
                         u = User(name=user, network=room.server)
                         u.save()
-                    room.participants.add(u)
-                    room.save()
+                    scene.participants.add(u)
+                    scene.save()
 
             del self.incoming[channel]
 
@@ -110,19 +112,20 @@ class UserListHandler(object):
             user = msg.prefix.split("!")[0]
             channel = msg.params[0]
 
-            room = self.get_room(client, channel)
-            if not room.participants.filter(name=user).exists():
+            scene = self.get_scene(client, channel)
+            if not scene.participants.filter(name=user).exists():
                 print "Adding %s" % user
                 try:
-                    u = room.server.users.get(name=user)
+                    u = scene.server.users.get(name=user)
                 except User.DoesNotExist:
                     u = User(name=user, network=room.server)
                     u.save()
-                room.participants.add(u)
-                room.save()
+                scene.participants.add(u)
+                scene.save()
 
             broadcast(
                 kind="chat.irc.%s.join" % channel,
+                scene_id = scene.pk,
                 user = user,
                 channel = channel,
                 )
@@ -132,11 +135,12 @@ class UserListHandler(object):
             channel = msg.params[0]
 
             print "Removing %s" % user
-            room = self.get_room(client, channel)
-            room.participants.remove(*room.participants.filter(name=user))
+            scene = self.get_scene(client, channel)
+            scene.participants.remove(*scene.participants.filter(name=user))
 
             broadcast(
                 kind ="chat.irc.%s.leave" % channel,
+                scene_id = scene.pk,
                 user = user,
                 channel = channel,
                 )

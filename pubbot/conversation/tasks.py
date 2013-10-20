@@ -20,6 +20,7 @@ from bs4 import BeautifulSoup
 import requests
 
 from pubbot.main.celery import app
+from pubbot.conversation.models import *
 
 
 def parse_chat_text(regex, subscribe=None):
@@ -42,6 +43,27 @@ def parse_chat_text(regex, subscribe=None):
         new_func = app.task(new_func, subscribe=subscribe or ['chat.#.chat'])
         return new_func
     return decorator
+
+
+@app.task(subscribe=['chat.#.join'])
+def hello(msg):
+    scene = Scene.objects.get(pk=msg['scene_id'])
+    scene.say(random.choice([
+        "hi %s",
+        "lo %s",
+        "lo. how you doing, %s?",
+        "%s, we all love you",
+        "Help me, Obi Wan %s, you're my only hope",
+        "Wave %s, wave",
+        "Give us a smile %s",
+        "%s! We've missed you!",
+        "%s is in the room. I have a bad feeling about this.",
+        "ewwo %s",
+        "yo, %s",
+        "Greetings, %s",
+        "wotcha, %s",
+        "Frak, it's %s",
+        ]) % msg['user'])
 
 
 """

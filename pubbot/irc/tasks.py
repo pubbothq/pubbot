@@ -28,6 +28,7 @@ def mouth(results, server, channel):
 
 
 @app.task(queue='irc')
-def say(msg):
-    clients[msg['server']].msg(msg['channel'], msg['content'].encode('utf-8'))
+def say(server, channel, content):
+    from pubbot.irc.bootsteps import clients
+    clients[server].msg(channel, content.encode('utf-8'))
 
