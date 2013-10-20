@@ -32,6 +32,10 @@ class Room(Scene):
         from pubbot.irc.tasks import say
         say.delay(server=self.server.server, channel=self.name, content=content)
 
+    def me(self, content):
+        from pubbot.irc.tasks import me
+        me.delay(server=server.server, channel=self.name, content=content)
+
 
 class User(Participant):
     network = models.ForeignKey(Network, related_name='users')

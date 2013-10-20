@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from geventirc import message
 from pubbot.main.celery import app
 
 
@@ -31,4 +32,10 @@ def mouth(results, server, channel):
 def say(server, channel, content):
     from pubbot.irc.bootsteps import clients
     clients[server].msg(channel, content.encode('utf-8'))
+
+
+@app.task(queue='irc')
+def me(server, channel, content):
+    from pubbot.irc.bootsteps import clients
+    clients[server].send_message(message.Me(channel, content.encode('utf-8')))
 
