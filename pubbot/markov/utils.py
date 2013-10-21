@@ -8,39 +8,42 @@ import re
 from pubbot.markov.models import Word, Chain
 
 
-class Collector(object):
+WORD_BITS = re.compile('([^(),.!?\s]+|[^\s])')
 
-    WORD_BITS = re.compile('([^(),.!?\s]+|[^\s])')
+
+def tokenize_sentence(sentence):
+    data = iter(sentence.split(' '))
+    while True:
+        value = data.next()
+        for bit in WORD_BITS.split(value):
+            if not bit:
+                continue
+            if value.startswith("http://") or value.startswith("https://") or value.startswith("www."):
+                yield "<url>"
+            else:
+                yield bit.replace('\x00', '')
+
+
+def chainify_sentence(sentence):
+    data = itertools.chain(["<start>"], tokenize_sentence(sentence), ["<stop>"])
+
+    left1 = data.next()
+    left2 = data.next()
+    while True:
+        right = data.next()
+        yield left1, left2, right
+        left1 = left2
+        left2 = right
+
+
+class Collector(object):
 
     def __init__(self):
         self.words = defaultdict(int)
         self.pairs = defaultdict(int)
 
-    def clean(self, line):
-        data = iter(line.split(' '))
-        while True:
-            value = data.next()
-            for bit in self.WORD_BITS.split(value):
-                if not bit:
-                    continue
-                if value.startswith("http://") or value.startswith("https://") or value.startswith("www."):
-                    yield "<url>"
-                else:
-                    yield bit.replace('\x00', '')
-
-    def iterline(self, line):
-        data = itertools.chain(["<start>"], self.clean(line), ["<stop>"])
-
-        left1 = data.next()
-        left2 = data.next()
-        while True:
-            right = data.next()
-            yield left1, left2, right
-            left1 = left2
-            left2 = right
-
     def process_line(self, line):
-        data = self.iterline(line)
+        data = chainify_sentence(line)
 
         try:
             left1, left2, right = data.next()
@@ -120,7 +123,7 @@ def render_sentence(iterator):
         while True:
             word = iterator.next()
             if word in ',.!?':
-                sentence[-1] += 'word'
+                sentence[-1] += word
             elif word == '<url>':
                 try:
                     sentence.append(random.choice(Link.objects.all()).url)
