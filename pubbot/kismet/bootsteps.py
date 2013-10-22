@@ -14,6 +14,7 @@
 
 from celery import bootsteps
 from pubbot.main.protocols.line_protocol import LineProtocol
+from pubbot.kismet import handlers
 
 
 class KismetConnection(LineProtocol):
@@ -54,7 +55,7 @@ class KismetConnection(LineProtocol):
         for handler in self.handlers:
             if hasattr(handler, "handles") and not k in handler.handles:
                 continue
-            handler(self.owner, k, parsed)
+            handler(k, parsed)
 
         # BACKWARDS COMPATIBILITY
         # NERF ASAP
@@ -97,7 +98,7 @@ class KismetConnection(LineProtocol):
     def kismet_PROTOCOLS(self, protocols):
         for protocol in protocols:
             self.send("!0 CAPABILITY %s" % protocol.upper())
-        self.subscribe("NETWORK", ["bssid", "type", "ssid", "channel", "lasttime"])
+        # self.subscribe("NETWORK", ["bssid", "type", "ssid", "channel", "lasttime"])
         self.subscribe("CLIENT", ["bssid", "mac", "type", "lasttime", "datapackets"])
 
     #def kismet_ACK(self, cmdid):
@@ -123,7 +124,10 @@ class Bootstep(bootsteps.StartStopStep):
     queue = 'kismet'
 
     def start(self, worker):
+        print "Connecting to kistmet"
         self.connection = KismetConnection('192.168.0.142', 2501)
+        self.connection.add_handler(handlers.NetworkFinder())
+        self.connection.add_handler(handlers.ClientFinder())
         self.connection.start()
 
     def stop(self, worker):

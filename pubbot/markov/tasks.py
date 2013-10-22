@@ -31,7 +31,10 @@ def markov(msg, sentence):
 
     word1, word2 = random.choice(start_points_2.get((word1, word2), [(word1, word2)]))
 
-    return {
-        'content': render_sentence(get_sentence_for(word1, word2))
-        }
+    try:
+        return {
+            'content': render_sentence(get_sentence_for(word1, word2))
+            }
+    except IndexError:
+        pass
 

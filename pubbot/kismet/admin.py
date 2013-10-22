@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from django.contrib import admin
-from pubbot.kismet.models import Device, Times
+from pubbot.kismet.models import Network, Device, Times
 
 
 class TimesInline(admin.TabularInline):
@@ -26,6 +26,7 @@ class DeviceAdmin(admin.ModelAdmin):
         ]
 
 
+admin.site.register(Network)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Times)
 

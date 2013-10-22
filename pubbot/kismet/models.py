@@ -15,9 +15,22 @@
 from django.db import models
 
 
+class Network(models.Model):
+
+    bssid = models.CharField(max_length=17)
+    name = models.CharField(max_length=64)
+    enabled = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.name, self.bssid)
+
+    class Meta:
+        ordering = ['name']
+
+
 class Device(models.Model):
 
-    mac = models.CharField(max_length=7)
+    mac = models.CharField(max_length=17)
     opt_out = models.BooleanField()
 
 
@@ -27,5 +40,4 @@ class Times(models.Model):
     date = models.DateField()
     first_seen = models.DateTimeField()
     last_seen = models.DateTimeField(blank=True, null=True)
-
 
