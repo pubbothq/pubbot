@@ -31,6 +31,7 @@ setup(
         'beautifulsoup4',
         'django-discover-runner',
         'django_polymorphic',
+        'django-taggit',
         ],
     )
 
