@@ -32,9 +32,14 @@ class Room(Scene):
         from pubbot.irc.tasks import say
         say.delay(server=self.server.server, channel=self.name, content=content)
 
-    def me(self, content):
-        from pubbot.irc.tasks import me
-        me.delay(server=server.server, channel=self.name, content=content)
+    def action(self, content):
+        from pubbot.irc.tasks import action
+        action.delay(server=self.server.server, channel=self.name, content=content)
+
+    def notice(self, content):
+        from pubbot.irc.tasks import notice
+        notice.delay(server=self.server.server, channel=self.name, content=content)
+
 
 
 class User(Participant):

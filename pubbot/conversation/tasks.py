@@ -61,8 +61,15 @@ def mouth(msg):
     else:
         scenes = active_scenes.filter(follows_tags__name='default')
 
+    if msg.get("action", False):
+        func_name = "action"
+    elif msg.get("notice", False):
+        func_name = "notice"
+    else:
+        func_name = "say"
+
     for scene in scenes.exclude(bans_tags__name__in=msg.get('tags', [])).distinct():
-        scene.say(msg['content'])
+        getattr(scene, func_name)(msg['content'])
 
 
 @app.task(subscribe=['chat.#.join'])

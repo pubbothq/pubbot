@@ -35,7 +35,18 @@ def say(server, channel, content):
 
 
 @app.task(queue='irc')
-def me(server, channel, content):
+def action(server, channel, content):
     from pubbot.irc.bootsteps import clients
     clients[server].send_message(message.Me(channel, content.encode('utf-8')))
+
+
+class Notice(message.Command):
+    def __init__(self, to, msg, prefix=None):
+        super(Notice, self).__init__([to, msg], prefix=prefix)
+
+
+@app.task(queue='irc')
+def notice(server, channel, content):
+    from pubbot.irc.bootsteps import clients
+    clients[server].send_message(Notice(channel, content.encode('utf-8')))
 
