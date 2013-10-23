@@ -13,7 +13,15 @@
 # limitations under the License.
 
 from pubbot.main.celery import app
-from pubbot.conversation.tasks import parse_chat_text
+from pubbot.conversation.tasks import parse_chat_text, mouth
+
+@app.task(subscribe=['music.start'])
+def current_song_notification(msg):
+    mouth({
+        'content': "%(title)s - %(artist)s (%(album)s)" % msg,
+        'tags': ['current_song_notification'],
+        'notice': True,
+        })
 
 
 @parse_chat_text(r'^skip(\s(?P<number>\d+))?$')
@@ -44,6 +52,7 @@ def requested_skip(msg, number):
     return {
         "content": "Voted to skip. %d more votes required" % (3 - skip.count())
         }
+
 
 @app.task(queue='squeeze')
 def skip(num_tracks):
