@@ -14,12 +14,16 @@
 
 from django.db import models
 from polymorphic import PolymorphicModel
+from taggit.managers import TaggableManager
+
 from pubbot.main.models import UserProfile
 
 
 class Scene(PolymorphicModel):
 
     name = models.CharField(max_length=128)
+    include = TaggableManager()
+    exclude = TaggableManager()
 
 
 class Participant(PolymorphicModel):

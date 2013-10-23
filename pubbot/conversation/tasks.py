@@ -44,27 +44,51 @@ def parse_chat_text(regex, subscribe=None):
         return new_func
     return decorator
 
+@app.task
+def mouth(msg):
+    if not 'content' in msg:
+        # FIXME: Some sort of logging would be good
+        return
+
+    scenes = Scene.objects.get_query_set()
+    if 'scene_id' in msg:
+        scenes = scenes.filter(pk=msg['scene_id'])
+    elif 'tags' in msg:
+        scenes = scenes.exclude(exclude__name__in=msg['tags'])
+        scenes = scenes.filter(include__name__in=msg['tags'])
+    else:
+        scenes = scenes.filter(include__name='default')
+
+    try:
+        scene = scenes[0]
+    except Scene.DoesNotExist:
+        # FIXME: Some sort of logging would be good
+        return
+
+    scene.say(msg['content'])
+
 
 @app.task(subscribe=['chat.#.join'])
 def hello(msg):
-    scene = Scene.objects.get(pk=msg['scene_id'])
-    scene.say(random.choice([
-        "hi %s",
-        "lo %s",
-        "lo. how you doing, %s?",
-        "%s, we all love you",
-        "Help me, Obi Wan %s, you're my only hope",
-        "Wave %s, wave",
-        "Give us a smile %s",
-        "%s! We've missed you!",
-        "%s is in the room. I have a bad feeling about this.",
-        "ewwo %s",
-        "yo, %s",
-        "Greetings, %s",
-        "wotcha, %s",
-        "Frak, it's %s",
-        ]) % msg['user'])
-
+    mouth({
+        'scene_id': msg['scene_id'],
+        'content': random.choice([
+            "hi %s",
+            "lo %s",
+            "lo. how you doing, %s?",
+            "%s, we all love you",
+            "Help me, Obi Wan %s, you're my only hope",
+            "Wave %s, wave",
+            "Give us a smile %s",
+            "%s! We've missed you!",
+            "%s is in the room. I have a bad feeling about this.",
+            "ewwo %s",
+            "yo, %s",
+            "Greetings, %s",
+            "wotcha, %s",
+            "Frak, it's %s",
+            ]) % msg['user'])
+        })
 
 """
 @parse_chat_text(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
