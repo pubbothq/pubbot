@@ -14,16 +14,19 @@
 
 from django.db import models
 from polymorphic import PolymorphicModel
-from taggit.managers import TaggableManager
 
 from pubbot.main.models import UserProfile
+
+
+class RelevanceTag(models.Model):
+    name = models.CharField(max_length=1024)
 
 
 class Scene(PolymorphicModel):
 
     name = models.CharField(max_length=128)
-    include = TaggableManager()
-    exclude = TaggableManager()
+    interested_in = models.ManyToManyField(RelevanceTag, related_name='scenes_interested_in')
+    not_interested_in = models.ManyToManyField(RelevanceTag, related_name='scenes_not_interested_in')
 
 
 class Participant(PolymorphicModel):

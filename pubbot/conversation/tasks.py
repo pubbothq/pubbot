@@ -54,18 +54,19 @@ def mouth(msg):
     if 'scene_id' in msg:
         scenes = scenes.filter(pk=msg['scene_id'])
     elif 'tags' in msg:
-        scenes = scenes.exclude(exclude__name__in=msg['tags'])
-        scenes = scenes.filter(include__name__in=msg['tags'])
+        scenes = scenes.exclude(not_interested_in__name__in=msg['tags'])
+        if not scenes.exists():
+            # If there are no scenes left after excluding then bail
+            return
+
+        scenes = scenes.filter(interested_in__name__in=msg['tags'])
+        if not scenes.exists():
+            scenes = Scene.objects.filter(interested_in__name='default')
     else:
-        scenes = scenes.filter(include__name='default')
+        scenes = scenes.filter(interested_in__name='default')
 
-    try:
-        scene = scenes[0]
-    except Scene.DoesNotExist:
-        # FIXME: Some sort of logging would be good
-        return
-
-    scene.say(msg['content'])
+    for scene in scenes.distinct():
+        scene.say(msg['content'])
 
 
 @app.task(subscribe=['chat.#.join'])
@@ -87,7 +88,7 @@ def hello(msg):
             "Greetings, %s",
             "wotcha, %s",
             "Frak, it's %s",
-            ]) % msg['user'])
+            ]) % msg['user'],
         })
 
 """
