@@ -25,8 +25,8 @@ class RelevanceTag(models.Model):
 class Scene(PolymorphicModel):
 
     name = models.CharField(max_length=128)
-    interested_in = models.ManyToManyField(RelevanceTag, related_name='scenes_interested_in')
-    not_interested_in = models.ManyToManyField(RelevanceTag, related_name='scenes_not_interested_in')
+    follows_tags = models.ManyToManyField(RelevanceTag, related_name='foolow_tags+')
+    bans_tags = models.ManyToManyField(RelevanceTag, related_name='bans_tags+')
 
 
 class Participant(PolymorphicModel):

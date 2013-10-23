@@ -50,22 +50,18 @@ def mouth(msg):
         # FIXME: Some sort of logging would be good
         return
 
-    scenes = Scene.objects.get_query_set()
+    active_scenes = Scene.objects.get_query_set()
+
     if 'scene_id' in msg:
-        scenes = scenes.filter(pk=msg['scene_id'])
+        scenes = active_scenes.filter(pk=msg['scene_id'])
     elif 'tags' in msg:
-        scenes = scenes.exclude(not_interested_in__name__in=msg['tags'])
+        scenes = active_scenes.filter(follows_tags__name__in=msg['tags'])
         if not scenes.exists():
-            # If there are no scenes left after excluding then bail
-            return
-
-        scenes = scenes.filter(interested_in__name__in=msg['tags'])
-        if not scenes.exists():
-            scenes = Scene.objects.filter(interested_in__name='default')
+            scenes = active_scenes.filter(follows_tags__name='default')
     else:
-        scenes = scenes.filter(interested_in__name='default')
+        scenes = active_scenes.filter(follows_tags__name='default')
 
-    for scene in scenes.distinct():
+    for scene in scenes.exclude(bans_tags__name__in=msg.get('tags', [])).distinct():
         scene.say(msg['content'])
 
 
