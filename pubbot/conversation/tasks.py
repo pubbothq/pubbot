@@ -74,6 +74,9 @@ def mouth(msg):
 
 @app.task(subscribe=['chat.#.join'])
 def hello(msg):
+    if msg.get('is_me', False):
+        return
+
     mouth({
         'scene_id': msg['scene_id'],
         'content': random.choice([

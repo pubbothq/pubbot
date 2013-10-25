@@ -23,6 +23,8 @@ class Network(models.Model):
     server = models.CharField(max_length=128)
     port = models.CharField(max_length=5)
     ssl = models.BooleanField()
+    nickserv_password = models.CharField(max_length=1024, blank=True, null=True)
+    nickserv_certfp = models.TextField(blank=True, null=True)
 
 
 class Room(Scene):

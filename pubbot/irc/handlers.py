@@ -24,6 +24,23 @@ from pubbot.irc.models import *
 from pubbot.irc.tasks import mouth
 
 
+class GhostHandler(object):
+
+    commands = [
+        '001',
+        replycode.ERR_NICKNAMEINUSE,
+        replycode.ERR_NICKCOLLISION,
+        ]
+
+    def __init__(self, nick, password):
+        self.nick = nick
+        self.password = password
+
+    def __call__(self, client, msg):
+        client.msg('NickServ', 'ghost %s %s' % (self.nick, self.password))
+        client.nick = self.nick
+
+
 class BotInterfaceHandler(object):
 
     """
@@ -128,6 +145,7 @@ class UserListHandler(object):
                 scene_id = scene.pk,
                 user = user,
                 channel = channel,
+                is_me = (user == client.nick),
                 )
 
         elif msg.command == 'PART':

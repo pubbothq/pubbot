@@ -5,7 +5,14 @@ import itertools
 import random
 import re
 
+from django.conf import settings
+
 from pubbot.markov.models import Word, Chain
+
+if "pubbot.tasty" in settings.INSTALLED_APPS:
+    from pubbot.tasty.models import Link
+else:
+    Link = None
 
 
 WORD_BITS = re.compile('([^(),.!?\s]+|[^\s])')
@@ -126,7 +133,10 @@ def render_sentence(iterator):
                 sentence[-1] += word
             elif word == '<url>':
                 try:
-                    sentence.append(random.choice(Link.objects.all()).url)
+                    if Link:
+                        sentence.append(random.choice(Link.objects.all()).url)
+                    else:
+                        sentence.append('www.github.com')
                 except IndexError:
                     sentence.append('http://www.duckduckgo.com')
             else:
