@@ -14,6 +14,8 @@
 
 import re
 
+from celery.canvas import chain
+
 from django.db.models import Q
 
 from geventirc.irc import Client, IRC_PORT
@@ -214,6 +216,13 @@ class ConversationHandler(object):
             print "User '%s' not in roster" % user
             participant = None
 
+        direct = False
+        if ": " in content:
+            user, msg = content.split(": ", 1)
+            if user == client.nick:
+                direct = True
+                content = msg
+
         handlers = get_broadcast_group_for_message(
             kind = "chat.irc.%s.chat" % channel,
             scene_id = getattr(scene, "pk", None),
@@ -221,7 +230,8 @@ class ConversationHandler(object):
             source = user,
             channel = channel,
             content = content,
+            direct = direct,
             )
 
-        (handlers | mouth.s(server=client.hostname, channel=channel)).apply_async()
+        chain(handlers, mouth.s(server=client.hostname, channel=channel))()
 
