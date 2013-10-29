@@ -23,6 +23,9 @@ start_points_2 = {
 
 @parse_chat_text(r'^(?P<sentence>.*)$')
 def markov(msg, sentence):
+    if not msg.get('direct', False):
+        return
+
     try:
         tokens = tokenize_sentence(sentence)
         word1, word2 = tokens.next(), tokens.next()
