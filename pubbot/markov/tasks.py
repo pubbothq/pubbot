@@ -1,7 +1,7 @@
 import random
 
 from pubbot.conversation.tasks import parse_chat_text
-from pubbot.markov.utils import tokenize_sentence, get_sentence_for, render_sentence
+from pubbot.markov.utils import tokenize_sentence, get_sentence_for, render_sentence, Collector
 
 
 # FIXME: Determine these sorts of things programatically/statistically
@@ -40,4 +40,14 @@ def markov(msg, sentence):
             }
     except IndexError:
         pass
+
+
+@parse_chat_text(r'^(?P<sentence>.*)$')
+def learn(msg, sentence):
+    if msg.get('direct', False):
+        return
+
+    c = Collector()
+    c.process_line(sentence)
+    c.update_database()
 
