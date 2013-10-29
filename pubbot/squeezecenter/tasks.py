@@ -42,16 +42,40 @@ def requested_skip(msg, number):
                 "content": "Skip already in progress; can't start another",
                 }
     except Skip.DoesNotExist:
-        current_skip = Skip(
-            number = number or 1,
-            )
+        current_skip = Skip()
         current_skip.save()
 
-    current_skip.skip.add(profile)
+    current_skip.skip(profile)
 
     return {
         "content": "Voted to skip. %d more votes required" % (3 - skip.count())
         }
+
+
+@parse_chat_text(r'^noskip$')
+def requested_skip(msg):
+    from .models import Skip
+
+    try:
+        profile = UserProfile.objects.get(id=msg['profile_id'])
+    except KeyError, UserProfile.DoesNotExist:
+        return {
+            "content": "I don't know who you are",
+            }
+
+    try:
+        current_skip = Skip.objects.get(vote_ended__isnull=True)
+    except Skip.DoesNotExist:
+        return {
+            "content": "There isn't a vote in progress.."
+            }
+
+    current_skip.noskip(profile)
+
+    return {
+        "content": "Voted to not skip. %d more votes required" % (3 - skip.count())
+        }
+
 
 
 @app.task(queue='squeeze')

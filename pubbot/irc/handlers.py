@@ -14,8 +14,6 @@
 
 import re
 
-from celery.canvas import chain
-
 from django.db.models import Q
 
 from geventirc.irc import Client, IRC_PORT
@@ -233,5 +231,6 @@ class ConversationHandler(object):
             direct = direct,
             )
 
-        chain(handlers, mouth.s(server=client.hostname, channel=channel))()
+        result = (handlers | mouth.s(server=client.hostname, channel=channel))()
+        # result.get()
 
