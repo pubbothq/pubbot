@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import datetime
+from django.utils import timezone
 from django.db import models
 
 from pubbot.main.models import UserProfile
@@ -38,34 +39,39 @@ class Song(models.Model):
 class Skip(models.Model):
 
     VOTE_DURATION = datetime.timedelta(seconds=30)
+    VOTE_REQUIREMENT = 3
 
     vote_started = models.DateTimeField(auto_now_add=True)
-    vote_ended = models.DateTimeField(blank=True)
+    vote_ended = models.DateTimeField(blank=True, null=True)
     number = models.IntegerField(default=0)
     songs = models.ManyToManyField(Song, related_name="skips")
 
-    skip = models.ManyToManyField(UserProfile)
-    noskip = models.ManyToManyField(UserProfile)
+    skippers = models.ManyToManyField(UserProfile, related_name="+skippers+")
+    noskippers = models.ManyToManyField(UserProfile, related_name="+noskippers+")
 
     @property
     def count(self):
-        return self.skip.count() - self.noskip.count()
+        return self.skippers.count() - self.noskippers.count()
+
+    @property
+    def needed(self):
+        return self.VOTE_REQUIREMENT - self.count
 
     @property
     def should_skip(self):
-        return self.count >= 3
+        return self.needed <= 0
 
     def noskip(self, user):
-        if self.vote_ended or datetime.datetime.now >= self.vote_started + VOTE_DURATION:
+        if self.vote_ended or timezone.now() >= self.vote_started + self.VOTE_DURATION:
             return
-        self.skip.remove(user)
-        self.noskip.add(user)
+        self.skippers.remove(user)
+        self.noskippers.add(user)
 
     def skip(self, user):
-        if self.vote_ended or datetime.datetime.now >= self.vote_started + VOTE_DURATION:
+        if self.vote_ended or timezone.now() >= self.vote_started + self.VOTE_DURATION:
             return
-        self.noskip.remove(user)
-        self.skip.add(user)
+        self.noskippers.remove(user)
+        self.skippers.add(user)
 
         if self.should_skip:
             self.vote_ended = datetime.datetime.now()

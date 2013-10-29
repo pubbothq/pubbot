@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django.utils import timezone
 from pubbot.main.celery import app
 from pubbot.conversation.tasks import parse_chat_text, mouth
+
 
 @app.task(subscribe=['music.start'])
 def current_song_notification(msg):
@@ -27,10 +29,14 @@ def current_song_notification(msg):
 @parse_chat_text(r'^skip(\s(?P<number>\d+))?$')
 def requested_skip(msg, number):
     from .models import Skip
+    from pubbot.conversation.models import Participant
 
     try:
-        profile = UserProfile.objects.get(id=msg['profile_id'])
-    except KeyError, UserProfile.DoesNotExist:
+        profile = Participant.objects.get(id=msg['participant_id'])
+    except KeyError, Participant.DoesNotExist:
+        profile = None
+
+    if not profile or not profile.profile:
         return {
             "content": "I don't know who you are",
             }
@@ -44,21 +50,26 @@ def requested_skip(msg, number):
     except Skip.DoesNotExist:
         current_skip = Skip()
         current_skip.save()
+        skip_timeout.apply_async((current_skip.id, ), countdown=Skip.VOTE_DURATION.seconds)
+    current_skip.skip(profile.profile)
 
-    current_skip.skip(profile)
-
-    return {
-        "content": "Voted to skip. %d more votes required" % (3 - skip.count())
-        }
+    if current_skip.needed > 0:
+        return {
+            "content": "Voted to skip. %d more votes required" % current_skip.needed,
+            }
 
 
 @parse_chat_text(r'^noskip$')
-def requested_skip(msg):
+def requested_noskip(msg):
     from .models import Skip
+    from pubbot.conversation.models import Participant
 
     try:
-        profile = UserProfile.objects.get(id=msg['profile_id'])
-    except KeyError, UserProfile.DoesNotExist:
+        profile = Participant.objects.get(id=msg['participant_id'])
+    except KeyError, Participant.DoesNotExist:
+        profile = None
+
+    if not profile or not profile.profile:
         return {
             "content": "I don't know who you are",
             }
@@ -70,12 +81,31 @@ def requested_skip(msg):
             "content": "There isn't a vote in progress.."
             }
 
-    current_skip.noskip(profile)
+    current_skip.noskip(profile.profile)
 
     return {
-        "content": "Voted to not skip. %d more votes required" % (3 - skip.count())
+        "content": "Voted to not skip. %d more votes required" % current_skip.needed,
         }
 
+
+@app.task(queue='squeeze')
+def skip_timeout(skip_id):
+    from .models import Skip
+
+    try:
+        s = Skip.objects.get(id=skip_id)
+    except Skip.DoesNotExist:
+        return
+
+    if s.vote_ended:
+        return
+
+    s.vote_ended = timezone.now()
+    s.save()
+
+    mouth.delay({
+        'content': 'Vote timed out after %d seconds' % Skip.VOTE_DURATION.seconds,
+        })
 
 
 @app.task(queue='squeeze')
