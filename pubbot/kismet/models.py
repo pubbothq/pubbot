@@ -14,6 +14,8 @@
 
 from django.db import models
 
+from pubbot.main.models import UserProfile
+
 
 class Network(models.Model):
 
@@ -31,6 +33,8 @@ class Network(models.Model):
 class Device(models.Model):
 
     mac = models.CharField(max_length=17)
+    user = models.ForeignKey(UserProfile, related_name="devices", blank=True, null=True)
+    name = models.CharField(max_length=64)
     opt_out = models.BooleanField()
 
 
