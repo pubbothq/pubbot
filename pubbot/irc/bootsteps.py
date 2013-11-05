@@ -40,7 +40,7 @@ class Bootstep(bootsteps.StartStopStep):
             # House keeping handlers
             client.add_handler(handlers.ping_handler, 'PING')
             if network.nickserv_password:
-                client.add_handler(GhostHandler(network.nickserv_password))
+                client.add_handler(GhostHandler(network.nick, network.nickserv_password))
             else:
                 client.add_handler(handlers.nick_in_use_handler, replycode.ERR_NICKNAMEINUSE)
             client.add_handler(UserListHandler())

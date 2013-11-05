@@ -183,10 +183,9 @@ def udefine(msg, term):
         definition = result['definition']
         definition = definition.replace('\r', '')
         definition = re.sub(r'\s', ' ', definition)
-        definition = ''.join(Soup(definition).findAll(text=True))
-        definition = Soup(definition, convertEntities=Soup.HTML_ENTITIES)
+        definition = ''.join(BeautifulSoup(definition).findAll(text=True))
 
-        definitions.append(unicode(definition))
+        definitions.append(u"\x031,1" + unicode(definition))
 
     if not definitions:
         return {

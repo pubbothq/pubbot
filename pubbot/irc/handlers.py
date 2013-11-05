@@ -14,6 +14,8 @@
 
 import re
 
+import gevent
+
 from django.db.models import Q
 
 from geventirc.irc import Client, IRC_PORT
@@ -22,6 +24,19 @@ from geventirc import handlers, replycode, message
 from pubbot.main.utils import broadcast, get_broadcast_group_for_message
 from pubbot.irc.models import *
 from pubbot.irc.tasks import mouth
+
+
+class JoinHandler(object):
+
+    commands = ['001']
+
+    def __init__(self, channel):
+        self.channel = channel
+
+    def __call__(self, client, msg):
+        gevent.sleep(5)
+        client.msg('ChanservServ', 'unban %s' % (self.channel, ))
+        client.send_message(message.Join(self.channel))
 
 
 class GhostHandler(object):
@@ -163,7 +178,7 @@ class UserListHandler(object):
             user = msg.prefix.split("!")[0]
 
             u = Network.objects.get(server=client.hostname).users.get(name=user)
-            for scene in u.scenes:
+            for scene in u.scenes.all():
                 self.remove(client, scene.name, user, "quit")
 
     def remove(self, client, channel, user, type, **kwargs):

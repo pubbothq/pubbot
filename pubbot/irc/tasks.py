@@ -24,8 +24,11 @@ def mouth(results, server, channel):
 
     msg = results[0]
 
+    content = [msg['content']] if not isinstance(msg['content'], list) else msg['content']
+
     from pubbot.irc.bootsteps import clients
-    clients[server].msg(channel, msg['content'].encode('utf-8'))
+    for c in content:
+        clients[server].msg(channel, c.encode('utf-8'))
 
 
 @app.task(queue='irc')

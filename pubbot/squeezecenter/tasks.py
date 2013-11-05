@@ -48,7 +48,7 @@ def requested_skip(msg, number):
                 "content": "Skip already in progress; can't start another",
                 }
     except Skip.DoesNotExist:
-        current_skip = Skip()
+        current_skip = Skip(number=number or 1)
         current_skip.save()
         skip_timeout.apply_async((current_skip.id, ), countdown=Skip.VOTE_DURATION.seconds)
     current_skip.skip(profile.profile)
@@ -111,12 +111,15 @@ def skip_timeout(skip_id):
 @app.task(queue='squeeze')
 def skip(num_tracks):
     if num_tracks == 0:
+        print "Asked to skip 0 tracks :("
         return
     sign = "+" if num_tracks > 0 else "-"
-    command.apply("playlist index %s%d" % (sign, num_tracks))
+    print "Calling command()"
+    command("playlist index %s%d" % (sign, num_tracks))
 
 
 @app.task(queue='squeeze')
 def command(command):
+    print "command: %s" % command
     app.squeezecenter.send(command)
 

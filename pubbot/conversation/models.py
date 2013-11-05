@@ -21,12 +21,18 @@ from pubbot.main.models import UserProfile
 class RelevanceTag(models.Model):
     name = models.CharField(max_length=1024)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Scene(PolymorphicModel):
 
     name = models.CharField(max_length=128)
     follows_tags = models.ManyToManyField(RelevanceTag, related_name='foolow_tags+')
     bans_tags = models.ManyToManyField(RelevanceTag, related_name='bans_tags+')
+
+    def __unicode__(self):
+        return self.name
 
 
 class Participant(PolymorphicModel):
@@ -38,4 +44,7 @@ class Participant(PolymorphicModel):
     @property
     def is_me(self):
         return False
+
+    def __unicode__(self):
+        return self.name
 

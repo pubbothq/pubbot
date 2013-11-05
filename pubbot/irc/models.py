@@ -26,6 +26,9 @@ class Network(models.Model):
     nickserv_password = models.CharField(max_length=1024, blank=True, null=True)
     nickserv_certfp = models.TextField(blank=True, null=True)
 
+    def __unicode__(self):
+        return self.server
+
 
 class Room(Scene):
     server = models.ForeignKey(Network, related_name="rooms")
@@ -46,5 +49,4 @@ class Room(Scene):
 
 class User(Participant):
     network = models.ForeignKey(Network, related_name='users')
-
 

@@ -20,7 +20,7 @@ from django.utils.importlib import import_module
 
 
 app = Celery('pubbot.main')
-app.config_from_object(settings)
+app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(settings.INSTALLED_APPS, related_name='tasks')
 
 
