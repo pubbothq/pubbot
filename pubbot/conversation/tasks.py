@@ -222,5 +222,6 @@ def fight(msg, word1, word2):
     score2 = intword(score2)
 
     return {
-        'content': '%(word1)s (%(score1)s) vs %(word2)s (%(score2)s) -- %(winner)s wins!' % locals(),
+        'content': '%(word1)s (%(score1)s) vs %(word2)s (%(score2)s) -- %(winner)s wins!' %
+        locals(),
     }

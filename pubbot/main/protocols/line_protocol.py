@@ -67,7 +67,7 @@ class LineProtocol(object):
 
     def _recv_loop(self):
         buf = ''
-        while 1:
+        while True:
             try:
                 data = self._socket.recv(512)
             except gevent.GreenletExit:
@@ -84,7 +84,7 @@ class LineProtocol(object):
                 pos = buf.find("\n")
 
     def _send_loop(self):
-        while 1:
+        while True:
             command = self._send_queue.get()
             try:
                 enc_cmd = command.decode('utf8')
@@ -102,5 +102,5 @@ class LineProtocol(object):
                 return
 
     def _process_loop(self):
-        while 1:
+        while True:
             self.line_received(self._recv_queue.get())

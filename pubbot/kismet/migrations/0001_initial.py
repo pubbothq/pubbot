@@ -59,23 +59,46 @@ class Migration(SchemaMigration):
         u'kismet.device': {
             'Meta': {'object_name': 'Device'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'mac': ('django.db.models.fields.CharField', [], {'max_length': '17'}),
-            'opt_out': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
+            'mac': (
+                'django.db.models.fields.CharField',
+                [],
+                {'max_length': '17'}),
+            'opt_out': (
+                'django.db.models.fields.BooleanField',
+                [],
+                {'default': 'False'})
         },
         u'kismet.network': {
             'Meta': {'ordering': "['name']", 'object_name': 'Network'},
-            'bssid': ('django.db.models.fields.CharField', [], {'max_length': '17'}),
-            'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'bssid': (
+                'django.db.models.fields.CharField',
+                [],
+                {'max_length': '17'}),
+            'enabled': (
+                'django.db.models.fields.BooleanField',
+                [],
+                {'default': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '64'})
+            'name': (
+                'django.db.models.fields.CharField',
+                [],
+                {'max_length': '64'})
         },
         u'kismet.times': {
             'Meta': {'object_name': 'Times'},
             'date': ('django.db.models.fields.DateField', [], {}),
-            'device': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'times'", 'to': u"orm['kismet.Device']"}),
+            'device': (
+                'django.db.models.fields.related.ForeignKey',
+                [],
+                {'related_name': "'times'",
+                 'to': u"orm['kismet.Device']"}),
             'first_seen': ('django.db.models.fields.DateTimeField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_seen': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
+            'last_seen': (
+                'django.db.models.fields.DateTimeField',
+                [],
+                {'null': 'True',
+                 'blank': 'True'})
         }
     }
 

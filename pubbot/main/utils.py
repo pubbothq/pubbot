@@ -32,7 +32,9 @@ def get_tasks_with_subscription(subscription):
 
 
 def get_broadcast_group_for_message(**kwargs):
-    return group(t.s(kwargs) for t in get_tasks_with_subscription(kwargs['kind']))
+    return (
+        group(t.s(kwargs) for t in get_tasks_with_subscription(kwargs['kind']))
+    )
 
 
 def broadcast(**kwargs):

@@ -50,7 +50,15 @@ class Bootstep(bootsteps.StartStopStep):
         finally:
             ref.close()
 
-    def _browse_callback(self, sdRef, flags, iface, errorCode, service, regtype, replydomain):
+    def _browse_callback(
+        self,
+        sdRef,
+        flags,
+        iface,
+        errorCode,
+        service,
+        regtype,
+            replydomain):
         self._to_resolve.put((iface, service, regtype, replydomain))
 
     def _resolve_loop(self):
@@ -65,7 +73,16 @@ class Bootstep(bootsteps.StartStopStep):
             finally:
                 ref.close()
 
-    def _resolve_callback(self, ref, flags, iface_index, errorCode, fullname, host, port, txt):
+    def _resolve_callback(
+        self,
+        ref,
+        flags,
+        iface_index,
+        errorCode,
+        fullname,
+        host,
+        port,
+            txt):
         if errorCode != pybonjour.kDNSServiceErr_NoError:
             return
 

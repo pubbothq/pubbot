@@ -83,7 +83,15 @@ class KismetConnection(LineProtocol):
     def parse_KISMET(self, data):
         return data.split(" ")
 
-    def kismet_KISMET(self, version, start_time, server_name, build_revision, unknown1, unknown2, unknown3):
+    def kismet_KISMET(
+        self,
+        version,
+        start_time,
+        server_name,
+        build_revision,
+        unknown1,
+        unknown2,
+            unknown3):
         self.version = version
         self.start_time = start_time
         self.server_name = server_name

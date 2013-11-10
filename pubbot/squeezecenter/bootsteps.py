@@ -74,7 +74,7 @@ class SqueezeCenterConnection(object):
 
     def _recv_loop(self):
         buf = ''
-        while 1:
+        while True:
             try:
                 data = self._socket.recv(512)
             except gevent.GreenletExit:
@@ -100,7 +100,7 @@ class SqueezeCenterConnection(object):
                 pos = buf.find("\n")
 
     def _send_loop(self):
-        while 1:
+        while True:
             command = self._send_queue.get()
             try:
                 enc_cmd = command.decode('utf8')
@@ -118,7 +118,7 @@ class SqueezeCenterConnection(object):
                 return
 
     def _process_loop(self):
-        while 1:
+        while True:
             data = self._recv_queue.get()
             for handler in self.handlers:
                 self._group.spawn(handler, self, data)

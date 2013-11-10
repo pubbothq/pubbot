@@ -33,7 +33,8 @@ def requested_skip(msg, number):
 
     try:
         profile = Participant.objects.get(id=msg['participant_id'])
-    except KeyError, Participant.DoesNotExist:
+    except KeyError as xxx_todo_changeme:
+        Participant.DoesNotExist = xxx_todo_changeme
         profile = None
 
     if not profile or not profile.profile:
@@ -56,7 +57,8 @@ def requested_skip(msg, number):
 
     if current_skip.needed > 0:
         return {
-            "content": "Voted to skip. %d more votes required" % current_skip.needed,
+            "content": "Voted to skip. %d more votes required" %
+            current_skip.needed,
         }
 
 
@@ -67,7 +69,8 @@ def requested_noskip(msg):
 
     try:
         profile = Participant.objects.get(id=msg['participant_id'])
-    except KeyError, Participant.DoesNotExist:
+    except KeyError as xxx_todo_changeme1:
+        Participant.DoesNotExist = xxx_todo_changeme1
         profile = None
 
     if not profile or not profile.profile:
@@ -85,7 +88,8 @@ def requested_noskip(msg):
     current_skip.noskip(profile.profile)
 
     return {
-        "content": "Voted to not skip. %d more votes required" % current_skip.needed,
+        "content": "Voted to not skip. %d more votes required" %
+        current_skip.needed,
     }
 
 
@@ -105,7 +109,8 @@ def skip_timeout(skip_id):
     s.save()
 
     mouth.delay({
-        'content': 'Vote timed out after %d seconds' % Skip.VOTE_DURATION.seconds,
+        'content': 'Vote timed out after %d seconds' %
+        Skip.VOTE_DURATION.seconds,
     })
 
 
