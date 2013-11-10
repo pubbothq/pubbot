@@ -28,7 +28,8 @@ class RelevanceTag(models.Model):
 class Scene(PolymorphicModel):
 
     name = models.CharField(max_length=128)
-    follows_tags = models.ManyToManyField(RelevanceTag, related_name='foolow_tags+')
+    follows_tags = models.ManyToManyField(
+        RelevanceTag, related_name='foolow_tags+')
     bans_tags = models.ManyToManyField(RelevanceTag, related_name='bans_tags+')
 
     def __unicode__(self):
@@ -38,7 +39,8 @@ class Scene(PolymorphicModel):
 class Participant(PolymorphicModel):
 
     name = models.CharField(max_length=128)
-    profile = models.ForeignKey(UserProfile, related_name='chat_accounts', blank=True, null=True)
+    profile = models.ForeignKey(
+        UserProfile, related_name='chat_accounts', blank=True, null=True)
     scenes = models.ManyToManyField(Scene, related_name='participants')
 
     @property
@@ -47,4 +49,3 @@ class Participant(PolymorphicModel):
 
     def __unicode__(self):
         return self.name
-

@@ -17,4 +17,3 @@ from pubbot.bonjour.models import Device
 
 
 admin.site.register(Device)
-

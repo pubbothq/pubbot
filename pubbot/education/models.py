@@ -24,8 +24,9 @@ class Education(models.Model):
     trigger = models.CharField(max_length=1024)
     response = models.CharField(max_length=1024)
     probability = models.FloatField(
-        validators=[validators.MinValueValidator(0), validators.MaxValueValidator(100),]
-        )
+        validators=[validators.MinValueValidator(
+            0), validators.MaxValueValidator(100), ]
+    )
     address_speaker = models.BooleanField()
     regex = models.BooleanField()
 
@@ -34,8 +35,8 @@ class Education(models.Model):
             try:
                 re.compile(self.trigger)
             except:
-                raise ValidationError('Trigger must be a regex if regex checked')
+                raise ValidationError(
+                    'Trigger must be a regex if regex checked')
 
     def __unicode__(self):
-       return '%r -> %r' % (self.trigger, self.response)
-
+        return '%r -> %r' % (self.trigger, self.response)

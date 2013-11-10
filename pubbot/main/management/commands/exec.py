@@ -21,4 +21,3 @@ class Command(BaseCommand):
 
     def handle(self, script, *args, **options):
         execfile(script, {}, {})
-

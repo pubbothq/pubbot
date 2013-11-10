@@ -24,5 +24,4 @@ class Command(BaseCommand):
     def run_from_argv(self, argv):
         app.start(
             [''] + argv[2:],
-            )
-
+        )

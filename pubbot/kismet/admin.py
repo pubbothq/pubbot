@@ -23,10 +23,9 @@ class TimesInline(admin.TabularInline):
 class DeviceAdmin(admin.ModelAdmin):
     inlines = [
         TimesInline,
-        ]
+    ]
 
 
 admin.site.register(Network)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Times)
-

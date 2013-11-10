@@ -23,7 +23,8 @@ class Network(models.Model):
     server = models.CharField(max_length=128)
     port = models.CharField(max_length=5)
     ssl = models.BooleanField()
-    nickserv_password = models.CharField(max_length=1024, blank=True, null=True)
+    nickserv_password = models.CharField(
+        max_length=1024, blank=True, null=True)
     nickserv_certfp = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
@@ -35,18 +36,19 @@ class Room(Scene):
 
     def say(self, content):
         from pubbot.irc.tasks import say
-        say.delay(server=self.server.server, channel=self.name, content=content)
+        say.delay(server=self.server.server,
+                  channel=self.name, content=content)
 
     def action(self, content):
         from pubbot.irc.tasks import action
-        action.delay(server=self.server.server, channel=self.name, content=content)
+        action.delay(server=self.server.server,
+                     channel=self.name, content=content)
 
     def notice(self, content):
         from pubbot.irc.tasks import notice
-        notice.delay(server=self.server.server, channel=self.name, content=content)
-
+        notice.delay(server=self.server.server,
+                     channel=self.name, content=content)
 
 
 class User(Participant):
     network = models.ForeignKey(Network, related_name='users')
-

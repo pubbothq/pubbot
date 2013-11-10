@@ -24,4 +24,3 @@ def change_kiosk_url(msg, url):
 @app.task(queue='kiosk')
 def reload():
     """ http://www.teaandkittens.co.uk/ """
-

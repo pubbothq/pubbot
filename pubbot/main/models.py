@@ -22,11 +22,10 @@ class UserProfile(models.Model):
     def __unicode__(self):
         if self.email:
             return self.email
-        
+
         try:
             return self.chat_accounts.all()[0].name
         except IndexError:
             pass
 
         return "UserProfile<unlinked>"
-

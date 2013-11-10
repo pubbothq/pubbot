@@ -20,3 +20,5 @@ requests==2.0.0
 # Install our main egg
 -e .
 
+# Testing stuff
+flake8

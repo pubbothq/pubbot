@@ -24,7 +24,8 @@ def mouth(results, server, channel):
 
     msg = results[0]
 
-    content = [msg['content']] if not isinstance(msg['content'], list) else msg['content']
+    content = [msg['content']] if not isinstance(
+        msg['content'], list) else msg['content']
 
     from pubbot.irc.bootsteps import clients
     for c in content:
@@ -44,6 +45,7 @@ def action(server, channel, content):
 
 
 class Notice(message.Command):
+
     def __init__(self, to, msg, prefix=None):
         super(Notice, self).__init__([to, msg], prefix=prefix)
 
@@ -52,4 +54,3 @@ class Notice(message.Command):
 def notice(server, channel, content):
     from pubbot.irc.bootsteps import clients
     clients[server].send_message(Notice(channel, content.encode('utf-8')))
-

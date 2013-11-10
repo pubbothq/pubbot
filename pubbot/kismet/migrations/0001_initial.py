@@ -10,31 +10,40 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'Network'
         db.create_table(u'kismet_network', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('bssid', self.gf('django.db.models.fields.CharField')(max_length=17)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            (u'id', self.gf('django.db.models.fields.AutoField')
+             (primary_key=True)),
+            ('bssid', self.gf('django.db.models.fields.CharField')
+             (max_length=17)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (max_length=64)),
+            ('enabled', self.gf('django.db.models.fields.BooleanField')
+             (default=True)),
         ))
         db.send_create_signal(u'kismet', ['Network'])
 
         # Adding model 'Device'
         db.create_table(u'kismet_device', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('mac', self.gf('django.db.models.fields.CharField')(max_length=17)),
-            ('opt_out', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            (u'id', self.gf('django.db.models.fields.AutoField')
+             (primary_key=True)),
+            ('mac', self.gf('django.db.models.fields.CharField')
+             (max_length=17)),
+            ('opt_out', self.gf('django.db.models.fields.BooleanField')
+             (default=False)),
         ))
         db.send_create_signal(u'kismet', ['Device'])
 
         # Adding model 'Times'
         db.create_table(u'kismet_times', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('device', self.gf('django.db.models.fields.related.ForeignKey')(related_name='times', to=orm['kismet.Device'])),
+            (u'id', self.gf('django.db.models.fields.AutoField')
+             (primary_key=True)),
+            ('device', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='times', to=orm['kismet.Device'])),
             ('date', self.gf('django.db.models.fields.DateField')()),
             ('first_seen', self.gf('django.db.models.fields.DateTimeField')()),
-            ('last_seen', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('last_seen', self.gf('django.db.models.fields.DateTimeField')
+             (null=True, blank=True)),
         ))
         db.send_create_signal(u'kismet', ['Times'])
-
 
     def backwards(self, orm):
         # Deleting model 'Network'
@@ -45,7 +54,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Times'
         db.delete_table(u'kismet_times')
-
 
     models = {
         u'kismet.device': {

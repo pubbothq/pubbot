@@ -34,6 +34,7 @@ def parse_chat_text(regex, subscribe=None):
             print "someone said hello to %s" % name
     """
     _regex = re.compile(regex)
+
     def decorator(func):
         def new_func(msg):
             result = _regex.search(msg['content'])
@@ -45,6 +46,7 @@ def parse_chat_text(regex, subscribe=None):
         new_func = app.task(new_func, subscribe=subscribe or ['chat.#.chat'])
         return new_func
     return decorator
+
 
 @app.task
 def mouth(msg):
@@ -96,8 +98,8 @@ def hello(msg):
             "Greetings, %s",
             "wotcha, %s",
             "Frak, it's %s",
-            ]) % msg['user'],
-        })
+        ]) % msg['user'],
+    })
 
 """
 @parse_chat_text(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
@@ -128,28 +130,29 @@ def pull_request(msg, user, repo, id):
     return {
         'content': '[ %s: %s ]' % (name, title),
         'useful': True,
-        }
+    }
 
 
 @parse_chat_text(r'https://alpha.app.net/(?P<account>[\d\w]+)/post/(?P<id>[\d]+)')
 def on_appdotnet_link(msg, account, id):
-    res = requests.get('https://alpha-api.app.net/stream/0/posts/%s' % id).json()
+    res = requests.get('https://alpha-api.app.net/stream/0/posts/%s' %
+                       id).json()
     tweet = res['data']['text'].encode('ascii', 'replace')
     screen_name = res['data']['user']['username']
     return {
         'content': '[ %s: %s ]' % (screen_name, tweet),
         'useful': True,
-        }
+    }
 
 
 @parse_chat_text(r'^(image|img) me (?P<query>[\s\w]+)')
 def image_search(msg, query):
     url = 'https://ajax.googleapis.com/ajax/services/search/images'
     results = requests.get(url, params=dict(
-        v = '1.0',
-        rsz = 8,
-        q = query,
-        )).json()
+        v='1.0',
+        rsz=8,
+        q=query,
+    )).json()
     images = results['responseData']['results']
 
     if images:
@@ -157,19 +160,18 @@ def image_search(msg, query):
         image = random.choice(images).get('url', def_image)
         return {
             'content': image,
-            }
+        }
 
     return {
         'content': "There are no images matching '%s'" % query,
-        }
-
+    }
 
 
 @parse_chat_text(r'^udefine: (?P<term>[\w]+)')
 def udefine(msg, term):
     results = requests.get("http://www.urbandictionary.com/iphone/search/define", params=dict(
         term=term,
-        )).json()
+    )).json()
 
     if results.get('result_type', '') == 'no_results':
         return
@@ -192,12 +194,12 @@ def udefine(msg, term):
     if not definitions:
         return {
             'content': "No matches found for '%s'" % term,
-            }
+        }
 
     return {
         'content': definitions[:4],
         'offensive': True,
-        }
+    }
 
     # message.reply("\x031,1 " + d)
 
@@ -205,7 +207,8 @@ def udefine(msg, term):
 @parse_chat_text(r'^fight:[\s]*(?P<word1>.*)(?:[;,]| vs\.? | v\.? )[\s]*(?P<word2>.*)')
 def fight(msg, word1, word2):
     def _score(word):
-        r = requests.get('http://www.google.co.uk/search', params={'q': word, 'safe': 'off'})
+        r = requests.get('http://www.google.co.uk/search',
+                         params={'q': word, 'safe': 'off'})
         soup = BeautifulSoup(r.text)
         score_string = soup.find(id='resultStats').string
         return int(''.join(re.findall('\d+', score_string)))
@@ -220,5 +223,4 @@ def fight(msg, word1, word2):
 
     return {
         'content': '%(word1)s (%(score1)s) vs %(word2)s (%(score2)s) -- %(winner)s wins!' % locals(),
-        }
-
+    }

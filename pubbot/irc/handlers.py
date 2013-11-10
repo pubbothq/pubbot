@@ -18,7 +18,6 @@ import gevent
 
 from django.db.models import Q
 
-from geventirc.irc import Client, IRC_PORT
 from geventirc import handlers, replycode, message
 
 from pubbot.main.utils import broadcast, get_broadcast_group_for_message
@@ -45,7 +44,7 @@ class GhostHandler(object):
         '001',
         replycode.ERR_NICKNAMEINUSE,
         replycode.ERR_NICKCOLLISION,
-        ]
+    ]
 
     def __init__(self, nick, password):
         self.nick = nick
@@ -86,7 +85,7 @@ class BotInterfaceHandler(object):
         broadcast(
             kind=self.kind,
             **results.groupdict()
-            )
+        )
 
 
 class UserListHandler(object):
@@ -116,7 +115,8 @@ class UserListHandler(object):
 
             # Eject user not present
             users = [u.lstrip("@").lstrip("+") for u in self.incoming[channel]]
-            scene.participants.remove(*scene.participants.exclude(name__in=users))
+            scene.participants.remove(
+                *scene.participants.exclude(name__in=users))
 
             # Record user presence
             users_from_db = [user.name for user in scene.participants.all()]
@@ -157,11 +157,11 @@ class UserListHandler(object):
 
             broadcast(
                 kind="chat.irc.%s.join" % channel,
-                scene_id = scene.pk,
-                user = user,
-                channel = channel,
-                is_me = (user == client.nick),
-                )
+                scene_id=scene.pk,
+                user=user,
+                channel=channel,
+                is_me=(user == client.nick),
+            )
 
         elif msg.command == 'PART':
             user = msg.prefix.split("!")[0]
@@ -177,7 +177,8 @@ class UserListHandler(object):
         elif msg.command == 'QUIT':
             user = msg.prefix.split("!")[0]
 
-            u = Network.objects.get(server=client.hostname).users.get(name=user)
+            u = Network.objects.get(
+                server=client.hostname).users.get(name=user)
             for scene in u.scenes.all():
                 self.remove(client, scene.name, user, "quit")
 
@@ -188,13 +189,13 @@ class UserListHandler(object):
         scene.participants.remove(*scene.participants.filter(name=user))
 
         broadcast(
-            kind ="chat.irc.%s.leave" % channel,
-            type = type,
-            scene_id = scene.pk,
-            user = user,
-            channel = channel,
+            kind="chat.irc.%s.leave" % channel,
+            type=type,
+            scene_id=scene.pk,
+            user=user,
+            channel=channel,
             **kwargs
-            )
+        )
 
 
 class InviteProcessor(object):
@@ -203,10 +204,10 @@ class InviteProcessor(object):
 
     def __call__(self, client, msg):
         broadcast(
-            kind = "chat.irc.%s.invite" % msg.params[1],
-            invited_to = msg.params[1],
-            invited_by = msg.prefix.split("!")[0],
-            )
+            kind="chat.irc.%s.invite" % msg.params[1],
+            invited_to=msg.params[1],
+            invited_by=msg.prefix.split("!")[0],
+        )
 
 
 class ConversationHandler(object):
@@ -237,15 +238,15 @@ class ConversationHandler(object):
                 content = msg
 
         handlers = get_broadcast_group_for_message(
-            kind = "chat.irc.%s.chat" % channel,
-            scene_id = getattr(scene, "pk", None),
-            participant_id = getattr(participant, "pk", None),
-            source = user,
-            channel = channel,
-            content = content,
-            direct = direct,
-            )
+            kind="chat.irc.%s.chat" % channel,
+            scene_id=getattr(scene, "pk", None),
+            participant_id=getattr(participant, "pk", None),
+            source=user,
+            channel=channel,
+            content=content,
+            direct=direct,
+        )
 
-        result = (handlers | mouth.s(server=client.hostname, channel=channel))()
+        result = (handlers |
+                  mouth.s(server=client.hostname, channel=channel))()
         # result.get()
-

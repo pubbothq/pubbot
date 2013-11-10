@@ -93,7 +93,7 @@ class SqueezeCenterConnection(object):
                     parts.pop(0)
                     self._recv_queue.put(parts)
                 else:
-                    #print len(parts), line
+                    # print len(parts), line
                     pass
 
                 buf = buf[pos + 1:]
@@ -143,4 +143,3 @@ class Bootstep(bootsteps.StartStopStep):
     def stop(self, worker):
         print "Disconnecting from SqueezeCenter"
         self.client.stop()
-

@@ -99,16 +99,17 @@ class KismetConnection(LineProtocol):
         for protocol in protocols:
             self.send("!0 CAPABILITY %s" % protocol.upper())
         # self.subscribe("NETWORK", ["bssid", "type", "ssid", "channel", "lasttime"])
-        self.subscribe("CLIENT", ["bssid", "mac", "type", "lasttime", "datapackets"])
+        self.subscribe("CLIENT",
+                       ["bssid", "mac", "type", "lasttime", "datapackets"])
 
-    #def kismet_ACK(self, cmdid):
+    # def kismet_ACK(self, cmdid):
     #    if cmdid in self.deferreds:
     #        self.deferreds[cmdid].callback(True)
     #        del self.deferreds[cmdid]
 
-    #def kismet_ERROR(self, cmdid, text):
+    # def kismet_ERROR(self, cmdid, text):
     #    if cmdid in self.deferreds:
-    #        #self.deferreds[cmdid].errback(Failure(text))
+    # self.deferreds[cmdid].errback(Failure(text))
     #        del self.deferreds[cmdid]
 
     def parse_CAPABILITY(self, data):
@@ -132,4 +133,3 @@ class Bootstep(bootsteps.StartStopStep):
 
     def stop(self, worker):
         self.connection.stop()
-

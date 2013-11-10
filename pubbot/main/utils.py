@@ -40,4 +40,3 @@ def broadcast(**kwargs):
     Invoke all tasks that subscribe to channels matching the channel on msg
     """
     return get_broadcast_group_for_message(**kwargs).apply_async()
-

@@ -41,7 +41,8 @@ class Bootstep(bootsteps.StartStopStep):
         # FIXME: Would be nice to detect more than just airplay...
         regtype = "_airplay._tcp"
 
-        ref = pybonjour.DNSServiceBrowse(regtype=regtype, callBack=self._browse_callback)
+        ref = pybonjour.DNSServiceBrowse(
+            regtype=regtype, callBack=self._browse_callback)
         try:
             while True:
                 wait_read(ref.fileno())
@@ -56,7 +57,8 @@ class Bootstep(bootsteps.StartStopStep):
         while True:
             iface, service, regtype, replydomain = self._to_resolve.get()
 
-            ref = pybonjour.DNSServiceResolve(0, iface, service, regtype, replydomain, self._resolve_callback)
+            ref = pybonjour.DNSServiceResolve(
+                0, iface, service, regtype, replydomain, self._resolve_callback)
             try:
                 wait_read(ref.fileno())
                 pybonjour.DNSServiceProcessResult(ref)
@@ -72,20 +74,20 @@ class Bootstep(bootsteps.StartStopStep):
         else:
             kind = "hello"
 
-        d, created = Device.get_or_create(fullname=fullname, defaults={'host': host, 'port': port, 'txt': txt})
+        d, created = Device.get_or_create(
+            fullname=fullname, defaults={'host': host, 'port': port, 'txt': txt})
         d.host = host
         d.port = port
         d.txt = txt
         d.save()
 
         broadcast(kind="network-device.%s" % kind,
-            fullname = fullname,
-            flags = flags,
-            iface_index = iface_index,
-            host = host,
-            port = port,
-            txt = txt,
-            )
+                  fullname=fullname,
+                  flags=flags,
+                  iface_index=iface_index,
+                  host=host,
+                  port=port,
+                  txt=txt,
+                  )
 
         print ' '.join(fullname, host, port, txt)
-

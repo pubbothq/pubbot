@@ -28,4 +28,3 @@ class Bootstep(bootsteps.StartStopStep):
     def stop(self, worker):
         # self.client.kill()
         pass
-

@@ -104,4 +104,3 @@ class LineProtocol(object):
     def _process_loop(self):
         while 1:
             self.line_received(self._recv_queue.get())
-

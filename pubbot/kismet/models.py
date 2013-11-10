@@ -33,7 +33,8 @@ class Network(models.Model):
 class Device(models.Model):
 
     mac = models.CharField(max_length=17)
-    user = models.ForeignKey(UserProfile, related_name="devices", blank=True, null=True)
+    user = models.ForeignKey(
+        UserProfile, related_name="devices", blank=True, null=True)
     name = models.CharField(max_length=64, blank=True, null=True)
     opt_out = models.BooleanField()
 
@@ -44,4 +45,3 @@ class Times(models.Model):
     date = models.DateField()
     first_seen = models.DateTimeField()
     last_seen = models.DateTimeField(blank=True, null=True)
-

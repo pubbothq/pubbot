@@ -24,4 +24,3 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         call_command('zap_and_create_db')
         call_command('update')
-

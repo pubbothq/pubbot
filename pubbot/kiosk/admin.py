@@ -16,4 +16,3 @@ from django.contrib import admin
 from pubbot.kiosk.models import Kiosk
 
 admin.site.register(Kiosk)
-

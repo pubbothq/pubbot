@@ -23,6 +23,7 @@ from pubbot.irc.handlers import *
 # FIXME: It would be nice if this global didn't exist..
 clients = {}
 
+
 class Bootstep(bootsteps.StartStopStep):
 
     queue = 'irc'
@@ -34,15 +35,18 @@ class Bootstep(bootsteps.StartStopStep):
         for network in Network.objects.all():
             print "Connecting to '%s' on port '%d'" % (network.server, int(network.port))
 
-            client = Client(network.server, network.nick, port=str(network.port), ssl=network.ssl)
+            client = Client(network.server, network.nick,
+                            port=str(network.port), ssl=network.ssl)
             clients[network.server] = client
 
             # House keeping handlers
             client.add_handler(handlers.ping_handler, 'PING')
             if network.nickserv_password:
-                client.add_handler(GhostHandler(network.nick, network.nickserv_password))
+                client.add_handler(
+                    GhostHandler(network.nick, network.nickserv_password))
             else:
-                client.add_handler(handlers.nick_in_use_handler, replycode.ERR_NICKNAMEINUSE)
+                client.add_handler(
+                    handlers.nick_in_use_handler, replycode.ERR_NICKNAMEINUSE)
             client.add_handler(UserListHandler())
             client.add_handler(InviteProcessor())
 
@@ -60,4 +64,3 @@ class Bootstep(bootsteps.StartStopStep):
     def stop(self, worker):
         print "Stopping irc services"
         [c.stop() for c in self.group]
-

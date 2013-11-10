@@ -23,7 +23,7 @@ def current_song_notification(msg):
         'content': "%(title)s - %(artist)s (%(album)s)" % msg,
         'tags': ['current_song_notification'],
         'notice': True,
-        })
+    })
 
 
 @parse_chat_text(r'^skip(\s(?P<number>\d+))?$')
@@ -39,24 +39,25 @@ def requested_skip(msg, number):
     if not profile or not profile.profile:
         return {
             "content": "I don't know who you are",
-            }
+        }
 
     try:
         current_skip = Skip.objects.get(vote_ended__isnull=True)
         if number:
             return {
                 "content": "Skip already in progress; can't start another",
-                }
+            }
     except Skip.DoesNotExist:
         current_skip = Skip(number=number or 1)
         current_skip.save()
-        skip_timeout.apply_async((current_skip.id, ), countdown=Skip.VOTE_DURATION.seconds)
+        skip_timeout.apply_async(
+            (current_skip.id, ), countdown=Skip.VOTE_DURATION.seconds)
     current_skip.skip(profile.profile)
 
     if current_skip.needed > 0:
         return {
             "content": "Voted to skip. %d more votes required" % current_skip.needed,
-            }
+        }
 
 
 @parse_chat_text(r'^noskip$')
@@ -72,20 +73,20 @@ def requested_noskip(msg):
     if not profile or not profile.profile:
         return {
             "content": "I don't know who you are",
-            }
+        }
 
     try:
         current_skip = Skip.objects.get(vote_ended__isnull=True)
     except Skip.DoesNotExist:
         return {
             "content": "There isn't a vote in progress.."
-            }
+        }
 
     current_skip.noskip(profile.profile)
 
     return {
         "content": "Voted to not skip. %d more votes required" % current_skip.needed,
-        }
+    }
 
 
 @app.task(queue='squeeze')
@@ -105,7 +106,7 @@ def skip_timeout(skip_id):
 
     mouth.delay({
         'content': 'Vote timed out after %d seconds' % Skip.VOTE_DURATION.seconds,
-        })
+    })
 
 
 @app.task(queue='squeeze')
@@ -122,4 +123,3 @@ def skip(num_tracks):
 def command(command):
     print "command: %s" % command
     app.squeezecenter.send(command)
-

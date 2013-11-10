@@ -25,10 +25,12 @@ app.autodiscover_tasks(settings.INSTALLED_APPS, related_name='tasks')
 
 
 class Bootstep(object):
+
     def start(self, worker):
         if not self.queue in worker.app.amqp.queues:
             return
         return super(Bootstep, self).start(worker)
+
     def stop(self, worker):
         if not self.queue in worker.app.amqp.queues:
             return
@@ -43,8 +45,9 @@ for installed_app in settings.INSTALLED_APPS:
         continue
 
     # If an app defines .bootsteps.Bootstep then register it against a worker.
-    # We adapt it so that its inert unless the queue it is interested in is active
+    # We adapt it so that its inert unless the queue it is interested in is
+    # active
     if hasattr(module, 'Bootstep'):
-        t = type('%s.bootsteps.Bootstep' % installed_app, (Bootstep, getattr(module, 'Bootstep')), {})
+        t = type('%s.bootsteps.Bootstep' %
+                 installed_app, (Bootstep, getattr(module, 'Bootstep')), {})
         app.steps['worker'].add(t)
-

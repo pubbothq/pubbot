@@ -17,4 +17,3 @@ from pubbot.main.models import UserProfile
 
 
 admin.site.register(UserProfile)
-

@@ -51,10 +51,10 @@ class CurrentSongHandler(object):
                     artist=self.artist,
                     album=self.album,
                     title=self.title
-                    )
+                )
                 self.title = self.artist = self.title = None
 
-        elif message[0] =='playlist' and message[1].startswith('newsong '):
+        elif message[0] == 'playlist' and message[1].startswith('newsong '):
             self.request_track_details(conn)
 
 
@@ -64,5 +64,4 @@ class StopHandler(object):
         if message[0] == 'playlist' and message[1] == 'stop':
             broadcast(
                 kind='music.stop',
-                )
-
+            )

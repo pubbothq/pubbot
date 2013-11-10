@@ -31,7 +31,8 @@ def raise_ticket(msg, ticket):
     #log.msg("Getting __FORM_TOKEN")
     form_page = s.get("%s/newticket" % self.instance, auth=auth)
     soup = BeautifulSoup(form_page.text)
-    token = soup.find('input', attrs={"type":"hidden", "name":"__FORM_TOKEN"})['value'].encode("utf-8")
+    token = soup.find('input', attrs={"type": "hidden", "name": "__FORM_TOKEN"})[
+        'value'].encode("utf-8")
 
     #log.msg("Trying to raise ticket")
     new_ticket = s.post("%s/newticket" % self.instance, allow_redirects=True, auth=auth, data={
@@ -40,9 +41,8 @@ def raise_ticket(msg, ticket):
         "field_status": "new",
         "field_reporter": reporter,
         "field_owner": "",
-        })
+    })
 
     return {
         'content': new_ticket.url,
-        }
-
+    }

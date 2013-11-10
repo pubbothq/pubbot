@@ -9,9 +9,11 @@ from pubbot.conversation.tasks import parse_chat_text
 from pubbot.main.celery import app
 from pubbot.tasty.models import Link
 
+
 @parse_chat_text(r'''(?xi)\b(?P<url>(?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''')
 def got_chat_link(msg, url):
-    # Once we have identified a URL we immediately re-queue it - we don't want to block the chatting processes
+    # Once we have identified a URL we immediately re-queue it - we don't want
+    # to block the chatting processes
     process_link.delay(url)
 
 
@@ -20,7 +22,7 @@ def last_link_details(msg):
     link = Link.objects.order_by('-first_seen')[0]
     return {
         'content': link.title or "URL isn't HTML or doesn't have a title tag",
-        }
+    }
 
 
 @app.task
@@ -42,4 +44,3 @@ def process_link(url):
         l.title = soup.title.string
 
     l.save()
-

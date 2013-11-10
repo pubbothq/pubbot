@@ -21,4 +21,3 @@ class ChainAdmin(admin.ModelAdmin):
 
 admin.site.register(Chain, ChainAdmin)
 admin.site.register(Word)
-

@@ -62,5 +62,4 @@ def lookup_education_response(msg):
 
     return {
         'content': reply,
-        }
-
+    }

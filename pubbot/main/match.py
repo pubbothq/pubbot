@@ -14,6 +14,7 @@
 
 import re
 
+
 def get_regex_for_routing_key(routing_key):
     regex = ['^']
     parts = routing_key.split(".")
@@ -39,4 +40,3 @@ def match(routing_keys, msg):
         if expr.match(msg):
             return True
     return False
-

@@ -47,7 +47,8 @@ class Skip(models.Model):
     songs = models.ManyToManyField(Song, related_name="skips")
 
     skippers = models.ManyToManyField(UserProfile, related_name="+skippers+")
-    noskippers = models.ManyToManyField(UserProfile, related_name="+noskippers+")
+    noskippers = models.ManyToManyField(
+        UserProfile, related_name="+noskippers+")
 
     @property
     def count(self):
@@ -79,4 +80,3 @@ class Skip(models.Model):
 
             from pubbot.squeezecenter.tasks import skip
             skip.delay(self.number)
-

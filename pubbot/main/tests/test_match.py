@@ -19,7 +19,7 @@ from pubbot.main.match import match
 # Message matching happens like in RabbitMQ:
 #
 #   * (star) can substitute for exactly one word.
-#   # (hash) can substitute for zero or more words.
+# (hash) can substitute for zero or more words.
 
 class TestMatch(unittest.TestCase):
 
@@ -55,8 +55,9 @@ class TestMatch(unittest.TestCase):
         self.assert_match('#.*', 'foo.bar.baz.qux.quux.corge.grault')
         self.assert_match('#.*', 'foo.bar.baz.qux.quux.corge.garply')
         self.assert_match('#.*', 'foo.bar.baz.qux.quux.corge.garply.waldo')
-        self.assert_match('#.*', 'foo.bar.baz.qux.quux.corge.garply.waldo.fred')
-        self.assert_match('#.*', 'foo.bar.baz.qux.quux.corge.garply.waldo.fred.plugh')
+        self.assert_match(
+            '#.*', 'foo.bar.baz.qux.quux.corge.garply.waldo.fred')
+        self.assert_match(
+            '#.*', 'foo.bar.baz.qux.quux.corge.garply.waldo.fred.plugh')
 
         self.assert_no_match('#.*', 'foo')
-

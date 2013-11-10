@@ -19,5 +19,3 @@ class Kiosk(models.Model):
 
     name = models.CharField(max_length=1024)
     url = models.URLField(max_length=1024)
-
-

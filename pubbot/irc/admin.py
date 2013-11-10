@@ -23,10 +23,9 @@ class RoomInline(admin.TabularInline):
 class NetworkAdmin(admin.ModelAdmin):
     inlines = [
         RoomInline,
-        ]
+    ]
 
 
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Room)
 admin.site.register(User)
-

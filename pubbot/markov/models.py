@@ -48,4 +48,3 @@ class Chain(models.Model):
 
     class Meta:
         unique_together = ('left1', 'left2', 'right')
-

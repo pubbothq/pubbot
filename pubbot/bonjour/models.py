@@ -22,4 +22,3 @@ class Device(models.Model):
     port = models.PositiveIntegerField(max_length=1024)
     txt = models.CharField(max_length=1024)
     last_updated = models.DateTimeField(auto_now=True, auto_now_add=True)
-

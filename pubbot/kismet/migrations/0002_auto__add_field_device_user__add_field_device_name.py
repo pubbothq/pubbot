@@ -10,14 +10,15 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Device.user'
         db.add_column(u'kismet_device', 'user',
-                      self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='devices', null=True, to=orm['main.UserProfile']),
+                      self.gf('django.db.models.fields.related.ForeignKey')(
+                          blank=True, related_name='devices', null=True, to=orm['main.UserProfile']),
                       keep_default=False)
 
         # Adding field 'Device.name'
         db.add_column(u'kismet_device', 'name',
-                      self.gf('django.db.models.fields.CharField')(max_length=64, null=True, blank=True),
+                      self.gf('django.db.models.fields.CharField')(
+                          max_length=64, null=True, blank=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting field 'Device.user'
@@ -25,7 +26,6 @@ class Migration(SchemaMigration):
 
         # Deleting field 'Device.name'
         db.delete_column(u'kismet_device', 'name')
-
 
     models = {
         u'kismet.device': {

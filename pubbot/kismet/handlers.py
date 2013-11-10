@@ -40,11 +40,11 @@ class ClientFinder(object):
         except Times.DoesNotExist:
             Times(device=device, date=dt, first_seen=dt, last_seen=dt).save()
             broadcast(
-                kind = "device.arrived",
-                mac = mac,
-                arrived = dt,
-                device_id = device.id,
-                )
+                kind="device.arrived",
+                mac=mac,
+                arrived=dt,
+                device_id=device.id,
+            )
 
 
 class NetworkFinder(object):
@@ -70,4 +70,3 @@ class NetworkFinder(object):
         network, _ = Network.objects.get_or_create(bssid=bssid)
         network.name = ssid
         network.save()
-

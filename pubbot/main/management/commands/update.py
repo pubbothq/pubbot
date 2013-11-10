@@ -25,4 +25,3 @@ class Command(BaseCommand):
         call_command('syncdb', interactive=False)
         call_command('migrate', interactive=False)
         call_command('collectstatic', interactive=False)
-

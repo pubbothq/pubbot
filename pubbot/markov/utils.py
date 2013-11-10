@@ -32,7 +32,8 @@ def tokenize_sentence(sentence):
 
 
 def chainify_sentence(sentence):
-    data = itertools.chain(["<start>"], tokenize_sentence(sentence), ["<stop>"])
+    data = itertools.chain(
+        ["<start>"], tokenize_sentence(sentence), ["<stop>"])
 
     left1 = data.next()
     left2 = data.next()
@@ -73,8 +74,8 @@ class Collector(object):
     def create_database(self):
         print "Bulk word insert"
         Word.objects.bulk_create(
-            Word(word=word, count=count) for (word,count) in self.words.items()
-            )
+            Word(word=word, count=count) for (word, count) in self.words.items()
+        )
 
         print "Build word get"
         words = dict((w.word, w) for w in Word.objects.all())
@@ -82,12 +83,12 @@ class Collector(object):
         print "Build chain insert"
         Chain.objects.bulk_create(
             Chain(
-                left1 = words[chain[0]],
-                left2 = words[chain[1]],
-                right = words[chain[2]],
-                count = count,
-                ) for chain, count in self.pairs.items()
-            )
+                left1=words[chain[0]],
+                left2=words[chain[1]],
+                right=words[chain[2]],
+                count=count,
+            ) for chain, count in self.pairs.items()
+        )
 
     def update_database(self):
         pkmap = {}
@@ -107,7 +108,8 @@ class Collector(object):
             right = pkmap[r]
 
             try:
-                chain = Chain.objects.get(left1=left1, left2=left2, right=right)
+                chain = Chain.objects.get(
+                    left1=left1, left2=left2, right=right)
             except Chain.DoesNotExist:
                 chain = Chain(left1=left1, left2=left2, right=right)
 
@@ -118,7 +120,8 @@ class Collector(object):
 def get_sentence_for(word1, word2):
     yield word1
     yield word2
-    c = random.choice(Chain.objects.filter(left1__word=word1, left2__word=word2))
+    c = random.choice(
+        Chain.objects.filter(left1__word=word1, left2__word=word2))
     while c.right.word != "<stop>":
         yield c.right.word
         c = c.get_next_chain()
@@ -143,4 +146,3 @@ def render_sentence(iterator):
                 sentence.append(word)
     except StopIteration:
         return ' '.join(sentence)
-
