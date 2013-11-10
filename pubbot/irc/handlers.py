@@ -124,7 +124,7 @@ class UserListHandler(object):
                     # has_op = True
                 if user.startswith("+"):
                     user = user[1:]
-                    # has_voice = True
+                    # has_voice = True
 
                 if not user in users_from_db:
                     print "Adding %s to %s" % (user, scene)
