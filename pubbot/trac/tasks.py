@@ -14,32 +14,37 @@
 
 from bs4 import BeautifulSoup
 import requests
+from requests.auth import HTTPBasicAuth
 
 from pubbot.conversation.tasks import parse_chat_text
 
 
 @parse_chat_text(r'^newticket: (?P<ticket>.*)$')
 def raise_ticket(msg, ticket):
+    instance = "http://localhost/sometrac"
+    username = "username"
+    password = "password"
+
     s = requests.Session()
     s.verify = False
 
-    auth = HTTPBasicAuth(self.username, self.password)
+    auth = HTTPBasicAuth(username, password)
 
     #log.msg("Logging in")
-    login_page = s.get("%s/login" % self.instance, auth=auth)
+    s.get("%s/login" % instance, auth=auth)
 
     #log.msg("Getting __FORM_TOKEN")
-    form_page = s.get("%s/newticket" % self.instance, auth=auth)
+    form_page = s.get("%s/newticket" % instance, auth=auth)
     soup = BeautifulSoup(form_page.text)
     token = soup.find('input', attrs={"type": "hidden", "name": "__FORM_TOKEN"})[
         'value'].encode("utf-8")
 
     #log.msg("Trying to raise ticket")
-    new_ticket = s.post("%s/newticket" % self.instance, allow_redirects=True, auth=auth, data={
+    new_ticket = s.post("%s/newticket" % instance, allow_redirects=True, auth=auth, data={
         "__FORM_TOKEN": token,
-        "field_summary": summary,
+        "field_summary": ticket,
         "field_status": "new",
-        "field_reporter": reporter,
+        "field_reporter": msg['source'],
         "field_owner": "",
     })
 

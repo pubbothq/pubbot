@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from functools import wraps
 import random
 import re
 
@@ -22,7 +21,7 @@ import requests
 from django.contrib.humanize.templatetags.humanize import intword
 
 from pubbot.main.celery import app
-from pubbot.conversation.models import *
+from pubbot.conversation.models import Scene
 
 
 def parse_chat_text(regex, subscribe=None):

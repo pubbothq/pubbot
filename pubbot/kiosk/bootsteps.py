@@ -14,8 +14,6 @@
 
 from celery import bootsteps
 
-from pubbot.main.utils import broadcast
-
 
 class Bootstep(bootsteps.StartStopStep):
 

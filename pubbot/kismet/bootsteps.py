@@ -38,14 +38,14 @@ class KismetConnection(LineProtocol):
 
     def unsubscribe(self, proto):
         proto = proto.upper()
-        self.send("!0 REMOVE %s" % p)
+        self.send("!0 REMOVE %s" % proto)
 
     def start(self):
         super(KismetConnection, self).start()
 
     def line_received(self, line):
         if not line.startswith("*"):
-            print ("Kismet: Abnormal data '%s'" % data)
+            print ("Kismet: Abnormal data '%s'" % line)
             return
         data = line[1:]
         k, v = data.split(": ", 1)
@@ -59,7 +59,7 @@ class KismetConnection(LineProtocol):
 
         # BACKWARDS COMPATIBILITY
         # NERF ASAP
-        process = getattr(self, "kismet_" + k, self._kismet_noop)(*parsed)
+        getattr(self, "kismet_" + k, self._kismet_noop)(*parsed)
 
     def _parse_identity(self, data):
         delim = False

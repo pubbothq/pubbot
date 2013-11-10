@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from django.db import models
-from pubbot.main.models import UserProfile
 from pubbot.conversation.models import Scene, Participant
 
 

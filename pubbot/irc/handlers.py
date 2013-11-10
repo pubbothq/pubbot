@@ -16,12 +16,10 @@ import re
 
 import gevent
 
-from django.db.models import Q
-
-from geventirc import handlers, replycode, message
+from geventirc import replycode, message
 
 from pubbot.main.utils import broadcast, get_broadcast_group_for_message
-from pubbot.irc.models import *
+from pubbot.irc.models import Network, Room, User
 from pubbot.irc.tasks import mouth
 
 
@@ -63,7 +61,7 @@ class BotInterfaceHandler(object):
 
     commands = ['PRIVMSG']
 
-    def __init__(self, botname, channels, regex, topic):
+    def __init__(self, botname, channels, regex, topic, kind):
         self.botname = botname
         self.channels = channels
         self.regex = regex
@@ -123,10 +121,10 @@ class UserListHandler(object):
             for user in self.incoming[channel]:
                 if user.startswith("@"):
                     user = user[1:]
-                    has_op = True
+                    # has_op = True
                 if user.startswith("+"):
                     user = user[1:]
-                    has_voice = True
+                    # has_voice = True
 
                 if not user in users_from_db:
                     print "Adding %s to %s" % (user, scene)
@@ -247,6 +245,4 @@ class ConversationHandler(object):
             direct=direct,
         )
 
-        result = (handlers |
-                  mouth.s(server=client.hostname, channel=channel))()
-        # result.get()
+        (handlers | mouth.s(server=client.hostname, channel=channel))()

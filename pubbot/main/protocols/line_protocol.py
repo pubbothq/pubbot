@@ -72,7 +72,7 @@ class LineProtocol(object):
                 data = self._socket.recv(512)
             except gevent.GreenletExit:
                 raise
-            except Exception as e:
+            except Exception:
                 gevent.spawn(self.reconnect)
 
             buf += data
@@ -97,7 +97,7 @@ class LineProtocol(object):
             enc_cmd = enc_cmd.encode('utf8', 'ignore')
             try:
                 self._socket.sendall(enc_cmd)
-            except Exception as e:
+            except Exception:
                 gevent.spawn(self.reconnect)
                 return
 

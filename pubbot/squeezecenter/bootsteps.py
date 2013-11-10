@@ -18,7 +18,6 @@ import gevent.queue
 import gevent.pool
 from gevent import socket
 
-from pubbot.main.utils import broadcast
 from pubbot.squeezecenter import handlers
 
 
@@ -79,7 +78,7 @@ class SqueezeCenterConnection(object):
                 data = self._socket.recv(512)
             except gevent.GreenletExit:
                 raise
-            except Exception as e:
+            except Exception:
                 gevent.spawn(self.reconnect)
 
             buf += data
@@ -113,7 +112,7 @@ class SqueezeCenterConnection(object):
             enc_cmd = enc_cmd.encode('utf8', 'ignore')
             try:
                 self._socket.sendall(enc_cmd)
-            except Exception as e:
+            except Exception:
                 gevent.spawn(self.reconnect)
                 return
 

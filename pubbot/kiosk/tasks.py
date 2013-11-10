@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from pubbot.main.celery import app
-from pubbot.conversation.tasks import parse_chat_text, mouth
+from pubbot.conversation.tasks import parse_chat_text
 
 
 @parse_chat_text(r'^kiosk (?P<url>.*)$')

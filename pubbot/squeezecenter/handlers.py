@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from urllib import unquote_plus
-import gevent.queue
-import gevent.pool
-from gevent import socket
 
 from pubbot.main.utils import broadcast
 

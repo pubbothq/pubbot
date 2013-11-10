@@ -14,7 +14,7 @@
 
 from __future__ import absolute_import
 
-from celery import group, chord
+from celery import group
 
 from pubbot.main.celery import app
 from pubbot.main.match import match

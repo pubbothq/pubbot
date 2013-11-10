@@ -17,7 +17,7 @@ from geventirc.irc import Client
 from geventirc import handlers, replycode
 
 from pubbot.irc.models import Network
-from pubbot.irc.handlers import *
+from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ConversationHandler
 
 
 # FIXME: It would be nice if this global didn't exist..

@@ -13,12 +13,13 @@
 # limitations under the License.
 
 from celery import bootsteps
-from gevent.socket import wait_read, timeout
+from gevent.socket import wait_read
 from gevent.queue import Queue
 from gevent.pool import Group
 import pybonjour
 
 from pubbot.main.utils import broadcast
+from pubbot.bonjour.models import Device
 
 
 class Bootstep(bootsteps.StartStopStep):
