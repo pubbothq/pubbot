@@ -20,7 +20,7 @@ setup(
         'amqp',
         'billiard',
         'kombu',
-        'celery',
+        'celery >= 3.1',
         'gevent',
         'greenlet',
         'gevent-psycopg2',
