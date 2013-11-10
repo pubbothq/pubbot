@@ -19,6 +19,8 @@ import re
 from bs4 import BeautifulSoup
 import requests
 
+from django.contrib.humanize.templatetags.humanize import intword
+
 from pubbot.main.celery import app
 from pubbot.conversation.models import *
 
@@ -212,6 +214,9 @@ def fight(msg, word1, word2):
     score2 = _score(word2)
 
     winner = word1 if score1 > score2 else word2
+
+    score1 = intword(score1)
+    score2 = intword(score2)
 
     return {
         'content': '%(word1)s (%(score1)s) vs %(word2)s (%(score2)s) -- %(winner)s wins!' % locals(),
