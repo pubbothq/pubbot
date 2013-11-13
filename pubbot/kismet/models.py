@@ -36,7 +36,7 @@ class Device(models.Model):
     user = models.ForeignKey(
         UserProfile, related_name="devices", blank=True, null=True)
     name = models.CharField(max_length=64, blank=True, null=True)
-    opt_out = models.BooleanField()
+    opt_out = models.BooleanField(default=False)
 
 
 class Times(models.Model):

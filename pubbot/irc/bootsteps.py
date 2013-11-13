@@ -17,7 +17,7 @@ from geventirc.irc import Client
 from geventirc import handlers, replycode
 
 from pubbot.irc.models import Network
-from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ConversationHandler
+from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ConversationHandler, JoinHandler
 
 
 # FIXME: It would be nice if this global didn't exist..
@@ -39,6 +39,8 @@ class Bootstep(bootsteps.StartStopStep):
                             port=str(network.port), ssl=network.ssl)
             clients[network.server] = client
 
+            client.add_handler(handlers.print_handler)
+
             # House keeping handlers
             client.add_handler(handlers.ping_handler, 'PING')
             if network.nickserv_password:
@@ -52,7 +54,7 @@ class Bootstep(bootsteps.StartStopStep):
 
             # Channels to join
             for room in network.rooms.all():
-                client.add_handler(handlers.JoinHandler(room.name, False))
+                client.add_handler(JoinHandler(room.name))
 
             # Inject conversation data into queue
             client.add_handler(ConversationHandler())

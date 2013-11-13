@@ -32,7 +32,8 @@ class JoinHandler(object):
 
     def __call__(self, client, msg):
         gevent.sleep(5)
-        client.msg('ChanservServ', 'unban %s' % (self.channel, ))
+        client.msg('ChanServ', 'unban %s' % (self.channel, ))
+        gevent.sleep(10)
         client.send_message(message.Join(self.channel))
 
 
@@ -129,7 +130,7 @@ class UserListHandler(object):
                 if not user in users_from_db:
                     print "Adding %s to %s" % (user, scene)
                     try:
-                        u = scene.server.users.get(name=user)
+                        u = scene.server.users.filter(name=user)[0]
                     except User.DoesNotExist:
                         u = User(name=user, network=scene.server)
                         u.save()
