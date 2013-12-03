@@ -22,7 +22,7 @@ def quizbot_request(msg, terms):
         data = response.json()
         conversation_tasks.mouth({
             'scene_id': msg['scene_id'],
-            'content': '{nick}: the answer to {terms!r} is: '.format(
+            'content': '{nick}: the answer to "{terms}" is: '.format(
                             nick=msg['user'],
                             terms=terms,
                             data['answer'],
@@ -31,7 +31,7 @@ def quizbot_request(msg, terms):
     except Exception:
         conversation_tasks.mouth({
             'scene_id': msg['scene_id'],
-            'content': "{nick}: I don't know the answer to {terms!r}".format(
+            'content': "{nick}: I don't know the answer to \"{terms}\"".format(
                             nick=msg['user'],
                             terms=terms,
                             ),
