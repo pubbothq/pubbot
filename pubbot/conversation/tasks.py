@@ -244,6 +244,8 @@ def doge(msg, prefix, word):
                 word_type = sibling.string
                 break
 
+            if not word_type:
+                continue
             prefixes = type_prefixes[word_type]
             if prefix in prefixes:
                 prefixes.remove(prefix)
