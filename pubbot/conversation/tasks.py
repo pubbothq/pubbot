@@ -263,10 +263,10 @@ def doge(msg, prefix, word):
                         synonyms |= set(match.group(1).split(', '))
                         synonyms |= set(match.group(2).split(', '))
                     break
-            if not synonyms:
-                continue
             synonyms = set(map(unicode.strip, synonyms))
             synonyms = set(filter(lambda x: ' ' not in x, synonyms))
+            if not synonyms:
+                continue
             synonym = random.choice(synonyms)
 
             response = '{prefix} {word}'.format(prefix=response_prefix,
