@@ -14,6 +14,7 @@
 
 import random
 import re
+from urllib import quote
 
 from bs4 import BeautifulSoup
 import requests
@@ -32,7 +33,10 @@ def parse_chat_text(regex, subscribe=None):
         def someone_said_hello(msg, name):
             print "someone said hello to %s" % name
     """
-    _regex = re.compile(regex)
+    if isinstance(regex, basestring):
+        _regex = re.compile(regex)
+    else:
+        _regex = regex
 
     def decorator(func):
         def new_func(msg):
@@ -164,6 +168,113 @@ def image_search(msg, query):
     return {
         'content': "There are no images matching '%s'" % query,
     }
+
+
+@parse_chat_text(r'^udefine: (?P<term>[\w]+)')
+def udefine(msg, term):
+    results = requests.get("http://www.urbandictionary.com/iphone/search/define", params=dict(
+        term=term,
+    )).json()
+
+    if results.get('result_type', '') == 'no_results':
+        return
+
+    if not "list" in results or len(results["list"]) == 0:
+        return
+
+    definitions = []
+    for result in results["list"]:
+        if result["word"] != term:
+            continue
+
+        definition = result['definition']
+        definition = definition.replace('\r', '')
+        definition = re.sub(r'\s', ' ', definition)
+        definition = ''.join(BeautifulSoup(definition).findAll(text=True))
+
+        definitions.append(u"\x031,1" + unicode(definition))
+
+    if not definitions:
+        return {
+            'content': "No matches found for '%s'" % term,
+        }
+
+    return {
+        'content': definitions[:4],
+        'offensive': True,
+    }
+
+    # message.reply("\x031,1 " + d)
+
+
+WIKTIONARY_URL_FORMAT = 'https://en.wiktionary.org/w/api.php?action=query&prop=extracts&titles={titles}&format=json'
+
+
+@parse_chat_text(
+    re.compile(r'^(?P<prefix>so|very|much|many)\s+(?P<word>[\w-]+)[\.\?!]?$', re.I)
+    )
+def doge(msg, prefix, word):
+    type_prefixes = {
+        'Verb': ['so', 'very', 'much', 'many'],
+        'Noun': ['so', 'very'],
+        'Adjective': ['much', 'many'],
+        'Adverb': ['much', 'many'],
+        }
+    response = 'wow'
+    word_type = None
+    # Adding word.title() may catch some extra English words, but also yields foreign words which we don't want.
+    page_titles = '|'.join([quote(word)])
+    url = WIKTIONARY_URL_FORMAT.format(titles=page_titles)
+    resp = requests.get(url)
+    data = resp.json()
+    pages = data['query']['pages']
+    for page_id in pages:
+        if page_id == u'-1':
+            continue
+        doc = BeautifulSoup(pages[page_id]['extract'])
+        for synonym_heading in doc.find_all(re.compile('^h[3-9]$')):
+            if synonym_heading.string != u'Synonyms':
+                continue
+
+            for sibling in synonym_heading.previous_siblings:
+                if not re.match(r'^h[3-5]', sibling.name or ''):
+                    continue
+                if sibling.string not in type_prefixes:
+                    continue
+                word_type = sibling.string
+                break
+
+            if not word_type:
+                continue
+            prefixes = type_prefixes[word_type]
+            if prefix in prefixes:
+                prefixes.remove(prefix)
+            response_prefix = random.choice(prefixes)
+
+            synonyms = set()
+            for list_ in synonym_heading.next_siblings:
+                if list_.name == u'ul':
+                    for item in list_.children:
+                        if item.name != 'li':
+                            continue
+                        match = re.match(r'^(?:\(([^,]+(?:,\s+[^,]+)?)\):\s+)?([^,]+(?:,\s+[^,]+)?)', item.string or '')
+                        if not match:
+                            continue
+                        synonyms |= set(match.group(1).split(', '))
+                        synonyms |= set(match.group(2).split(', '))
+                    break
+            synonyms = set(map(unicode.strip, synonyms))
+            synonyms = set(filter(lambda x: ' ' not in x, synonyms))
+            if not synonyms:
+                continue
+            synonym = random.choice(synonyms)
+
+            response = '{prefix} {word}'.format(prefix=response_prefix,
+                                                word=synonym)
+            break
+        break
+
+    return {'content': response}
 
 
 @parse_chat_text(r'^fight:[\s]*(?P<word1>.*)(?:[;,]| vs\.? | v\.? )[\s]*(?P<word2>.*)')
