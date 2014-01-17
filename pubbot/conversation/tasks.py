@@ -260,8 +260,10 @@ def doge(msg, prefix, word):
                         match = re.match(r'^(?:\(([^,]+(?:,\s+[^,]+)?)\):\s+)?([^,]+(?:,\s+[^,]+)?)', item.string or '')
                         if not match:
                             continue
-                        synonyms |= set(match.group(1).split(', '))
-                        synonyms |= set(match.group(2).split(', '))
+                        if match.group(1):
+                            synonyms |= set(match.group(1).split(', '))
+                        if match.group(2):
+                            synonyms |= set(match.group(2).split(', '))
                     break
             synonyms = set(map(unicode.strip, synonyms))
             synonyms = set(filter(lambda x: ' ' not in x, synonyms))
