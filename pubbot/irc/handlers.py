@@ -131,7 +131,7 @@ class UserListHandler(object):
                     print "Adding %s to %s" % (user, scene)
                     try:
                         u = scene.server.users.filter(name=user)[0]
-                    except User.DoesNotExist:
+                    except (User.DoesNotExist, IndexError):
                         u = User(name=user, network=scene.server)
                         u.save()
                     scene.participants.add(u)

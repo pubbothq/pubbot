@@ -17,7 +17,7 @@ from django.db import models
 
 class Word(models.Model):
 
-    word = models.CharField(max_length=510)
+    word = models.CharField(max_length=510, db_index=True)
     count = models.IntegerField(default=0)
 
     def __unicode__(self):
@@ -47,4 +47,10 @@ class Chain(models.Model):
         return "%s -> %s -> %s" % (self.left1, self.left2, self.right)
 
     class Meta:
-        unique_together = ('left1', 'left2', 'right')
+        unique_together = [
+            ['left1', 'left2', 'right'],
+        ]
+        index_together = [
+            ['left1', 'left2'],
+            ['left2', 'right'],
+        ]
