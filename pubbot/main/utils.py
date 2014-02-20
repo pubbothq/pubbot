@@ -37,7 +37,7 @@ def get_broadcast_group_for_message(**kwargs):
         if not hasattr(t, "pb_msg_regex"):
             tasks.append(t.s())
             continue
-        result = _regex.search(kwargs['content'])
+        result = t.pb_msg_regex.search(kwargs['content'])
         if result:
             tasks.append(t.s(kwargs, **result.groupdict()))
     return group(tasks)
