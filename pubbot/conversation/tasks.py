@@ -37,16 +37,11 @@ def parse_chat_text(regex, subscribe=None):
         _regex = re.compile(regex)
     else:
         _regex = regex
-
     def decorator(func):
-        def new_func(msg):
-            result = _regex.search(msg['content'])
-            if result:
-                return func(msg, **result.groupdict())
         new_func.__name__ = func.__name__
         new_func.__doc__ = func.__doc__
         new_func.__dict__.update(func.__dict__)
-        new_func = app.task(new_func, subscribe=subscribe or ['chat.#.chat'])
+        new_func = app.task(func, subscribe=subscribe or ['chat.#.chat'], pb_msg_regex=_regex)
         return new_func
     return decorator
 
