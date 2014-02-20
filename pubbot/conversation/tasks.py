@@ -38,9 +38,6 @@ def parse_chat_text(regex, subscribe=None):
     else:
         _regex = regex
     def decorator(func):
-        new_func.__name__ = func.__name__
-        new_func.__doc__ = func.__doc__
-        new_func.__dict__.update(func.__dict__)
         new_func = app.task(func, subscribe=subscribe or ['chat.#.chat'], pb_msg_regex=_regex)
         return new_func
     return decorator
