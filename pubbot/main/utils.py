@@ -35,7 +35,7 @@ def get_broadcast_group_for_message(**kwargs):
     tasks = []
     for t in get_tasks_with_subscription(kwargs['kind']):
         if not hasattr(t, "pb_msg_regex"):
-            tasks.append(t.s())
+            tasks.append(t.s(kwargs))
             continue
         result = t.pb_msg_regex.search(kwargs['content'])
         if result:
