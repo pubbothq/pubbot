@@ -162,43 +162,6 @@ def image_search(msg, query):
     }
 
 
-@parse_chat_text(r'^udefine: (?P<term>[\w]+)')
-def udefine(msg, term):
-    results = requests.get("http://www.urbandictionary.com/iphone/search/define", params=dict(
-        term=term,
-    )).json()
-
-    if results.get('result_type', '') == 'no_results':
-        return
-
-    if not "list" in results or len(results["list"]) == 0:
-        return
-
-    definitions = []
-    for result in results["list"]:
-        if result["word"] != term:
-            continue
-
-        definition = result['definition']
-        definition = definition.replace('\r', '')
-        definition = re.sub(r'\s', ' ', definition)
-        definition = ''.join(BeautifulSoup(definition).findAll(text=True))
-
-        definitions.append(u"\x031,1" + unicode(definition))
-
-    if not definitions:
-        return {
-            'content': "No matches found for '%s'" % term,
-        }
-
-    return {
-        'content': definitions[:4],
-        'offensive': True,
-    }
-
-    # message.reply("\x031,1 " + d)
-
-
 WIKTIONARY_URL_FORMAT = 'https://en.wiktionary.org/w/api.php?action=query&prop=extracts&titles={titles}&format=json'
 
 
