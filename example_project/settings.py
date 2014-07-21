@@ -140,7 +140,6 @@ INSTALLED_APPS = (
     'pubbot.markov',
     'pubbot.quizbot',
     'pubbot.conversation',
-    'pubbot.bonjour',
     'pubbot.education',
 )
 
