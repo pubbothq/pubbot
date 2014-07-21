@@ -22,17 +22,17 @@ def quizbot_request(msg, terms):
         data = response.json()
         conversation_tasks.mouth({
             'scene_id': msg['scene_id'],
-            'content': u'{nick}: the answer to "{terms}" is: '.format(
-                            nick=msg['user'],
-                            terms=terms,
-                            data['answer'],
-                            ),
+            'content': u'{nick}: the answer to "{terms}" is: {answer}'.format(
+                nick=msg['user'],
+                terms=terms,
+                answer=data['answer'],
+            ),
         })
     except Exception:
         conversation_tasks.mouth({
             'scene_id': msg['scene_id'],
             'content': u"{nick}: I don't know the answer to \"{terms}\"".format(
-                            nick=msg['user'],
-                            terms=terms,
-                            ),
-            })
+                nick=msg['user'],
+                terms=terms,
+            ),
+        })

@@ -37,6 +37,7 @@ def parse_chat_text(regex, subscribe=None):
         _regex = re.compile(regex)
     else:
         _regex = regex
+
     def decorator(func):
         new_func = app.task(func, subscribe=subscribe or ['chat.#.chat'], pb_msg_regex=_regex)
         return new_func
@@ -45,7 +46,7 @@ def parse_chat_text(regex, subscribe=None):
 
 @app.task
 def mouth(msg):
-    if not 'content' in msg:
+    if 'content' not in msg:
         # FIXME: Some sort of logging would be good
         return
 
@@ -167,14 +168,14 @@ WIKTIONARY_URL_FORMAT = 'https://en.wiktionary.org/w/api.php?action=query&prop=e
 
 @parse_chat_text(
     re.compile(r'^(?P<prefix>so|very|much|many)\s+(?P<word>[\w-]+)[\.\?!]?$', re.I)
-    )
+)
 def doge(msg, prefix, word):
     type_prefixes = {
         'Verb': ['so', 'very', 'much', 'many'],
         'Noun': ['so', 'very'],
         'Adjective': ['much', 'many'],
         'Adverb': ['much', 'many'],
-        }
+    }
     response = 'wow'
     word_type = None
     # Adding word.title() may catch some extra English words, but also yields foreign words which we don't want.

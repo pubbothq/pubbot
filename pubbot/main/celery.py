@@ -27,12 +27,12 @@ app.autodiscover_tasks(settings.INSTALLED_APPS, related_name='tasks')
 class Bootstep(object):
 
     def start(self, worker):
-        if not self.queue in worker.app.amqp.queues:
+        if self.queue not in worker.app.amqp.queues:
             return
         return super(Bootstep, self).start(worker)
 
     def stop(self, worker):
-        if not self.queue in worker.app.amqp.queues:
+        if self.queue not in worker.app.amqp.queues:
             return
         return super(Bootstep, self).stop(worker)
 

@@ -53,7 +53,7 @@ class KismetConnection(LineProtocol):
         parsed = getattr(self, "parse_" + k, self._parse_identity)(v)
 
         for handler in self.handlers:
-            if hasattr(handler, "handles") and not k in handler.handles:
+            if hasattr(handler, "handles") and k not in handler.handles:
                 continue
             handler(k, parsed)
 

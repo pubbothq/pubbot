@@ -74,7 +74,7 @@ class BotInterfaceHandler(object):
             return
 
         channel, content = msg.params[0], " ".join(msg.params[1:])
-        if not channel in self.channels:
+        if channel not in self.channels:
             return
 
         results = self._regex.search(content)
@@ -108,7 +108,7 @@ class UserListHandler(object):
 
             scene = self.get_scene(client, channel)
 
-            if not channel in self.incoming:
+            if channel not in self.incoming:
                 scene.participants.clear()
                 return
 
@@ -127,7 +127,7 @@ class UserListHandler(object):
                     user = user[1:]
                     # has_voice = True
 
-                if not user in users_from_db:
+                if user not in users_from_db:
                     print "Adding %s to %s" % (user, scene)
                     try:
                         u = scene.server.users.filter(name=user)[0]
