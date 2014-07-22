@@ -12,88 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
 import re
+import random
 from urllib import quote
 
 from bs4 import BeautifulSoup
 import requests
 
 from django.contrib.humanize.templatetags.humanize import intword
+from django.dispatch import receiver
 
-from pubbot.conversation.models import Scene
-
-from . import signals
-
-
-def chat_receiver(regex, **kwargs):
-    """
-    A decorator that hooks up a function to the pubbot.conversation.signals.message signal
-    """
-    if isinstance(regex, basestring):
-        regex = re.compile(regex)
-    def _decorator(func):
-        @receiver(signals.message)
-        def _inner(**kwargs):
-            if regex.search(message):
-                return func(**kwargs)
-        return _inner
-    return _decorator
+from .signals import join
+from .base import chat_receiver
 
 
-"""
-@app.task
-def mouth(msg):
-    if 'content' not in msg:
-        # FIXME: Some sort of logging would be good
-        return
-
-    active_scenes = Scene.objects.get_query_set()
-
-    if 'scene_id' in msg:
-        scenes = active_scenes.filter(pk=msg['scene_id'])
-    elif 'tags' in msg:
-        scenes = active_scenes.filter(follows_tags__name__in=msg['tags'])
-        if not scenes.exists():
-            scenes = active_scenes.filter(follows_tags__name='default')
-    else:
-        scenes = active_scenes.filter(follows_tags__name='default')
-
-    if msg.get("action", False):
-        func_name = "action"
-    elif msg.get("notice", False):
-        func_name = "notice"
-    else:
-        func_name = "say"
-
-    for scene in scenes.exclude(bans_tags__name__in=msg.get('tags', [])).distinct():
-        getattr(scene, func_name)(msg['content'])
-"""
-
-@receiver(signals.join)
-def hello(msg):
+@receiver(join)
+# @rate_limited(1, 60)  # Only say hello once every 60s
+# @rate_limited(1, 24*60*60, group_by="user")  # Only say hello to a given user once a day
+def hello(scene, msg):
     if msg.get('is_me', False):
         return
 
-    mouth({
-        'scene_id': msg['scene_id'],
-        'content': random.choice([
-            "hi %s",
-            "lo %s",
-            "lo. how you doing, %s?",
-            "%s, we all love you",
-            "Help me, Obi Wan %s, you're my only hope",
-            "Wave %s, wave",
-            "Give us a smile %s",
-            "%s! We've missed you!",
-            "%s is in the room. I have a bad feeling about this.",
-            "ewwo %s",
-            "yo, %s",
-            "Greetings, %s",
-            "wotcha, %s",
-            "Frak, it's %s",
-        ]) % msg['user'],
-    })
+    scene.say(random.choice([
+        "hi %s",
+        "lo %s",
+        "lo. how you doing, %s?",
+        "%s, we all love you",
+        "Help me, Obi Wan %s, you're my only hope",
+        "Wave %s, wave",
+        "Give us a smile %s",
+        "%s! We've missed you!",
+        "%s is in the room. I have a bad feeling about this.",
+        "ewwo %s",
+        "yo, %s",
+        "Greetings, %s",
+        "wotcha, %s",
+        "Frak, it's %s",
+    ]) % msg['user'])
+
 
 """
 @chat_receiver(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')

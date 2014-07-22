@@ -16,13 +16,13 @@ from django.dispatch import Signal
 
 
 """ Sent when a bot receives a message """
-message = Signal(providing_args=["post","request"])
+message = Signal(providing_args=["post", "request"])
 
 """ Sent when a bot is invited to a channel """
-invite = Signal(providing_args=["post","request"])
+invite = Signal(providing_args=["post", "request"])
 
 """ Sent when a user joins a channel """
-join = Signal(providing_args=["post","request"])
+join = Signal(providing_args=["post", "request"])
 
 """ Sent when a user leaves a channel """
-leave = Signal(providing_args=["post","request"])
+leave = Signal(providing_args=["post", "request"])

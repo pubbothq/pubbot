@@ -13,14 +13,17 @@
 # limitations under the License.
 
 import re
+import logging
 
 import gevent
 
 from geventirc import replycode, message
 
 from pubbot.irc.models import Network, Room, User
-# from pubbot.irc.tasks import mouth
 from . import signals
+
+
+logger = logging.getLogger(__file__)
 
 
 class JoinHandler(object):
@@ -246,4 +249,8 @@ class ConversationHandler(object):
             direct=direct,
         )
 
-        # FIXME: Process responses
+        # Filter out False return values
+        # Log exceptions
+        # Do a reply
+
+        logger.info(responses[0])

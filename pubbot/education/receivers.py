@@ -15,6 +15,7 @@
 import random
 import re
 
+from pubbot.conversation import chat_receiver
 from pubbot.education.models import Education
 
 

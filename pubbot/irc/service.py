@@ -31,29 +31,29 @@ class Notice(message.Command):
         super(Notice, self).__init__([to, msg], prefix=prefix)
 
 
-class Channel(service.BaseService):
+class ChannelService(service.BaseService):
 
     def __init__(self, channel):
-        super(Channel, self).__init__(channel.name)
+        super(ChannelService, self).__init__(channel.name)
         self.channel = channel
 
     def start(self):
         self.parent.add_handler(JoinHandler(self.channel.name))
 
     def say(self, message):
-        self.parent.client.msg(channel, message.encode('utf-8'))
+        self.parent.client.msg(self.channel.name, message.encode('utf-8'))
 
-    def action(server, message):
-        self.parent.client.send_message(message.Me(channel, message.encode('utf-8')))
+    def action(self, message):
+        self.parent.client.send_message(message.Me(self.channel.name, message.encode('utf-8')))
 
-    def notice(server, message):
-        self.parent.client.send_message(Notice(channel, message.encode('utf-8')))
+    def notice(self, message):
+        self.parent.client.send_message(Notice(self.channel.name, message.encode('utf-8')))
 
 
-class Network(service.BaseService):
+class NetworkService(service.BaseService):
 
     def __init__(self, network):
-        super(Connection, self).__init__(network.server)
+        super(NetworkService, self).__init__(network.server)
         self.network = network
 
     def start(self):
@@ -73,7 +73,7 @@ class Network(service.BaseService):
 
         # Channels to join
         for room in self.network.rooms.all():
-            self.add_child(Channel(room))
+            self.add_child(ChannelService(room))
 
         # Inject conversation data into queue
         self.client.add_handler(ConversationHandler())
@@ -85,4 +85,4 @@ class Service(service.BaseService):
         print "Starting irc services"
         self.group = []
         for network in Network.objects.all():
-            self.add_child(Network(network))
+            self.add_child(NetworkService(network))

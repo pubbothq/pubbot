@@ -4,7 +4,6 @@ from pubbot.conversation.tasks import mouth
 from pubbot.weather.models import Point
 
 
-@app.task
 def update_forecast():
     for point in Point.objects.all():
         forecast = requests.get(

@@ -13,11 +13,15 @@
 # limitations under the License.
 
 from django.utils import timezone
+from django.dispatch import receiver
+
+from pubbot.conversation import chat_receiver, say
+from . import signals
 
 
-@receiver(song_start)
+@receiver(signals.song_start)
 def current_song_notification(msg):
-    mouth({
+    say({
         'content': "%(title)s - %(artist)s (%(album)s)" % msg,
         'tags': ['current_song_notification'],
         'notice': True,
@@ -105,7 +109,7 @@ def skip_timeout(skip_id):
     s.vote_ended = timezone.now()
     s.save()
 
-    mouth.delay({
+    say({
         'content': 'Vote timed out after %d seconds' %
         Skip.VOTE_DURATION.seconds,
     })
