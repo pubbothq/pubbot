@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from geventirc.irc import Client
 from geventirc import handlers, replycode
 
 from pubbot import service
 from pubbot.irc.models import Network
 from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ConversationHandler, JoinHandler
+
+
+logger = logging.getLogger(__name__)
 
 
 class Channel(service.BaseService):
@@ -52,7 +57,7 @@ class Connection(service.BaseService):
         self.client.add_handler(InviteProcessor())
 
         # Channels to join
-        for room in network.rooms.all():
+        for room in self.network.rooms.all():
             self.add_child(Channel(room))
 
         # Inject conversation data into queue

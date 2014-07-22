@@ -14,6 +14,13 @@
 
 from UserDict import IterableUserDict
 from gevent.pool import Group
+import logging
+
+from django.conf import settings
+from django.utils.importlib import import_module
+
+
+logger = logging.getLogger(__name__)
 
 
 class BaseService(IterableUserDict):
@@ -24,14 +31,14 @@ class BaseService(IterableUserDict):
         self.parent = None
 
     def spawn(self, func, *args, **kwargs):
-        return self.parent.spawn(fun, *args, **kwargs)
- 
+        return self.parent.spawn(func, *args, **kwargs)
+
     def add_child(self, child):
         if child.name in self.data:
             raise KeyError("Cannot have duplicate service name %r" % child.name)
         self.disown_parent()
         child.parent = self
-        self.data[child.name] = name
+        self.data[child.name] = child
 
     def remove_child(self, child):
         if child.name not in self.data:
@@ -45,7 +52,7 @@ class BaseService(IterableUserDict):
 
     def start(self):
         for child in self.values():
-            gevent.spawn(child.start)
+            self.spawn(child.start)
 
     def stop(self):
         for child in self.values():
@@ -66,13 +73,13 @@ class PubbotService(BaseService):
                 continue
 
         if hasattr(module, 'Service'):
-            t = type('%s.service.Service' % installed_app, (Service, getattr(module, 'Service')), {})
-            self.add_child(t())
+            Service = getattr(module, 'Service')
+            self.add_child(Service())
 
-    	self.group = Group()
+        self.group = Group()
 
     def spawn(self, func, *args, **kwargs):
-        return self.group.spawn(fun, *args, **kwargs)
+        return self.group.spawn(func, *args, **kwargs)
 
     def run(self):
         self.start()
