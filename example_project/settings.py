@@ -131,7 +131,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'zap',
     'south',
-    'gunicorn',
+    'pubbot.wsgi',
     'pubbot.main',
     'pubbot.irc',
     'pubbot.squeezecenter',

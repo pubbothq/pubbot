@@ -23,7 +23,7 @@ from django.utils.importlib import import_module
 logger = logging.getLogger(__name__)
 
 
-class BaseService(IterableUserDict):
+class BaseService(IterableUserDict, object):
 
     def __init__(self, name):
         self.name = name
@@ -68,13 +68,12 @@ class PubbotService(BaseService):
             logger.info("Checking {installed_app} for Service".format(installed_app=installed_app))
             try:
                 module = import_module('%s.service' % installed_app)
-            except ImportError as e:
-                logger.exception(e)
+            except ImportError:
                 continue
 
-        if hasattr(module, 'Service'):
-            Service = getattr(module, 'Service')
-            self.add_child(Service())
+            if hasattr(module, 'Service'):
+                Service = getattr(module, 'Service')
+                self.add_child(Service(name=installed_app))
 
         self.group = Group()
 

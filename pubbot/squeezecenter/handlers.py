@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from pubbot.main.utils import broadcast
+from . import signals
 
 
 class DebugHandler(object):
@@ -42,8 +42,8 @@ class CurrentSongHandler(object):
             setattr(self, message[0], message[1])
 
             if self.title and self.album and self.artist:
-                broadcast(
-                    kind="music.start",
+                signals.song_start.send(
+                    sender=conn,
                     artist=self.artist,
                     album=self.album,
                     title=self.title
@@ -58,6 +58,6 @@ class StopHandler(object):
 
     def __call__(self, conn, message):
         if message[0] == 'playlist' and message[1] == 'stop':
-            broadcast(
-                kind='music.stop',
+            signals.music_stop.send(
+                sender=conn,
             )

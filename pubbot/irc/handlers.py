@@ -18,9 +18,9 @@ import gevent
 
 from geventirc import replycode, message
 
-from pubbot.main.utils import broadcast, get_broadcast_group_for_message
 from pubbot.irc.models import Network, Room, User
-from pubbot.irc.tasks import mouth
+# from pubbot.irc.tasks import mouth
+from . import signals
 
 
 class JoinHandler(object):
@@ -81,10 +81,10 @@ class BotInterfaceHandler(object):
         if not results:
             return
 
-        broadcast(
-            kind=self.kind,
-            **results.groupdict()
-        )
+        # broadcast(
+        #     kind=self.kind,
+        #     **results.groupdict()
+        # )
 
 
 class UserListHandler(object):
@@ -154,8 +154,8 @@ class UserListHandler(object):
                 scene.participants.add(u)
                 scene.save()
 
-            broadcast(
-                kind="chat.irc.%s.join" % channel,
+            signals.join.send_robust(
+                sender=client,
                 scene_id=scene.pk,
                 user=user,
                 channel=channel,
@@ -187,8 +187,8 @@ class UserListHandler(object):
         scene = self.get_scene(client, channel)
         scene.participants.remove(*scene.participants.filter(name=user))
 
-        broadcast(
-            kind="chat.irc.%s.leave" % channel,
+        signals.leave.send_robust(
+            sender=client,
             type=type,
             scene_id=scene.pk,
             user=user,
@@ -202,8 +202,8 @@ class InviteProcessor(object):
     commands = ['INVITE']
 
     def __call__(self, client, msg):
-        broadcast(
-            kind="chat.irc.%s.invite" % msg.params[1],
+        signals.invite.send_robust(
+            sender=client,
             invited_to=msg.params[1],
             invited_by=msg.prefix.split("!")[0],
         )
@@ -236,8 +236,8 @@ class ConversationHandler(object):
                 direct = True
                 content = msg
 
-        handlers = get_broadcast_group_for_message(
-            kind="chat.irc.%s.chat" % channel,
+        responses = signals.message.send_robust(
+            sender=client,
             scene_id=getattr(scene, "pk", None),
             participant_id=getattr(participant, "pk", None),
             source=user,
@@ -246,4 +246,4 @@ class ConversationHandler(object):
             direct=direct,
         )
 
-        (handlers | mouth.s(server=client.hostname, channel=channel))()
+        # FIXME: Process responses
