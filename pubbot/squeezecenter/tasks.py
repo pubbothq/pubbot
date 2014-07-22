@@ -13,10 +13,9 @@
 # limitations under the License.
 
 from django.utils import timezone
-from pubbot.conversation.tasks import parse_chat_text, mouth
 
 
-@app.task(subscribe=['music.start'])
+@receiver(song_start)
 def current_song_notification(msg):
     mouth({
         'content': "%(title)s - %(artist)s (%(album)s)" % msg,
@@ -25,7 +24,7 @@ def current_song_notification(msg):
     })
 
 
-@parse_chat_text(r'^skip(\s(?P<number>\d+))?$')
+@chat_receiver(r'^skip(\s(?P<number>\d+))?$')
 def requested_skip(msg, number):
     from .models import Skip
     from pubbot.conversation.models import Participant
@@ -61,7 +60,7 @@ def requested_skip(msg, number):
         }
 
 
-@parse_chat_text(r'^noskip$')
+@chat_receiver(r'^noskip$')
 def requested_noskip(msg):
     from .models import Skip
     from pubbot.conversation.models import Participant

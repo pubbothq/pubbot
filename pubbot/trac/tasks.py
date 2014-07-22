@@ -16,10 +16,8 @@ from bs4 import BeautifulSoup
 import requests
 from requests.auth import HTTPBasicAuth
 
-from pubbot.conversation.tasks import parse_chat_text
 
-
-@parse_chat_text(r'^newticket: (?P<ticket>.*)$')
+@chat_receiver(r'^newticket: (?P<ticket>.*)$')
 def raise_ticket(msg, ticket):
     instance = "http://localhost/sometrac"
     username = "username"

@@ -38,9 +38,9 @@ All incoming irc messages get broadcast to any task that subcribes to ``chat.<ty
 
 There is a helper if you want to respond to a trigger that can be matched by a regex. In tasks.py::
 
-    from pubbot.conversation.tasks import parse_chat_text
+    from pubbot.conversation import chat_receiver
 
-    @parse_chat_text(r'foo=(?P<foo>[\d\w]+), bar=(?P<bar>[\d\w]+)')
+    @chat_receiver(r'foo=(?P<foo>[\d\w]+), bar=(?P<bar>[\d\w]+)')
     def my_chat_handler(msg, foo, bar):
         return {
             'content': 'Foo was "%s", bar was "%s"' % (foo, bar),

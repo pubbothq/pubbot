@@ -23,26 +23,25 @@ from django.contrib.humanize.templatetags.humanize import intword
 
 from pubbot.conversation.models import Scene
 
+from . import signals
 
-def parse_chat_text(regex, subscribe=None):
+
+def chat_receiver(regex, **kwargs):
     """
-    A decorator that turns a function into a task that receives chat messages that can be parse by a regex::
-
-        @parse_chat_text(r'^hello <?P<name>)
-        def someone_said_hello(msg, name):
-            print "someone said hello to %s" % name
+    A decorator that hooks up a function to the pubbot.conversation.signals.message signal
     """
     if isinstance(regex, basestring):
-        _regex = re.compile(regex)
-    else:
-        _regex = regex
+        regex = re.compile(regex)
+    def _decorator(func):
+        @receiver(signals.message)
+        def _inner(**kwargs):
+            if regex.search(message):
+                return func(**kwargs)
+        return _inner
+    return _decorator
 
-    def decorator(func):
-        new_func = app.task(func, subscribe=subscribe or ['chat.#.chat'], pb_msg_regex=_regex)
-        return new_func
-    return decorator
 
-
+"""
 @app.task
 def mouth(msg):
     if 'content' not in msg:
@@ -69,9 +68,9 @@ def mouth(msg):
 
     for scene in scenes.exclude(bans_tags__name__in=msg.get('tags', [])).distinct():
         getattr(scene, func_name)(msg['content'])
+"""
 
-
-@app.task(subscribe=['chat.#.join'])
+@receiver(signals.join)
 def hello(msg):
     if msg.get('is_me', False):
         return
@@ -97,7 +96,7 @@ def hello(msg):
     })
 
 """
-@parse_chat_text(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
+@chat_receiver(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
 def twitter_link(msg, account, id):
     # See https://dev.twitter.com/docs/auth/application-only-auth
     # and https://dev.twitter.com/docs/api/1.1/post/oauth2/token
@@ -114,7 +113,7 @@ def twitter_link(msg, account, id):
 """
 
 
-@parse_chat_text(r'https://github.com/(?P<user>[\d\w]+)/(?P<repo>[\d\w]+)/pull/(?P<id>[\d]+)')
+@chat_receiver(r'https://github.com/(?P<user>[\d\w]+)/(?P<repo>[\d\w]+)/pull/(?P<id>[\d]+)')
 def pull_request(msg, user, repo, id):
     url = 'https://api.github.com/repos/%(user)s/%(repo)s/pulls/%(id)s' % locals()
 
@@ -128,7 +127,7 @@ def pull_request(msg, user, repo, id):
     }
 
 
-@parse_chat_text(r'https://alpha.app.net/(?P<account>[\d\w]+)/post/(?P<id>[\d]+)')
+@chat_receiver(r'https://alpha.app.net/(?P<account>[\d\w]+)/post/(?P<id>[\d]+)')
 def on_appdotnet_link(msg, account, id):
     res = requests.get('https://alpha-api.app.net/stream/0/posts/%s' %
                        id).json()
@@ -140,7 +139,7 @@ def on_appdotnet_link(msg, account, id):
     }
 
 
-@parse_chat_text(r'^(image|img) me (?P<query>[\s\w]+)')
+@chat_receiver(r'^(image|img) me (?P<query>[\s\w]+)')
 def image_search(msg, query):
     url = 'https://ajax.googleapis.com/ajax/services/search/images'
     results = requests.get(url, params=dict(
@@ -165,9 +164,7 @@ def image_search(msg, query):
 WIKTIONARY_URL_FORMAT = 'https://en.wiktionary.org/w/api.php?action=query&prop=extracts&titles={titles}&format=json'
 
 
-@parse_chat_text(
-    re.compile(r'^(?P<prefix>so|very|much|many)\s+(?P<word>[\w-]+)[\.\?!]?$', re.I)
-)
+@chat_receiver(re.compile(r'^(?P<prefix>so|very|much|many)\s+(?P<word>[\w-]+)[\.\?!]?$', re.I))
 def doge(msg, prefix, word):
     type_prefixes = {
         'Verb': ['so', 'very', 'much', 'many'],
@@ -234,7 +231,7 @@ def doge(msg, prefix, word):
     return {'content': response}
 
 
-@parse_chat_text(r'^fight:[\s]*(?P<word1>.*)(?:[;,]| vs\.? | v\.? )[\s]*(?P<word2>.*)')
+@chat_receiver(r'^fight:[\s]*(?P<word1>.*)(?:[;,]| vs\.? | v\.? )[\s]*(?P<word2>.*)')
 def fight(msg, word1, word2):
     def _score(word):
         r = requests.get('http://www.google.co.uk/search',

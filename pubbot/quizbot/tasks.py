@@ -5,15 +5,13 @@ Created on 3 Dec 2013
 '''
 import requests
 
-from pubbot.conversation import tasks as conversation_tasks
-
 
 URL = 'http://developer.evi.com/ajax/api/combined'
 USER_AGENT = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, '
               'like Gecko) Chrome/31.0.1650.57 Safari/537.36')
 
 
-@conversation_tasks.parse_chat_text('^quizbot:\\s+(?P<terms>.*)')
+@chat_receiver('^quizbot:\\s+(?P<terms>.*)')
 def quizbot_request(msg, terms):
     try:
         response = requests.get(URL,

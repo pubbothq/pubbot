@@ -1,6 +1,5 @@
 import random
 
-from pubbot.conversation.tasks import parse_chat_text
 from pubbot.markov.utils import tokenize_sentence, get_sentence_for, render_sentence, Collector
 
 
@@ -21,7 +20,7 @@ start_points_2 = {
 }
 
 
-@parse_chat_text(r'^(?P<sentence>.*)$')
+@chat_receiver(r'^(?P<sentence>.*)$')
 def markov(msg, sentence):
     if not msg.get('direct', False):
         return
@@ -43,7 +42,7 @@ def markov(msg, sentence):
         pass
 
 
-@parse_chat_text(r'^(?P<sentence>.*)$')
+@chat_receiver(r'^(?P<sentence>.*)$')
 def learn(msg, sentence):
     if msg.get('direct', False):
         return
