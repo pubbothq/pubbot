@@ -81,8 +81,12 @@ class NetworkService(service.BaseService):
 
 class Service(service.BaseService):
 
-    def start(self):
+    def run(self):
         print "Starting irc services"
         self.group = []
         for network in Network.objects.all():
             self.add_child(NetworkService(network))
+
+        while not self.stopping:
+            import gevent
+            gevent.sleep(100)

@@ -14,6 +14,8 @@
 
 from UserDict import IterableUserDict
 from gevent.pool import Group
+from gevent.event import AsyncResult
+import gevent
 import logging
 
 from django.conf import settings
@@ -29,6 +31,8 @@ class BaseService(IterableUserDict, object):
         self.name = name
         self.data = {}
         self.parent = None
+        self.stopping = False
+        self.result = AsyncResult()
 
     def spawn(self, func, *args, **kwargs):
         return self.parent.spawn(func, *args, **kwargs)
@@ -50,25 +54,21 @@ class BaseService(IterableUserDict, object):
         if self.parent:
             self.parent.remove_child(self)
 
-    def do_start(self):
-        for child in self.values():
-            child.do_start()
-        self.spawn(self.start)
-
-    def do_stop(self):
-        self.stop()
-        for child in self.values():
-            child.do_stop()
-
-    def run(self):
-        """ Start a service and wait for it to finish running """
-        self.start()
-        self.running.wait()
-
     def start(self):
-        pass
+        for child in self.values():
+            child.start()
+        gevent.spawn(self.run).rawlink(self.result)
 
     def stop(self):
+        for child in self.values():
+            child.stop()
+        self.stopping = True
+
+    def wait(self):
+        """ Start a service and wait for it to finish running """
+        return self.result.get()
+
+    def run(self):
         pass
 
 
@@ -88,11 +88,6 @@ class PubbotService(BaseService):
                 Service = getattr(module, 'Service')
                 self.add_child(Service(name=installed_app))
 
-        self.group = Group()
-
-    def spawn(self, func, *args, **kwargs):
-        return self.group.spawn(func, *args, **kwargs)
-
     def run(self):
-        self.start()
-        self.group.join()
+        while not self.stopping:
+            gevent.sleep(100)

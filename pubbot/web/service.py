@@ -33,8 +33,11 @@ class Service(service.BaseService):
                 self.pool_size = int(settings.WEB_POOL)
             except ValueError:
                 raise ImproperlyConfigured("'WEB_POOL' must be an integer")
+        else:
+            self.pool_size = None
 
     def run(self):
+        print "Setting up WSGI host"
         app = get_internal_wsgi_application()
         pool = Pool(self.pool_size) if self.pool_size else None
         server = wsgi.WSGIServer((self.addr, self.port), app, spawn=pool)

@@ -26,4 +26,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         pubbot = service.PubbotService()
-        pubbot.run()
+        pubbot.start()
+        pubbot.wait()

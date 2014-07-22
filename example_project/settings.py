@@ -110,7 +110,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'pubbot.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'pubbot.wsgi.application'
+WSGI_APPLICATION = 'example_project.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -131,7 +131,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'zap',
     'south',
-    'pubbot.wsgi',
+    'pubbot.web',
     'pubbot.main',
     'pubbot.irc',
     'pubbot.squeezecenter',
