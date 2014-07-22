@@ -126,4 +126,4 @@ def skip(num_tracks):
 
 def command(command):
     print "command: %s" % command
-    app.squeezecenter.send(command)
+    # app.squeezecenter.send(command)

@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import chat_receiver, say
+from .utils import chat_receiver, say
 
 __all__ = ["chat_receiver", "say"]

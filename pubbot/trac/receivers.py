@@ -15,6 +15,7 @@
 from bs4 import BeautifulSoup
 import requests
 from requests.auth import HTTPBasicAuth
+from pubbot.conversation import chat_receiver
 
 
 @chat_receiver(r'^newticket: (?P<ticket>.*)$')
