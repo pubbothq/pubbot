@@ -12,28 +12,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from UserDict import IterableUserDict
+from gevent.pool import Group
 
-class BaseService(object):
+
+class BaseService(IterableUserDict):
 
     def __init__(self, name):
         self.name = name
-        self.children = {}
+        self.data = {}
+        self.parent = None
+
+    def spawn(self, func, *args, **kwargs):
+        return self.parent.spawn(fun, *args, **kwargs)
  
     def add_child(self, child):
-        if child.name in self.children:
+        if child.name in self.data:
             raise KeyError("Cannot have duplicate service name %r" % child.name)
-        self.children[child.name] = name
+        self.disown_parent()
+        child.parent = self
+        self.data[child.name] = name
+
+    def remove_child(self, child):
+        if child.name not in self.data:
+            raise KeyError("Cannot remove child %r that not parent of" % child.name)
+        del self.data[child.name]
+        child.parent = None
+
+    def disown_parent(self):
+        if self.parent:
+            self.parent.remove_child(self)
 
     def start(self):
-        for child in self.children.values():
+        for child in self.values():
             gevent.spawn(child.start)
 
     def stop(self):
-        for child in self.children.values():
+        for child in self.values():
             child.stop()
 
 
-class PubbotService(object):
+class PubbotService(BaseService):
 
     def __init__(self, name='pubbot'):
         super(PubbotService, self).__init__(name)
@@ -49,3 +68,12 @@ class PubbotService(object):
         if hasattr(module, 'Service'):
             t = type('%s.service.Service' % installed_app, (Service, getattr(module, 'Service')), {})
             self.add_child(t())
+
+    	self.group = Group()
+
+    def spawn(self, func, *args, **kwargs):
+        return self.group.spawn(fun, *args, **kwargs)
+
+    def run(self):
+        self.start()
+        self.group.join()
