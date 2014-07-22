@@ -135,7 +135,6 @@ INSTALLED_APPS = (
     'pubbot.main',
     'pubbot.irc',
     'pubbot.squeezecenter',
-    'pubbot.kismet',
     'pubbot.markov',
     'pubbot.quizbot',
     'pubbot.conversation',
