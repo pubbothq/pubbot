@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from geventirc import message
-from pubbot.main.celery import app
 
 
 @app.task(queue='irc')

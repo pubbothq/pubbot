@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 import requests
 
 from pubbot.conversation.tasks import parse_chat_text
-from pubbot.main.celery import app
 from pubbot.tasty.models import Link
 
 

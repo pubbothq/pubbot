@@ -28,17 +28,7 @@ To do an incremental migration and collect static files::
 
 To launch me::
 
-    pubbot worker --queues celery,irc
-
-
-Workers and other services
-==========================
-
-I can have tasks that operate on a persistent network connection. Consider IRC. Only one worker can own the IRC connection at once. Only one irc client can be me.
-
-I launch the IRC connection using the celery bootsteps interface. See ``pubbot/irc/bootsteps.py``.
-
-Then I route tasks for the IRC connection by using a different celery queue. The bootstep only 'onlines' the IRC connection on the worker that listens to the ``irc`` queue.
+    pubbot bot
 
 
 Responding to an irc message
@@ -61,8 +51,6 @@ Messages
 ========
 
 You can subscribe to a message by setting the ``subscribe`` option on a ``task`` decorator::
-
-    from pubbot.main.celery import app
 
     @app.task(subscribe=['chat.irc.#.chat'])
     def my_chat_handler(msg):

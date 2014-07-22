@@ -14,16 +14,10 @@
 
 from __future__ import absolute_import
 
-from celery import group
-
-from pubbot.main.celery import app
 from pubbot.main.match import match
 
 
 def get_tasks_with_subscription(subscription):
-    """
-    Find all celery tasks that subscribe to a given channel
-    """
     for task in app.tasks.values():
         # FIXME: The intention is to create a differet default task that
         # precompiles channels to a regex ahead of time

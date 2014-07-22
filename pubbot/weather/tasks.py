@@ -1,6 +1,5 @@
 import requests
 import random
-from pubbot.main.celery import app
 from pubbot.conversation.tasks import mouth
 from pubbot.weather.models import Point
 

@@ -21,13 +21,12 @@ import requests
 
 from django.contrib.humanize.templatetags.humanize import intword
 
-from pubbot.main.celery import app
 from pubbot.conversation.models import Scene
 
 
 def parse_chat_text(regex, subscribe=None):
     """
-    A decorator that turns a function into a celery task that receives chat messages that can be parse by a regex::
+    A decorator that turns a function into a task that receives chat messages that can be parse by a regex::
 
         @parse_chat_text(r'^hello <?P<name>)
         def someone_said_hello(msg, name):

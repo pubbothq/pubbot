@@ -15,7 +15,6 @@
 import random
 import re
 
-from pubbot.main.celery import app
 from pubbot.education.models import Education
 
 

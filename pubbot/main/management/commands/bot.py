@@ -15,11 +15,13 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 
+from pubbot import service
+
 
 class Command(BaseCommand):
     args = ''
     help = 'Apply any migrations to this site'
 
     def handle(self, *args, **options):
-        # Actually run pubbot
-        pass
+        pubbot = service.Pubbot()
+        pubbot.run()

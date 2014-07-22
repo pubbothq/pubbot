@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from django.utils import timezone
-from pubbot.main.celery import app
 from pubbot.conversation.tasks import parse_chat_text, mouth
 
 

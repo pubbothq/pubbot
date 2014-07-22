@@ -13,11 +13,11 @@
 # limitations under the License.
 
 from urllib import unquote_plus
-from celery import bootsteps
 import gevent.queue
 import gevent.pool
 from gevent import socket
 
+from pubbot import service
 from pubbot.squeezecenter import handlers
 
 
@@ -123,12 +123,9 @@ class SqueezeCenterConnection(object):
                 self._group.spawn(handler, self, data)
 
 
-class Bootstep(bootsteps.StartStopStep):
-
-    queue = 'squeeze'
+class Service(service.BaseService):
 
     def start(self, worker):
-        print "Connecting to SqueezeCenter"
         self.client = SqueezeCenterConnection('music', 9090)
 
         self.client.add_handler(handlers.CurrentSongHandler())
@@ -136,9 +133,3 @@ class Bootstep(bootsteps.StartStopStep):
         # self.client.add_handler(handlers.DebugHandler())
 
         self.client.start()
-
-        worker.app.squeezecenter = self.client
-
-    def stop(self, worker):
-        print "Disconnecting from SqueezeCenter"
-        self.client.stop()

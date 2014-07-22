@@ -17,10 +17,6 @@ setup(
         'psycopg2',
         'South',
         'django-zap',
-        'amqp',
-        'billiard',
-        'kombu',
-        'celery >= 3.1',
         'gevent',
         'greenlet',
         'gevent-psycopg2',
@@ -28,7 +24,6 @@ setup(
         'gunicorn',
         'requests',
         'beautifulsoup4',
-        'django-discover-runner',
         'django_polymorphic',
         ],
     )
