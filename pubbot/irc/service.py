@@ -15,7 +15,7 @@
 import logging
 
 from geventirc.irc import Client
-from geventirc import handlers, replycode
+from geventirc import handlers, replycode, message
 
 from pubbot import service
 from pubbot.irc.models import Network
@@ -23,6 +23,12 @@ from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, 
 
 
 logger = logging.getLogger(__name__)
+
+
+class Notice(message.Command):
+
+    def __init__(self, to, msg, prefix=None):
+        super(Notice, self).__init__([to, msg], prefix=prefix)
 
 
 class Channel(service.BaseService):
@@ -34,8 +40,17 @@ class Channel(service.BaseService):
     def start(self):
         self.parent.add_handler(JoinHandler(self.channel.name))
 
+    def say(self, message):
+        self.parent.client.msg(channel, message.encode('utf-8'))
 
-class Connection(service.BaseService):
+    def action(server, message):
+        self.parent.client.send_message(message.Me(channel, message.encode('utf-8')))
+
+    def notice(server, message):
+        self.parent.client.send_message(Notice(channel, message.encode('utf-8')))
+
+
+class Network(service.BaseService):
 
     def __init__(self, network):
         super(Connection, self).__init__(network.server)
@@ -70,4 +85,4 @@ class Service(service.BaseService):
         print "Starting irc services"
         self.group = []
         for network in Network.objects.all():
-            self.add_child(Connection(network))
+            self.add_child(Network(network))

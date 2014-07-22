@@ -18,7 +18,7 @@ import re
 from pubbot.education.models import Education
 
 
-@app.task(subscribe='chat.#.chat')
+@chat_receiver(r".*")
 def lookup_education_response(msg):
     replies = []
 

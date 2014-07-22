@@ -91,7 +91,6 @@ def requested_noskip(msg):
     }
 
 
-@app.task(queue='squeeze')
 def skip_timeout(skip_id):
     from .models import Skip
 
@@ -112,7 +111,6 @@ def skip_timeout(skip_id):
     })
 
 
-@app.task(queue='squeeze')
 def skip(num_tracks):
     if num_tracks == 0:
         print "Asked to skip 0 tracks :("
@@ -122,7 +120,6 @@ def skip(num_tracks):
     command("playlist index %s%d" % (sign, num_tracks))
 
 
-@app.task(queue='squeeze')
 def command(command):
     print "command: %s" % command
     app.squeezecenter.send(command)
