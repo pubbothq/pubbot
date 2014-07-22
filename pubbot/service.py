@@ -50,13 +50,26 @@ class BaseService(IterableUserDict, object):
         if self.parent:
             self.parent.remove_child(self)
 
-    def start(self):
+    def do_start(self):
         for child in self.values():
-            self.spawn(child.start)
+            child.do_start()
+        self.spawn(self.start)
+
+    def do_stop(self):
+        self.stop()
+        for child in self.values():
+            child.do_stop()
+
+    def run(self):
+        """ Start a service and wait for it to finish running """
+        self.start()
+        self.running.wait()
+
+    def start(self):
+        pass
 
     def stop(self):
-        for child in self.values():
-            child.stop()
+        pass
 
 
 class PubbotService(BaseService):
