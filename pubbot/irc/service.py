@@ -56,7 +56,7 @@ class NetworkService(service.BaseService):
         super(NetworkService, self).__init__(network.server)
         self.network = network
 
-    def start(self):
+    def start_service(self):
         logger.info("Connecting to '%s' on port '%d'" % (self.network.server, int(self.network.port)))
         self.client = Client(self.network.server, self.network.nick, port=str(self.network.port), ssl=self.network.ssl)
 
@@ -81,12 +81,7 @@ class NetworkService(service.BaseService):
 
 class Service(service.BaseService):
 
-    def run(self):
+    def start_service(self):
         print "Starting irc services"
-        self.group = []
         for network in Network.objects.all():
             self.add_child(NetworkService(network))
-
-        while not self.stopping:
-            import gevent
-            gevent.sleep(100)

@@ -13,16 +13,24 @@
 # limitations under the License.
 
 from UserDict import IterableUserDict
-from gevent.pool import Group
-from gevent.event import AsyncResult
 import gevent
 import logging
 
 from django.conf import settings
 from django.utils.importlib import import_module
 
+from .state import State, Transition, Machine
 
 logger = logging.getLogger(__name__)
+
+
+class ServiceState(Machine):
+
+    not_running = State(initial=True)
+    running = State()
+
+    starting = Transition(from_state='not_running', to_states=['running'])
+    stopping = Transition(from_state='running', to_states=['stopping'])
 
 
 class BaseService(IterableUserDict, object):
@@ -31,11 +39,7 @@ class BaseService(IterableUserDict, object):
         self.name = name
         self.data = {}
         self.parent = None
-        self.stopping = False
-        self.result = AsyncResult()
-
-    def spawn(self, func, *args, **kwargs):
-        return self.parent.spawn(func, *args, **kwargs)
+        self.state = ServiceState()
 
     def add_child(self, child):
         if child.name in self.data:
@@ -55,21 +59,45 @@ class BaseService(IterableUserDict, object):
             self.parent.remove_child(self)
 
     def start(self):
-        for child in self.values():
-            child.start()
-        gevent.spawn(self.run).rawlink(self.result)
+        with self.state.transition_to("running"):
+            self.start_service()
+            for child in self.values():
+                child.start()
+
+    def start_and_wait(self):
+        self.start()
+        self.state.wait("not_running")
 
     def stop(self):
-        for child in self.values():
-            child.stop()
-        self.stopping = True
+        with self.state.transition_to("not_running"):
+            for child in self.values():
+                child.stop()
+            self.stop_service()
 
-    def wait(self):
-        """ Start a service and wait for it to finish running """
-        return self.result.get()
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, **exc):
+        self.stop()
+
+    def start_service(self):
+        pass
+
+    def stop_service(self):
+        pass
+
+
+class TaskService(BaseService):
+
+    """ A service that runs a function and when that function returns the service stops """
+
+    def start_service(self):
+        self._task = gevent.spawn(self.run)
+        self._task.link(self.stop)
 
     def run(self):
-        pass
+        raise NotImplementedError(self.run)
 
 
 class PubbotService(BaseService):
@@ -87,7 +115,3 @@ class PubbotService(BaseService):
             if hasattr(module, 'Service'):
                 Service = getattr(module, 'Service')
                 self.add_child(Service(name=installed_app))
-
-    def run(self):
-        while not self.stopping:
-            gevent.sleep(100)

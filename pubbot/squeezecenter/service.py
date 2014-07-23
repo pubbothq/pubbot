@@ -125,7 +125,7 @@ class SqueezeCenterConnection(object):
 
 class Service(service.BaseService):
 
-    def start(self):
+    def start_service(self):
         self.client = SqueezeCenterConnection('music', 9090)
 
         self.client.add_handler(handlers.CurrentSongHandler())

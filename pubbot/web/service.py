@@ -8,7 +8,7 @@ from gevent.pool import Pool
 from pubbot import service
 
 
-class Service(service.BaseService):
+class Service(service.TaskService):
 
     def __init__(self, name):
         super(Service, self).__init__(name)
