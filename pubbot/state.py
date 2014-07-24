@@ -17,14 +17,15 @@ from gevent.event import Event
 
 
 class State(object):
-    pass
+    def __init__(self, initial=False):
+        self.initial = initial
 
 
 class Transition(object):
 
-    def __init__(self, from_state, to_state):
+    def __init__(self, from_state, to_states):
         self.from_state = from_state
-        self.to_stat = to_state
+        self.to_states = to_states
 
 
 class TransitionContext(object):
@@ -42,52 +43,56 @@ class TransitionContext(object):
             self.machine._events[self.machine.state].clear()
         self.machine.state = self.new_state
         self.machine._in_transition = False
-        self._events[self.machine.state].set()
+        self.machine._events[self.machine.state].set()
 
 
 class MachineType(type):
 
     def __new__(meta, class_name, bases, new_attrs):
-        filtered_attrs = dict(kv for kv in new_attrs.items() if not isinstance(kv[1], (State, Transition)))
-        cls = type.__new__(meta, class_name, bases, filtered_attrs)
+        attrs = dict(kv for kv in new_attrs.items() if not isinstance(kv[1], (State, Transition)))
 
-        cls.__initial_state__ = None
-        cls.__states__ = {}
-        cls.__transitions__ = {}
+        attrs['__initial_state__'] = None
+        states = attrs['__states__'] = {}
+        transitions = attrs['__transitions__'] = {}
+
+        cls = type.__new__(meta, class_name, bases, attrs)
 
         for b in bases:
             if hasattr(b, "__initial_state__"):
-                cls.__initial_state__ = b.__initial__state
+                cls.__initial_state__ = b.__initial_state__
             if hasattr(b, "__states__"):
-                cls.__states__.update(b.__states__)
+                states.update(b.__states__)
             if hasattr(b, "__transitions__"):
-                cls.__transitions__.update(b.__transitions__)
+                transitions.update(b.__transitions__)
 
         for key, value in new_attrs.items():
             if isinstance(value, State):
-                if key in cls.__states__:
+                if key in states:
                     raise RuntimeError("Duplicate state %r" % key)
                 value.name = key
-                cls.__states__[key] = value
+                states[key] = value
                 if getattr(value, "initial", False):
                     if cls.__initial_state__:
                         raise RuntimeError("State '%r' wants to be initial, but state '%r' is already initial" % (key, cls.__initial_state__))
                     cls.__initial_state__ = key
 
             elif isinstance(value, Transition):
-                if key in cls.__transitions__:
+                if key in transitions:
                     raise RuntimeError("Duplicate transition %r" % key)
                 value.name = key
-                cls.__transitions__[key] = value
+                transitions[key] = value
+
+        if states and not cls.__initial_state__:
+            raise RuntimeError("%s: One state must be declared as the initial state" % cls)
 
         return cls
 
 
 class Machine(six.with_metaclass(MachineType)):
 
-    def __init__(self, subject):
+    def __init__(self):
         self.state = self.__initial_state__
-        self._events = dict((state.name, Event()) for state in self.__states__)
+        self._events = dict((state, Event()) for state in self.__states__)
         self._in_transition = False
 
     def wait(self, state, timeout=None):
@@ -95,14 +100,14 @@ class Machine(six.with_metaclass(MachineType)):
             raise RuntimeError("Unable to wait for '{}'".format(state))
         self._events[state].wait(timeout)
 
-    def transition(self, new_state):
+    def transition_to(self, new_state):
         if self._in_transition:
             raise RuntimeError("Cannot transition to %r: Already in transition" % new_state)
 
         if new_state not in self.__states__:
             raise RuntimeError("'{}' is not a valid state".format(new_state))
 
-        for t in self.__transitions__:
+        for t in self.__transitions__.values():
             if t.from_state != self.state:
                 continue
             if new_state in t.to_states:
