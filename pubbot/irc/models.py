@@ -33,21 +33,6 @@ class Network(models.Model):
 class Room(Scene):
     server = models.ForeignKey(Network, related_name="rooms")
 
-    def say(self, content):
-        from pubbot.irc.tasks import say
-        say.delay(server=self.server.server,
-                  channel=self.name, content=content)
-
-    def action(self, content):
-        from pubbot.irc.tasks import action
-        action.delay(server=self.server.server,
-                     channel=self.name, content=content)
-
-    def notice(self, content):
-        from pubbot.irc.tasks import notice
-        notice.delay(server=self.server.server,
-                     channel=self.name, content=content)
-
 
 class User(Participant):
     network = models.ForeignKey(Network, related_name='users')
