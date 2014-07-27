@@ -106,6 +106,12 @@ class PubbotService(BaseService):
         super(PubbotService, self).__init__(name)
 
         for installed_app in settings.INSTALLED_APPS:
+            logger.info("Checking {installed_app} for receivers".format(installed_app=installed_app))
+            try:
+                import_module("%s.receivers" % installed_app)
+            except ImportError:
+                continue
+
             logger.info("Checking {installed_app} for Service".format(installed_app=installed_app))
             try:
                 module = import_module('%s.service' % installed_app)
