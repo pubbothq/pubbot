@@ -16,7 +16,6 @@ setup(
         'Django',
         'dj-database-url',
         'psycopg2',
-        'South',
         'django-zap',
         'gevent',
         'greenlet',
