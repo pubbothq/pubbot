@@ -26,11 +26,11 @@ class TestFight(unittest.TestCase):
 
     def test_fight(self):
         r1 = mock.Mock()
-        r1.text = '<html><body><div id="resultStats">About 1000 results><nobr>(0.27 seconds)</nobr></div></body></html>'
+        r1.text = '<div id="resultStats">About 1000 results<nobr>(0.27 seconds)</nobr></div>'
         r2 = mock.Mock()
-        r2.text = '<html><body><div id="resultStats">About 100 results><nobr>(0.27 seconds)</nobr></div></body></html>'
+        r2.text = '<div id="resultStats">About 100 results<nobr>(0.27 seconds)</nobr></div>'
 
         with mock.patch("requests.get") as get:
             get.side_effect = [r1, r2]
-            result = receivers.fight("fight: dog vs cat")
+            result = receivers.fight(None, content="fight: dog vs cat")
             self.assertEqual(result['content'], 'dog (1000) vs cat (100) -- dog wins!')

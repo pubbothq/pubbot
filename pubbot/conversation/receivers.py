@@ -33,7 +33,7 @@ def hello(sender, **kwargs):
     if kwargs.get('is_me', False):
         return
 
-    scene.say(random.choice([
+    kwargs['scene'].say(random.choice([
         "hi %s",
         "lo %s",
         "lo. how you doing, %s?",
@@ -190,10 +190,14 @@ def doge(sender, prefix, word, **kwargs):
 @chat_receiver(r'^fight:[\s]*(?P<word1>.*)(?:[;,]| vs\.? | v\.? )[\s]*(?P<word2>.*)')
 def fight(sender, word1, word2, **kwargs):
     def _score(word):
-        r = requests.get('http://www.google.co.uk/search',
-                         params={'q': word, 'safe': 'off'})
+        r = requests.get('http://www.google.co.uk/search', params={
+            'q': word,
+            'safe': 'off'
+        })
         soup = BeautifulSoup(r.text)
-        score_string = soup.find(id='resultStats').string
+        score_string = soup.find(id='resultStats').text
+        if "(" in score_string:
+            score_string, other = score_string.split("(", 1)
         return int(''.join(re.findall('\d+', score_string)))
 
     score1 = _score(word1)
