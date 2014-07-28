@@ -23,7 +23,7 @@ from django.contrib.humanize.templatetags.humanize import intword
 from django.dispatch import receiver
 
 from .signals import join
-from .base import chat_receiver
+from .utils import chat_receiver
 
 
 @receiver(join)

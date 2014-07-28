@@ -10,8 +10,7 @@ gevent==1.0.1
 greenlet==0.4.1
 gevent-psycopg2==0.0.3
 geventirc==0.1dev
-gunicorn==18.0
-requests==2.0.0
+requests==2.3.0
 
 # Install our main egg
 -e .
