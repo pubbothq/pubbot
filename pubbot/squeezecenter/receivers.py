@@ -19,22 +19,22 @@ from pubbot.conversation import chat_receiver, say
 from . import signals
 
 
-@receiver(signals.song_start)
-def current_song_notification(msg):
+@receiver(signals.song_started)
+def current_song_notification(sender, **kwargs):
     say({
-        'content': "%(title)s - %(artist)s (%(album)s)" % msg,
+        'content': "%(title)s - %(artist)s (%(album)s)" % kwargs,
         'tags': ['current_song_notification'],
         'notice': True,
     })
 
 
 @chat_receiver(r'^skip(\s(?P<number>\d+))?$')
-def requested_skip(msg, number):
+def requested_skip(sender, number, **kwargs):
     from .models import Skip
     from pubbot.conversation.models import Participant
 
     try:
-        profile = Participant.objects.get(id=msg['participant_id'])
+        profile = Participant.objects.get(id=kwargs['participant_id'])
     except KeyError as xxx_todo_changeme:
         Participant.DoesNotExist = xxx_todo_changeme
         profile = None
@@ -65,12 +65,12 @@ def requested_skip(msg, number):
 
 
 @chat_receiver(r'^noskip$')
-def requested_noskip(msg):
+def requested_noskip(sender, **kwargs):
     from .models import Skip
     from pubbot.conversation.models import Participant
 
     try:
-        profile = Participant.objects.get(id=msg['participant_id'])
+        profile = Participant.objects.get(id=kwargs['participant_id'])
     except KeyError as xxx_todo_changeme1:
         Participant.DoesNotExist = xxx_todo_changeme1
         profile = None

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 @chat_receiver('^quizbot:\\s+(?P<terms>.*)')
-def quizbot_request(msg, terms):
+def quizbot_request(sender, terms, **kwargs):
     logger.info("quizbot_request: %r" % terms)
     try:
         response = requests.get(

@@ -19,7 +19,7 @@ from pubbot.conversation import chat_receiver
 
 
 @chat_receiver(r'^newticket: (?P<ticket>.*)$')
-def raise_ticket(msg, ticket):
+def raise_ticket(sender, ticket, **kwargs):
     instance = "http://localhost/sometrac"
     username = "username"
     password = "password"
@@ -43,7 +43,7 @@ def raise_ticket(msg, ticket):
         "__FORM_TOKEN": token,
         "field_summary": ticket,
         "field_status": "new",
-        "field_reporter": msg['source'],
+        "field_reporter": kwargs['source'],
         "field_owner": "",
     })
 

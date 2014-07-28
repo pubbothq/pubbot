@@ -19,7 +19,7 @@ from geventirc import handlers, replycode, message
 
 from pubbot import service
 from pubbot.irc.models import Network
-from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ConversationHandler, JoinHandler
+from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ChannelHandler, JoinHandler
 
 
 logger = logging.getLogger(__name__)
@@ -38,9 +38,10 @@ class ChannelService(service.BaseService):
         self.channel = channel
 
     def start(self):
-        self.parent.add_handler(JoinHandler(self.channel.name))
+        self.parent.client.add_handler(ChannelHandler(self))
+        self.parent.client.add_handler(JoinHandler(self.channel.name))
 
-    def say(self, message):
+    def msg(self, message):
         self.parent.client.msg(self.channel.name, message.encode('utf-8'))
 
     def action(self, message):
@@ -75,13 +76,12 @@ class NetworkService(service.BaseService):
         for room in self.network.rooms.all():
             self.add_child(ChannelService(room))
 
-        # Inject conversation data into queue
-        self.client.add_handler(ConversationHandler())
+        self.client.start()
 
 
 class Service(service.BaseService):
 
-    def start_service(self):
-        print "Starting irc services"
+    def __init__(self, *args, **kwargs):
+        super(Service, self).__init__(*args, **kwargs)
         for network in Network.objects.all():
             self.add_child(NetworkService(network))

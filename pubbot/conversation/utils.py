@@ -33,10 +33,11 @@ def chat_receiver(regex, **kwargs):
 
     def _decorator(func):
         @receiver(message)
-        def _inner(*args, **kwargs):
+        def _inner(sender, **kwargs):
             result = regex.search(kwargs['content'])
             if result:
-                return func(*args, **result.groupdict())
+                kwargs.update(result.groupdict())
+                return func(sender, **kwargs)
         return _inner
 
     return _decorator

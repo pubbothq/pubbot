@@ -48,6 +48,9 @@ class BaseService(IterableUserDict, object):
         child.parent = self
         self.data[child.name] = child
 
+        if self.state.state == "running":
+            child.start()
+
     def remove_child(self, child):
         if child.name not in self.data:
             raise KeyError("Cannot remove child %r that not parent of" % child.name)
@@ -59,10 +62,12 @@ class BaseService(IterableUserDict, object):
             self.parent.remove_child(self)
 
     def start(self):
+        print "%r: Starting" % self
         with self.state.transition_to("running"):
             self.start_service()
             for child in self.values():
                 child.start()
+        print "%r: Finished starting" % self
 
     def start_and_wait(self):
         self.start()
@@ -87,6 +92,9 @@ class BaseService(IterableUserDict, object):
     def stop_service(self):
         pass
 
+    def __repr__(self):
+        return "Service(%s)" % self.name
+
 
 class TaskService(BaseService):
 
@@ -109,13 +117,17 @@ class PubbotService(BaseService):
             logger.info("Checking {installed_app} for receivers".format(installed_app=installed_app))
             try:
                 import_module("%s.receivers" % installed_app)
-            except ImportError:
-                continue
+            except ImportError as e:
+                if str(e) != "No module named receivers":
+                    logger.exception(e)
 
             logger.info("Checking {installed_app} for Service".format(installed_app=installed_app))
+            module_name = "%s.service" % installed_app
             try:
-                module = import_module('%s.service' % installed_app)
-            except ImportError:
+                module = import_module(module_name)
+            except ImportError as e:
+                if str(e) != "No module named service":
+                    logger.exception(e)
                 continue
 
             if hasattr(module, 'Service'):

@@ -20,7 +20,7 @@ import gevent
 from geventirc import replycode, message
 
 from pubbot.irc.models import Network, Room, User
-from . import signals
+from pubbot.conversation import signals
 
 
 logger = logging.getLogger(__file__)
@@ -212,16 +212,21 @@ class InviteProcessor(object):
         )
 
 
-class ConversationHandler(object):
+class ChannelHandler(object):
 
     commands = ['PRIVMSG']
 
-    def __init__(self):
-        self.channels = {}
+    def __init__(self, channel):
+        self.channel = channel
 
     def __call__(self, client, msg):
         channel, content = msg.params[0], " ".join(msg.params[1:])
         user = msg.prefix.split("!")[0]
+
+        if channel != self.channel.name:
+            return
+
+        print msg
 
         scene = Room.objects.get(server__server=client.hostname, name=channel)
 
@@ -249,8 +254,15 @@ class ConversationHandler(object):
             direct=direct,
         )
 
-        # Filter out False return values
-        # Log exceptions
-        # Do a reply
+        valid_responses = []
+        for receiver, response in responses:
+            if not response:
+                continue
+            if isinstance(response, Exception):
+                print response
+                logger.exception(response)
+                continue
+            valid_responses.append(response)
 
-        logger.info(responses[0])
+        if valid_responses:
+            self.channel.msg(valid_responses[0]['content'])

@@ -22,8 +22,8 @@ start_points_2 = {
 
 
 @chat_receiver(r'^(?P<sentence>.*)$')
-def markov(msg, sentence):
-    if not msg.get('direct', False):
+def markov(sender, sentence, **kwargs):
+    if not kwargs.get('direct', False):
         return
 
     try:
@@ -44,8 +44,8 @@ def markov(msg, sentence):
 
 
 @chat_receiver(r'^(?P<sentence>.*)$')
-def learn(msg, sentence):
-    if msg.get('direct', False):
+def learn(sender, sentence, **kwargs):
+    if kwargs.get('direct', False):
         return
 
     c = Collector()
