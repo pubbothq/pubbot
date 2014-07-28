@@ -12,93 +12,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
 import re
+import random
 from urllib import quote
 
 from bs4 import BeautifulSoup
 import requests
 
 from django.contrib.humanize.templatetags.humanize import intword
+from django.dispatch import receiver
 
-from pubbot.main.celery import app
-from pubbot.conversation.models import Scene
-
-
-def parse_chat_text(regex, subscribe=None):
-    """
-    A decorator that turns a function into a celery task that receives chat messages that can be parse by a regex::
-
-        @parse_chat_text(r'^hello <?P<name>)
-        def someone_said_hello(msg, name):
-            print "someone said hello to %s" % name
-    """
-    if isinstance(regex, basestring):
-        _regex = re.compile(regex)
-    else:
-        _regex = regex
-
-    def decorator(func):
-        new_func = app.task(func, subscribe=subscribe or ['chat.#.chat'], pb_msg_regex=_regex)
-        return new_func
-    return decorator
+from .signals import join
+from .utils import chat_receiver
 
 
-@app.task
-def mouth(msg):
-    if 'content' not in msg:
-        # FIXME: Some sort of logging would be good
+@receiver(join)
+# @rate_limited(1, 60)  # Only say hello once every 60s
+# @rate_limited(1, 24*60*60, group_by="user")  # Only say hello to a given user once a day
+def hello(sender, **kwargs):
+    if kwargs.get('is_me', False):
         return
 
-    active_scenes = Scene.objects.get_query_set()
+    kwargs['scene'].say(random.choice([
+        "hi %s",
+        "lo %s",
+        "lo. how you doing, %s?",
+        "%s, we all love you",
+        "Help me, Obi Wan %s, you're my only hope",
+        "Wave %s, wave",
+        "Give us a smile %s",
+        "%s! We've missed you!",
+        "%s is in the room. I have a bad feeling about this.",
+        "ewwo %s",
+        "yo, %s",
+        "Greetings, %s",
+        "wotcha, %s",
+        "Frak, it's %s",
+    ]) % kwargs['user'])
 
-    if 'scene_id' in msg:
-        scenes = active_scenes.filter(pk=msg['scene_id'])
-    elif 'tags' in msg:
-        scenes = active_scenes.filter(follows_tags__name__in=msg['tags'])
-        if not scenes.exists():
-            scenes = active_scenes.filter(follows_tags__name='default')
-    else:
-        scenes = active_scenes.filter(follows_tags__name='default')
-
-    if msg.get("action", False):
-        func_name = "action"
-    elif msg.get("notice", False):
-        func_name = "notice"
-    else:
-        func_name = "say"
-
-    for scene in scenes.exclude(bans_tags__name__in=msg.get('tags', [])).distinct():
-        getattr(scene, func_name)(msg['content'])
-
-
-@app.task(subscribe=['chat.#.join'])
-def hello(msg):
-    if msg.get('is_me', False):
-        return
-
-    mouth({
-        'scene_id': msg['scene_id'],
-        'content': random.choice([
-            "hi %s",
-            "lo %s",
-            "lo. how you doing, %s?",
-            "%s, we all love you",
-            "Help me, Obi Wan %s, you're my only hope",
-            "Wave %s, wave",
-            "Give us a smile %s",
-            "%s! We've missed you!",
-            "%s is in the room. I have a bad feeling about this.",
-            "ewwo %s",
-            "yo, %s",
-            "Greetings, %s",
-            "wotcha, %s",
-            "Frak, it's %s",
-        ]) % msg['user'],
-    })
 
 """
-@parse_chat_text(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
+@chat_receiver(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
 def twitter_link(msg, account, id):
     # See https://dev.twitter.com/docs/auth/application-only-auth
     # and https://dev.twitter.com/docs/api/1.1/post/oauth2/token
@@ -115,8 +69,8 @@ def twitter_link(msg, account, id):
 """
 
 
-@parse_chat_text(r'https://github.com/(?P<user>[\d\w]+)/(?P<repo>[\d\w]+)/pull/(?P<id>[\d]+)')
-def pull_request(msg, user, repo, id):
+@chat_receiver(r'https://github.com/(?P<user>[\d\w]+)/(?P<repo>[\d\w]+)/pull/(?P<id>[\d]+)')
+def pull_request(sender, user, repo, id, **kwargs):
     url = 'https://api.github.com/repos/%(user)s/%(repo)s/pulls/%(id)s' % locals()
 
     pull = requests.get(url).json()
@@ -129,8 +83,8 @@ def pull_request(msg, user, repo, id):
     }
 
 
-@parse_chat_text(r'https://alpha.app.net/(?P<account>[\d\w]+)/post/(?P<id>[\d]+)')
-def on_appdotnet_link(msg, account, id):
+@chat_receiver(r'https://alpha.app.net/(?P<account>[\d\w]+)/post/(?P<id>[\d]+)')
+def on_appdotnet_link(sender, account, id, **kwargs):
     res = requests.get('https://alpha-api.app.net/stream/0/posts/%s' %
                        id).json()
     tweet = res['data']['text'].encode('ascii', 'replace')
@@ -141,8 +95,8 @@ def on_appdotnet_link(msg, account, id):
     }
 
 
-@parse_chat_text(r'^(image|img) me (?P<query>[\s\w]+)')
-def image_search(msg, query):
+@chat_receiver(r'^(image|img) me (?P<query>[\s\w]+)')
+def image_search(sender, query, **kwargs):
     url = 'https://ajax.googleapis.com/ajax/services/search/images'
     results = requests.get(url, params=dict(
         v='1.0',
@@ -166,10 +120,8 @@ def image_search(msg, query):
 WIKTIONARY_URL_FORMAT = 'https://en.wiktionary.org/w/api.php?action=query&prop=extracts&titles={titles}&format=json'
 
 
-@parse_chat_text(
-    re.compile(r'^(?P<prefix>so|very|much|many)\s+(?P<word>[\w-]+)[\.\?!]?$', re.I)
-)
-def doge(msg, prefix, word):
+@chat_receiver(re.compile(r'^(?P<prefix>so|very|much|many)\s+(?P<word>[\w-]+)[\.\?!]?$', re.I))
+def doge(sender, prefix, word, **kwargs):
     type_prefixes = {
         'Verb': ['so', 'very', 'much', 'many'],
         'Noun': ['so', 'very'],
@@ -235,13 +187,17 @@ def doge(msg, prefix, word):
     return {'content': response}
 
 
-@parse_chat_text(r'^fight:[\s]*(?P<word1>.*)(?:[;,]| vs\.? | v\.? )[\s]*(?P<word2>.*)')
-def fight(msg, word1, word2):
+@chat_receiver(r'^fight:[\s]*(?P<word1>.*)(?:[;,]| vs\.? | v\.? )[\s]*(?P<word2>.*)')
+def fight(sender, word1, word2, **kwargs):
     def _score(word):
-        r = requests.get('http://www.google.co.uk/search',
-                         params={'q': word, 'safe': 'off'})
+        r = requests.get('http://www.google.co.uk/search', params={
+            'q': word,
+            'safe': 'off'
+        })
         soup = BeautifulSoup(r.text)
-        score_string = soup.find(id='resultStats').string
+        score_string = soup.find(id='resultStats').text
+        if "(" in score_string:
+            score_string, other = score_string.split("(", 1)
         return int(''.join(re.findall('\d+', score_string)))
 
     score1 = _score(word1)

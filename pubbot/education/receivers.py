@@ -15,16 +15,16 @@
 import random
 import re
 
-from pubbot.main.celery import app
+from pubbot.conversation import chat_receiver
 from pubbot.education.models import Education
 
 
-@app.task(subscribe='chat.#.chat')
-def lookup_education_response(msg):
+@chat_receiver(r".*")
+def lookup_education_response(sender, **kwargs):
     replies = []
 
     # FIXME: Stupid bug in match.py
-    if not msg['kind'].endswith('.chat'):
+    if not kwargs['kind'].endswith('.chat'):
         return
 
     # FIXME: Cache this... in memcache.. somewhere..?
@@ -35,12 +35,12 @@ def lookup_education_response(msg):
             regex = r'\b%s\b' % re.escape(module.trigger)
 
         # Does this line of text match the database?
-        result = re.search(regex, msg['content'].lower())
+        result = re.search(regex, kwargs['content'].lower())
         if not result:
             continue
 
         # Build a reply using common fields and values matched in regex
-        metadata = {'nick': msg['source']}
+        metadata = {'nick': kwargs['source']}
         metadata.update(result.groupdict())
         reply = module.response % metadata
 

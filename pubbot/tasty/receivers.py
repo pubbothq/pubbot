@@ -4,28 +4,25 @@ import urlparse
 
 from bs4 import BeautifulSoup
 import requests
+import gevent
 
-from pubbot.conversation.tasks import parse_chat_text
-from pubbot.main.celery import app
 from pubbot.tasty.models import Link
+from pubbot.conversation import chat_receiver
 
 
-@parse_chat_text(r'''(?xi)\b(?P<url>(?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''')
-def got_chat_link(msg, url):
-    # Once we have identified a URL we immediately re-queue it - we don't want
-    # to block the chatting processes
-    process_link.delay(url)
+@chat_receiver(r'''(?xi)\b(?P<url>(?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''')
+def got_chat_link(sender, url, **kwargs):
+    gevent.spawn(process_link, url)
 
 
-@parse_chat_text(r'^(lastlink)|(last link)')
-def last_link_details(msg):
+@chat_receiver(r'^(lastlink)|(last link)')
+def last_link_details(sender, **kwargs):
     link = Link.objects.order_by('-first_seen')[0]
     return {
         'content': link.title or "URL isn't HTML or doesn't have a title tag",
     }
 
 
-@app.task
 def process_link(url):
     r = requests.head(url, allow_redirects=True)
 

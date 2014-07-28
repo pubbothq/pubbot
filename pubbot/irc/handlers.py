@@ -13,14 +13,17 @@
 # limitations under the License.
 
 import re
+import logging
 
 import gevent
 
 from geventirc import replycode, message
 
-from pubbot.main.utils import broadcast, get_broadcast_group_for_message
 from pubbot.irc.models import Network, Room, User
-from pubbot.irc.tasks import mouth
+from pubbot.conversation import signals
+
+
+logger = logging.getLogger(__file__)
 
 
 class JoinHandler(object):
@@ -81,10 +84,10 @@ class BotInterfaceHandler(object):
         if not results:
             return
 
-        broadcast(
-            kind=self.kind,
-            **results.groupdict()
-        )
+        # broadcast(
+        #     kind=self.kind,
+        #     **results.groupdict()
+        # )
 
 
 class UserListHandler(object):
@@ -154,8 +157,8 @@ class UserListHandler(object):
                 scene.participants.add(u)
                 scene.save()
 
-            broadcast(
-                kind="chat.irc.%s.join" % channel,
+            signals.join.send_robust(
+                sender=client,
                 scene_id=scene.pk,
                 user=user,
                 channel=channel,
@@ -187,8 +190,8 @@ class UserListHandler(object):
         scene = self.get_scene(client, channel)
         scene.participants.remove(*scene.participants.filter(name=user))
 
-        broadcast(
-            kind="chat.irc.%s.leave" % channel,
+        signals.leave.send_robust(
+            sender=client,
             type=type,
             scene_id=scene.pk,
             user=user,
@@ -202,23 +205,28 @@ class InviteProcessor(object):
     commands = ['INVITE']
 
     def __call__(self, client, msg):
-        broadcast(
-            kind="chat.irc.%s.invite" % msg.params[1],
+        signals.invite.send_robust(
+            sender=client,
             invited_to=msg.params[1],
             invited_by=msg.prefix.split("!")[0],
         )
 
 
-class ConversationHandler(object):
+class ChannelHandler(object):
 
     commands = ['PRIVMSG']
 
-    def __init__(self):
-        self.channels = {}
+    def __init__(self, channel):
+        self.channel = channel
 
     def __call__(self, client, msg):
         channel, content = msg.params[0], " ".join(msg.params[1:])
         user = msg.prefix.split("!")[0]
+
+        if channel != self.channel.name:
+            return
+
+        print msg
 
         scene = Room.objects.get(server__server=client.hostname, name=channel)
 
@@ -236,8 +244,8 @@ class ConversationHandler(object):
                 direct = True
                 content = msg
 
-        handlers = get_broadcast_group_for_message(
-            kind="chat.irc.%s.chat" % channel,
+        responses = signals.message.send_robust(
+            sender=client,
             scene_id=getattr(scene, "pk", None),
             participant_id=getattr(participant, "pk", None),
             source=user,
@@ -246,4 +254,15 @@ class ConversationHandler(object):
             direct=direct,
         )
 
-        (handlers | mouth.s(server=client.hostname, channel=channel))()
+        valid_responses = []
+        for receiver, response in responses:
+            if not response:
+                continue
+            if isinstance(response, Exception):
+                print response
+                logger.exception(response)
+                continue
+            valid_responses.append(response)
+
+        if valid_responses:
+            self.channel.msg(valid_responses[0]['content'])

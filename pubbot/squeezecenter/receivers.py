@@ -13,26 +13,28 @@
 # limitations under the License.
 
 from django.utils import timezone
-from pubbot.main.celery import app
-from pubbot.conversation.tasks import parse_chat_text, mouth
+from django.dispatch import receiver
+
+from pubbot.conversation import chat_receiver, say
+from . import signals
 
 
-@app.task(subscribe=['music.start'])
-def current_song_notification(msg):
-    mouth({
-        'content': "%(title)s - %(artist)s (%(album)s)" % msg,
+@receiver(signals.song_started)
+def current_song_notification(sender, **kwargs):
+    say({
+        'content': "%(title)s - %(artist)s (%(album)s)" % kwargs,
         'tags': ['current_song_notification'],
         'notice': True,
     })
 
 
-@parse_chat_text(r'^skip(\s(?P<number>\d+))?$')
-def requested_skip(msg, number):
+@chat_receiver(r'^skip(\s(?P<number>\d+))?$')
+def requested_skip(sender, number, **kwargs):
     from .models import Skip
     from pubbot.conversation.models import Participant
 
     try:
-        profile = Participant.objects.get(id=msg['participant_id'])
+        profile = Participant.objects.get(id=kwargs['participant_id'])
     except KeyError as xxx_todo_changeme:
         Participant.DoesNotExist = xxx_todo_changeme
         profile = None
@@ -62,13 +64,13 @@ def requested_skip(msg, number):
         }
 
 
-@parse_chat_text(r'^noskip$')
-def requested_noskip(msg):
+@chat_receiver(r'^noskip$')
+def requested_noskip(sender, **kwargs):
     from .models import Skip
     from pubbot.conversation.models import Participant
 
     try:
-        profile = Participant.objects.get(id=msg['participant_id'])
+        profile = Participant.objects.get(id=kwargs['participant_id'])
     except KeyError as xxx_todo_changeme1:
         Participant.DoesNotExist = xxx_todo_changeme1
         profile = None
@@ -93,7 +95,6 @@ def requested_noskip(msg):
     }
 
 
-@app.task(queue='squeeze')
 def skip_timeout(skip_id):
     from .models import Skip
 
@@ -108,13 +109,12 @@ def skip_timeout(skip_id):
     s.vote_ended = timezone.now()
     s.save()
 
-    mouth.delay({
+    say({
         'content': 'Vote timed out after %d seconds' %
         Skip.VOTE_DURATION.seconds,
     })
 
 
-@app.task(queue='squeeze')
 def skip(num_tracks):
     if num_tracks == 0:
         print "Asked to skip 0 tracks :("
@@ -124,7 +124,6 @@ def skip(num_tracks):
     command("playlist index %s%d" % (sign, num_tracks))
 
 
-@app.task(queue='squeeze')
 def command(command):
     print "command: %s" % command
-    app.squeezecenter.send(command)
+    # app.squeezecenter.send(command)

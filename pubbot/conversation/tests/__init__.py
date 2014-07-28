@@ -1,4 +1,4 @@
-# Copyright 2008-2013 the original author or authors
+# Copyright 2014 John Carr
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,16 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from django.core.management.base import BaseCommand
-from pubbot.main.celery import app
-
-
-class Command(BaseCommand):
-    args = ''
-    help = 'Start a celery command'
-
-    def run_from_argv(self, argv):
-        app.start(
-            [''] + argv[2:],
-        )

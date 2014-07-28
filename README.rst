@@ -28,17 +28,7 @@ To do an incremental migration and collect static files::
 
 To launch me::
 
-    pubbot worker --queues celery,irc
-
-
-Workers and other services
-==========================
-
-I can have tasks that operate on a persistent network connection. Consider IRC. Only one worker can own the IRC connection at once. Only one irc client can be me.
-
-I launch the IRC connection using the celery bootsteps interface. See ``pubbot/irc/bootsteps.py``.
-
-Then I route tasks for the IRC connection by using a different celery queue. The bootstep only 'onlines' the IRC connection on the worker that listens to the ``irc`` queue.
+    pubbot bot
 
 
 Responding to an irc message
@@ -48,9 +38,9 @@ All incoming irc messages get broadcast to any task that subcribes to ``chat.<ty
 
 There is a helper if you want to respond to a trigger that can be matched by a regex. In tasks.py::
 
-    from pubbot.conversation.tasks import parse_chat_text
+    from pubbot.conversation import chat_receiver
 
-    @parse_chat_text(r'foo=(?P<foo>[\d\w]+), bar=(?P<bar>[\d\w]+)')
+    @chat_receiver(r'foo=(?P<foo>[\d\w]+), bar=(?P<bar>[\d\w]+)')
     def my_chat_handler(msg, foo, bar):
         return {
             'content': 'Foo was "%s", bar was "%s"' % (foo, bar),
@@ -61,8 +51,6 @@ Messages
 ========
 
 You can subscribe to a message by setting the ``subscribe`` option on a ``task`` decorator::
-
-    from pubbot.main.celery import app
 
     @app.task(subscribe=['chat.irc.#.chat'])
     def my_chat_handler(msg):

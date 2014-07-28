@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,20 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.contrib import admin
-from pubbot.kismet.models import Network, Device, Times
+from django.dispatch import Signal
 
 
-class TimesInline(admin.TabularInline):
-    model = Times
+""" Sent when a bot receives a message """
+message = Signal(providing_args=["post", "request"])
 
+""" Sent when a bot is invited to a channel """
+invite = Signal(providing_args=["post", "request"])
 
-class DeviceAdmin(admin.ModelAdmin):
-    inlines = [
-        TimesInline,
-    ]
+""" Sent when a user joins a channel """
+join = Signal(providing_args=["post", "request"])
 
-
-admin.site.register(Network)
-admin.site.register(Device, DeviceAdmin)
-admin.site.register(Times)
+""" Sent when a user leaves a channel """
+leave = Signal(providing_args=["post", "request"])

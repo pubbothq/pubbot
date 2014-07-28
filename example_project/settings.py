@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
+
 # Django settings for pubbot project.
 
 DEBUG = True
@@ -55,7 +58,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(sys.prefix, "var", "media")
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -66,7 +69,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(sys.prefix, "var", "static")
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -107,10 +110,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'pubbot.urls'
+ROOT_URLCONF = 'example_project.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'pubbot.wsgi.application'
+WSGI_APPLICATION = 'example_project.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -129,14 +132,11 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'discover_runner',
     'zap',
-    'south',
-    'gunicorn',
+    'pubbot.web',
     'pubbot.main',
     'pubbot.irc',
     'pubbot.squeezecenter',
-    'pubbot.kismet',
     'pubbot.markov',
     'pubbot.quizbot',
     'pubbot.conversation',
@@ -152,31 +152,24 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 # more details on how to customize your logging configuration.
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+        'django.db.backends': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level': 'CRITICAL',
+        },
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': True,
         },
-    }
+    },
 }
 
-TEST_RUNNER = 'discover_runner.DiscoverRunner'
-
-BROKER_URL = 'amqp://'
-CELERY_RESULT_BACKEND = 'cache+memcached://127.0.0.1:11211/'
-CELERYD_POOL = 'gevent'
-
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'

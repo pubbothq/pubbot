@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from gevent import monkey
+monkey.patch_all()
+
 from django.core.management.base import BaseCommand
-from django.core.management import call_command
+
+from pubbot import service
 
 
 class Command(BaseCommand):
@@ -21,5 +25,5 @@ class Command(BaseCommand):
     help = 'Apply any migrations to this site'
 
     def handle(self, *args, **options):
-        # Actually run pubbot
-        pass
+        pubbot = service.PubbotService()
+        pubbot.start_and_wait()
