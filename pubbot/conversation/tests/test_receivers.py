@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import unittest
+import mock
 
 from pubbot.conversation import receivers
 
@@ -24,5 +25,12 @@ class TestPullRequest(unittest.TestCase):
 class TestFight(unittest.TestCase):
 
     def test_fight(self):
-        result = receivers.fight("fight: dog vs cat")
-        self.assertEqual(result['content'], 'dog (100) vs cat (1000) -- dog wins!')
+        r1 = mock.Mock()
+        r1.text = '<html><body><div id="resultStats">About 1000 results><nobr>(0.27 seconds)</nobr></div></body></html>'
+        r2 = mock.Mock()
+        r2.text = '<html><body><div id="resultStats">About 100 results><nobr>(0.27 seconds)</nobr></div></body></html>'
+
+        with mock.patch("requests.get") as get:
+            get.side_effect = [r1, r2]
+            result = receivers.fight("fight: dog vs cat")
+            self.assertEqual(result['content'], 'dog (1000) vs cat (100) -- dog wins!')
