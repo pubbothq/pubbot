@@ -27,16 +27,15 @@ class Education(models.Model):
         validators=[validators.MinValueValidator(
             0), validators.MaxValueValidator(100), ]
     )
-    address_speaker = models.BooleanField()
-    regex = models.BooleanField()
+    address_speaker = models.BooleanField(default=False)
+    regex = models.BooleanField(default=False)
 
     def clean(self):
         if self.regex:
             try:
                 re.compile(self.trigger)
             except:
-                raise ValidationError(
-                    'Trigger must be a regex if regex checked')
+                raise ValidationError('Trigger must be a valid regex if regex checked')
 
     def __unicode__(self):
         return '%r -> %r' % (self.trigger, self.response)
