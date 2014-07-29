@@ -125,7 +125,7 @@ def skip(num_tracks):
 
 
 def _escape(text):
-    #FIXME: Is full on url style escaping required perhaps?
+    # FIXME: Is full on url style escaping required perhaps?
     return text.replace(' ', '+')
 
 
@@ -156,7 +156,7 @@ def doeswantlater(sender, doeswantlater, **kwargs):
 @chat_receiver(r'^random$')
 def random(sender, **kwargs):
     words = filter(lambda x: len(x) <= 4, open("/usr/share/dict/words").read().split("\n"))
-    doeswant(msg, random.choice(words))
+    doeswant(sender, random.choice(words), **kwargs)
     return {"had_side_effect": True, }
 
 
