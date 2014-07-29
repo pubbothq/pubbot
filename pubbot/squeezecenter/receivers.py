@@ -124,6 +124,42 @@ def skip(num_tracks):
     command("playlist index %s%d" % (sign, num_tracks))
 
 
+def _escape(text):
+    #FIXME: Is full on url style escaping required perhaps?
+    return text.replace(' ', '+')
+
+
+@chat_receiver(r'^canhas (?P<canhas>.*)')
+def canhas(sender, canhas, **kwargs):
+    command("playlist loadtracks contributor.namesearch=%s" % _escape(canhas))
+    return {"had_side_effect": True, }
+
+
+@chat_receiver(r'^canhaslater (?P<canhaslater>.*)')
+def canhaslater(sender, canhaslater, **kwargs):
+    command("playlist addtracks contributor.namesearch=%s" % _escape(canhaslater))
+    return {"had_side_effect": True, }
+
+
+@chat_receiver(r'^doeswant (?P<doeswant>.*)')
+def doeswant(sender, doeswant, **kwargs):
+    command("playlist loadtracks track.titlesearch=%s" % _escape(doeswant))
+    return {"had_side_effect": True, }
+
+
+@chat_receiver(r'^doeswantlater (?P<doeswantlater>.*)')
+def doeswantlater(sender, doeswantlater, **kwargs):
+    command("playlist: addtracks track.titlesearch=%s" % _escape(doeswantlater))
+    return {"had_side_effect": True, }
+
+
+@chat_receiver(r'^random$')
+def random(sender, **kwargs):
+    words = filter(lambda x: len(x) <= 4, open("/usr/share/dict/words").read().split("\n"))
+    doeswant(msg, random.choice(words))
+    return {"had_side_effect": True, }
+
+
 def command(command):
     print "command: %s" % command
     # app.squeezecenter.send(command)
