@@ -11,10 +11,6 @@ I am a rewrite of an old and slightly broken Twisted IRC bot. I'm still very rou
 Development environment
 =======================
 
-Dependencies::
-
-    sudo apt-get libavahi-compat-libdnssd-dev libmemcached-dev
-
 To build me::
 
     git clone git://github.com/pubbothq/pubbot
@@ -31,43 +27,45 @@ To launch me::
     pubbot bot
 
 
+Hacking
+=======
+
+All interesting and hookable behaviour is extensible via Django signals.
+
+
 Responding to an irc message
-============================
+----------------------------
 
-All incoming irc messages get broadcast to any task that subcribes to ``chat.<type>.<channel>.irc``. In ``tasks.py``::
+The signal ``pubbot.conversation.signals.message`` is fired when a chat message
+is received. You can listen to it with the standard Django mechanisms,
+including the ``@receiver`` decorator::
 
-There is a helper if you want to respond to a trigger that can be matched by a regex. In tasks.py::
+    from django.dispatch import receiver
+
+    @receiver(message)
+    def my_receiver(signal, **kwargs):
+        return {"content": "Hello!"}
+
+The responses will be sorted and the best match will be used as the IRC reply.
+
+As most chat messages can be filtered by regexes a helper is provided::
 
     from pubbot.conversation import chat_receiver
 
-    @chat_receiver(r'foo=(?P<foo>[\d\w]+), bar=(?P<bar>[\d\w]+)')
-    def my_chat_handler(msg, foo, bar):
-        return {
-            'content': 'Foo was "%s", bar was "%s"' % (foo, bar),
-            }
+    @chat_receiver(r'https://github.com/(?P<user>[\d\w]+)/(?P<repo>[\d\w]+)/pull/(?P<id>[\d]+)')
+    def pull_request(sender, user, repo, id, **kwargs):
+        # Process pull request in some way
+        return {'content': 'Some information about a pull request'}
 
 
-Messages
-========
-
-You can subscribe to a message by setting the ``subscribe`` option on a ``task`` decorator::
-
-    @app.task(subscribe=['chat.irc.#.chat'])
-    def my_chat_handler(msg):
-        return {
-            'content': 'You set something in irc',
-            }
-
-Messages can be matched in a similar way to RabbitMQ routing keys:
-
- * ``*`` matches a single word
- * ``#`` matches one or more words
+Signals
+=======
 
 
-``chat.<protocol>.<#channel>.chat``
------------------------------------
+``pubbot.conversation.signals.message``
+---------------------------------------
 
-This message is sent when a new line of chat has arrived.
+This signal is sent when a new line of chat has arrived.
 
 source
 channel
@@ -76,18 +74,18 @@ source_id
     The pk of a UserProfile object for the user that sent this chat. ``None`` if no UserProfile available.
 
 
-``chat.<protocol>.<#channel>.join``
------------------------------------
-
-``chat.<protocol>.<#channel>.leave``
+``pubbot.conversation.signals.join``
 ------------------------------------
 
+``pubbot.conversation.signals.leave``
+-------------------------------------
 
 
-``music.track``
----------------
 
-This message is sent when the current track changes.
+``pubbot.squeezecenter.signals.song_started``
+---------------------------------------------
+
+This signal is sent when the current track changes.
 
 title
     The title of the current track.
@@ -96,10 +94,16 @@ album
 artist
     The artist of the current track.
 
-``music.stop``
---------------
+``pubbot.squeezecenter.signals.music_stopped``
+----------------------------------------------
 
-This message is sent when the music stops. It doesn't have any arguments.
+This signal is sent when the music stops. It doesn't have any arguments.
+
+
+``pubbot.vcs.signals.commit``
+-----------------------------
+
+This signal is sent when a commit is detected.
 
 
 FAQ
@@ -109,20 +113,3 @@ Where is manage.py?
 -------------------
 
 The source is in ``pubbot/manage.py``. But it's installed as ``bin/pubbot``, so when your virtualenv is active you can just run ``pubbot syncdb`` etc.
-
-
-Rules
-=====
-
- * Don't make me self-aware
- * Don't bring buildout anywhere near me
- * Don't give me access to the nukes
- * Try to stick to PEP8
- * Write tests!!!
-
-
-Todo
-====
-
-Dashboard - with SSE or websockets or something. See http://stackoverflow.com/questions/12853067/django-cleaning-up-redis-connection-after-client-disconnects-from-stream
-
