@@ -15,6 +15,9 @@
 from gevent import monkey
 monkey.patch_all()
 
+from gevent_psycopg2 import monkey_patch
+monkey_patch()
+
 from django.core.management.base import BaseCommand
 
 from pubbot import service
