@@ -14,6 +14,7 @@
 
 import re
 import random
+import datetime
 from urllib import quote
 
 from bs4 import BeautifulSoup
@@ -211,4 +212,42 @@ def fight(sender, word1, word2, **kwargs):
     return {
         'content': '%(word1)s (%(score1)s) vs %(word2)s (%(score2)s) -- %(winner)s wins!' %
         locals(),
+    }
+
+
+@chat_receiver(r'^blame')
+def blame(sender, room, **kwargs):
+    return
+
+    try:
+        nick = random.choice(room.nicks)
+    except IndexError:
+        pass
+
+    if nick.is_me:
+        return {"content": "It's all my fault!"}
+
+    return {"content": "It's all %s's fault!" % nick.name}
+
+
+@chat_receiver(r'christmas')
+def christmas(sender, **kwargs):
+    today = datetime.datetime.today()
+
+    # We've probably had enough christmas to last us till next year
+    if today.month == 12 and today.day > 25:
+        return
+
+    if today.month == 12 and today.day == 25:
+        return {
+            'content': "It's christmas \o/",
+        }
+
+    christmas = datetime.datetime(today.year, 12, 25)
+    delta = christmas - today
+    if delta.days > 60:
+        return
+
+    return {
+        'content': "only %s days 'til Christmas!" % delta.days,
     }
