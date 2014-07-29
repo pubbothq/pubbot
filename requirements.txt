@@ -2,12 +2,12 @@
 --find-links https://www.djangoproject.com/download/1.7c2/tarball/#egg=Django-1.7c1
 
 beautifulsoup4==4.3.2
-Django==1.7c1
-dj-database-url==0.2.2
-psycopg2==2.5.1
+Django==1.6.5
+dj-database-url==0.3.0
+psycopg2==2.5.3
 django-zap==0.0.1
 gevent==1.0.1
-greenlet==0.4.1
+greenlet==0.4.2
 gevent-psycopg2==0.0.3
 geventirc==0.1dev
 requests==2.3.0
