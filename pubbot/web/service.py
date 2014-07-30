@@ -37,8 +37,10 @@ class Service(service.TaskService):
             self.pool_size = None
 
     def run(self):
-        print "Setting up WSGI host"
+        self.logger.debug("Getting WSGI application")
         app = get_internal_wsgi_application()
         pool = Pool(self.pool_size) if self.pool_size else None
+        self.logger.debug("Prerparing  WSGI server")
         server = wsgi.WSGIServer((self.addr, self.port), app, spawn=pool)
+        self.logger.debug("Serving WSGI requests")
         server.serve_forever()

@@ -152,10 +152,16 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 # more details on how to customize your logging configuration.
 LOGGING = {
     'version': 1,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+        },
+    },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            'formatter': 'standard',
         },
     },
     'loggers': {

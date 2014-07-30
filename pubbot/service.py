@@ -40,6 +40,7 @@ class BaseService(IterableUserDict, object):
         self.data = {}
         self.parent = None
         self.state = ServiceState()
+        self.logger = logging.getLogger("%s.%s[%s]" % (self.__module__, self.__class__.__name__, self.name))
 
     def add_child(self, child):
         if child.name in self.data:
@@ -62,12 +63,12 @@ class BaseService(IterableUserDict, object):
             self.parent.remove_child(self)
 
     def start(self):
-        print "%r: Starting" % self
+        self.logger.debug("Starting")
         with self.state.transition_to("running"):
             self.start_service()
             for child in self.values():
                 child.start()
-        print "%r: Finished starting" % self
+        self.logger.debug("Finished starting")
 
     def start_and_wait(self):
         self.start()
@@ -114,20 +115,20 @@ class PubbotService(BaseService):
         super(PubbotService, self).__init__(name)
 
         for installed_app in settings.INSTALLED_APPS:
-            logger.info("Checking {installed_app} for receivers".format(installed_app=installed_app))
+            self.logger.info("Checking {installed_app} for receivers".format(installed_app=installed_app))
             try:
                 import_module("%s.receivers" % installed_app)
             except ImportError as e:
                 if str(e) != "No module named receivers":
-                    logger.exception(e)
+                    self.logger.exception(e)
 
-            logger.info("Checking {installed_app} for Service".format(installed_app=installed_app))
+            self.logger.info("Checking {installed_app} for Service".format(installed_app=installed_app))
             module_name = "%s.service" % installed_app
             try:
                 module = import_module(module_name)
             except ImportError as e:
                 if str(e) != "No module named service":
-                    logger.exception(e)
+                    self.logger.exception(e)
                 continue
 
             if hasattr(module, 'Service'):

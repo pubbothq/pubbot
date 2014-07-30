@@ -58,7 +58,7 @@ class NetworkService(service.BaseService):
         self.network = network
 
     def start_service(self):
-        logger.info("Connecting to '%s' on port '%d'" % (self.network.server, int(self.network.port)))
+        self.logger.info("Connecting to '%s' on port '%d'" % (self.network.server, int(self.network.port)))
         self.client = Client(self.network.server, self.network.nick, port=str(self.network.port), ssl=self.network.ssl)
 
         # self.client.add_handler(handlers.print_handler)
