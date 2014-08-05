@@ -45,7 +45,7 @@ def chat_receiver(regex, **kwargs):
 
 def say(msg):
     if 'content' not in msg:
-        # FIXME: Some sort of logging would be good
+        logger.critical("Got request with no content: %r" % repr(msg))
         return
 
     active_scenes = Scene.objects.get_query_set()
