@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.servers.basehttp import get_internal_wsgi_application
+from django.core.handlers.wsgi import WSGIHandler
 
 from gevent import wsgi
 from gevent.pool import Pool
@@ -38,9 +38,11 @@ class Service(service.TaskService):
 
     def run(self):
         self.logger.debug("Getting WSGI application")
-        app = get_internal_wsgi_application()
+        app = WSGIHandler()
+
         pool = Pool(self.pool_size) if self.pool_size else None
         self.logger.debug("Prerparing  WSGI server")
         server = wsgi.WSGIServer((self.addr, self.port), app, spawn=pool)
+
         self.logger.debug("Serving WSGI requests")
         server.serve_forever()
