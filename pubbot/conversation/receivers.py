@@ -16,6 +16,7 @@ import re
 import random
 import datetime
 from urllib import quote
+import logging
 
 from bs4 import BeautifulSoup
 import requests
@@ -25,6 +26,9 @@ from django.dispatch import receiver
 
 from .signals import join
 from .utils import chat_receiver
+
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(join)
@@ -52,22 +56,28 @@ def hello(sender, **kwargs):
     ]) % kwargs['user'])
 
 
-"""
 @chat_receiver(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
-def twitter_link(msg, account, id):
-    # See https://dev.twitter.com/docs/auth/application-only-auth
-    # and https://dev.twitter.com/docs/api/1.1/post/oauth2/token
-    bearer_token = requests.post('https://api.twitter.com/oauth2/token')
+def twitter_link(sender, account, id, **kwargs):
+    response = requests.get('https://twitter.com/%s/status/%s' % (account, id))
 
-    s = requests.get('https://api.twitter.com/1/statuses/show.json?id=%s' % id).json()
-    tweet = s['text'].encode('ascii', 'replace')
-    screen_name = s['user']['screen_name']
+    if response.status_code != 200:
+        logger.critical("Unable to lookup tweet %s/%s" % (account, id))
+        return
+
+    bs = BeautifulSoup(response.text)
+    try:
+        tweet = bs.find_all("p", class_="tweet-text")[0].text
+    except Exception as e:
+        logger.exception(e)
+        return {
+            'content': 'Look it up yourself, twitter changed the API again',
+            'useful': True,
+        }
 
     return {
-        'content': '[ %s: %s ]' % (screen_name, tweet),
+        'content': '[ %s: %s ]' % (account, tweet),
         'useful': True,
-        }
-"""
+    }
 
 
 @chat_receiver(r'https://github.com/(?P<user>[\d\w]+)/(?P<repo>[\d\w]+)/pull/(?P<id>[\d]+)')
