@@ -22,12 +22,6 @@ try:
 except ImportError:
     pass
 
-try:
-    import gevent_psycopg2
-    gevent_psycopg2.monkey_patch()
-except ImportError:
-    pass
-
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "example_project.settings")

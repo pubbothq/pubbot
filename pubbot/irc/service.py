@@ -61,7 +61,7 @@ class NetworkService(service.BaseService):
         self.logger.info("Connecting to '%s' on port '%d'" % (self.network.server, int(self.network.port)))
         self.client = Client(self.network.server, self.network.nick, port=str(self.network.port), ssl=self.network.ssl)
 
-        # self.client.add_handler(handlers.print_handler)
+        self.client.add_handler(handlers.print_handler)
         self.client.add_handler(handlers.ping_handler, 'PING')
 
         if self.network.nickserv_password:

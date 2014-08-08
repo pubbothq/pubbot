@@ -17,7 +17,6 @@ import logging
 
 from django.dispatch import receiver
 
-from .models import Scene
 from .signals import message
 
 
@@ -43,29 +42,25 @@ def chat_receiver(regex, **kwargs):
     return _decorator
 
 
-def say(msg):
-    if 'content' not in msg:
-        logger.critical("Got request with no content: %r" % repr(msg))
-        return
+def say(content, **kwargs):
+    from pubbot.irc.models import Room
+    rooms = [kwargs.get('room', None)]
+    if not rooms:
+        if 'tags' in kwargs:
+            rooms = Room.objects.filter(subscribes__name__in=kwargs['tags'])
+            if not rooms.exists():
+                rooms = Room.objects.filter(subscribes__name__in=['default'])
+            rooms = rooms.exclude(blocks__name__in=kwargs['tags'])
+        else:
+            rooms = Room.objects.filter(subscribes__name__in=['default'])
 
-    active_scenes = Scene.objects.get_query_set()
-
-    if 'scene_id' in msg:
-        scenes = active_scenes.filter(pk=msg['scene_id'])
-    elif 'tags' in msg:
-        scenes = active_scenes.filter(follows_tags__name__in=msg['tags'])
-        if not scenes.exists():
-            scenes = active_scenes.filter(follows_tags__name='default')
-    else:
-        scenes = active_scenes.filter(follows_tags__name='default')
-
-    if msg.get("action", False):
+    if kwargs.get("action", False):
         func_name = "action"
-    elif msg.get("notice", False):
+    elif kwargs.get("notice", False):
         func_name = "notice"
     else:
         func_name = "say"
 
-    for scene in scenes.exclude(bans_tags__name__in=msg.get('tags', [])).distinct():
+    for room in rooms.distinct():
         # getattr(scene, func_name)(msg['content'])
-        logger.debug("Saying %r in %r via %r" % (msg, scene, func_name))
+        logger.debug("Saying %r in %r via %r" % (content, room, func_name))

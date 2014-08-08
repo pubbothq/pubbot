@@ -14,17 +14,12 @@ setup(
     install_requires=[
         'six',
         'Django',
-        'dj-database-url',
-        'psycopg2',
-        'django-zap',
         'gevent',
         'greenlet',
-        'gevent-psycopg2',
         'geventirc',
         'gunicorn',
         'requests',
         'beautifulsoup4',
-        'django_polymorphic',
         ],
     )
 

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from django.db import models
-from pubbot.conversation.models import Scene, Participant
 
 
 class Network(models.Model):
@@ -30,9 +29,15 @@ class Network(models.Model):
         return self.server
 
 
-class Room(Scene):
+class Room(models.Model):
     server = models.ForeignKey(Network, related_name="rooms")
+    name = models.CharField(max_length=128)
 
 
-class User(Participant):
+class User(models.Model):
     network = models.ForeignKey(Network, related_name='users')
+    name = models.CharField(max_length=128)
+
+    @property
+    def is_me(self):
+        return self.name == self.network.nick

@@ -27,7 +27,12 @@ ADMINS = (
 MANAGERS = ADMINS
 
 import dj_database_url
-DATABASES = { 'default': dj_database_url.config('DATABASE', 'postgres://pubbot:pubbot@localhost/pubbot') }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(sys.prefix, "var", "pubbot.sqlite")
+    },
+}
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
