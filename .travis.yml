@@ -3,9 +3,8 @@ python:
   - "2.7"
 
 install:
-  - sudo apt-get update
-  - sudo apt-get install libpq-dev libavahi-compat-libdnssd-dev
   - pip install -r requirements.txt
+  - mkdir $VIRTUAL_ENV/var
 
 script:
   - python manage.py rebuild
