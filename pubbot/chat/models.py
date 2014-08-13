@@ -1,4 +1,4 @@
-# Copyright 2008-2013 the original author or authors
+# Copyright 2014 the original author or authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,18 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from django.db.backends.signals import connection_created
-
-
-def setup_sqlite_connection(sender, connection, **kwargs):
-    if connection.vendor != "sqlite":
-        return
-
-    cursor = connection.cursor()
-    cursor.execute("PRAGMA journal_mode = truncate;")
-    cursor.execute("PRAGMA temp_store = memory;")
-    cursor.execute("PRAGMA synchronous = OFF;")
-
-
-connection_created.connect(setup_sqlite_connection)

@@ -1,4 +1,4 @@
-# Copyright 2008-2013 the original author or authors
+# Copyright 2014 the original author or authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,3 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from django.utils.functional import LazyObject
+import networkx as nx
+
+
+class Graph(nx.DiGraph):
+
+    def __init__(self):
+        super(Graph, self).__init__()
+
+        if "START" not in self:
+            self.add_node("START")
+        if "END" not in self:
+            self.add_node("END")
+
+
+class LazyGraph(LazyObject):
+
+    def _setup(self):
+        self._wrapped = Graph()
+
+
+graph = LazyGraph()

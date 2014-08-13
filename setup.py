@@ -20,6 +20,9 @@ setup(
         'gunicorn',
         'requests',
         'beautifulsoup4',
+        'networkx',
+        'PyStemmer',
+        'progressbar',
         ],
     )
 

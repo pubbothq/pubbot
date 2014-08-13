@@ -137,12 +137,11 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'zap',
     'pubbot.web',
     'pubbot.main',
     'pubbot.irc',
     'pubbot.squeezecenter',
-    'pubbot.markov',
+    'pubbot.chat',
     'pubbot.quizbot',
     'pubbot.conversation',
     'pubbot.education',
