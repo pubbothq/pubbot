@@ -18,8 +18,8 @@ from .stemmer import stemmer
 
 
 def group_tokens(tokens):
-    a = tokens.next()
-    b = tokens.next()
+    a = ''
+    b = ''
     c = tokens.next()
     yield (a, b, c)
 
@@ -32,14 +32,10 @@ def group_tokens(tokens):
 
 def process_token(token):
     if token not in graph:
-        graph.add_node(token)
-
         stem = stemmer.stem(token)
         if stem:
-            if stem not in graph:
-                graph.add_node(stem)
-            if token not in graph[stem]:
-                graph.add_edge(stem, token)
+            if stem not in graph.stems:
+                graph.stems[stem].append(token)
 
 
 def process_node(node):
@@ -47,7 +43,7 @@ def process_node(node):
         graph.add_node(node)
 
         process_token(node[2])
-        graph.add_edge(node[2], node)
+        graph.tokens[node[2]].append(node)
 
 
 def process_edge(src, dst):

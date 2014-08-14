@@ -25,7 +25,7 @@ class DefaultStemmer(object):
         self.stemmer = Stemmer.Stemmer(getattr(settings, "CHAT_STEMMER_LANGUAGE", "en"))
 
     def stem_many(self, tokens):
-        for token in tokens:
+        for token in list(tokens):
             stem = self.stem(token)
             if stem:
                 yield stem

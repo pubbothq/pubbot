@@ -13,4 +13,5 @@ class Command(BaseCommand):
             raise CommandError("No input text")
         elif len(args) > 1:
             raise CommandError("Make sure your input is quite")
+
         self.stdout.write(reply(args[0]))

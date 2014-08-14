@@ -7,6 +7,7 @@ from progressbar import ProgressBar
 from django.core.management.base import BaseCommand, CommandError
 
 from pubbot.chat.reading import learn_string
+from pubbot.chat.graph import graph
 
 
 class Command(BaseCommand):
@@ -32,7 +33,7 @@ class Command(BaseCommand):
                 # Couple of problems with this approach.
                 #  1. len() doesn't give size in bytes
                 #  2. Ideally we'd set the size *after* each iteration
-                pb.update(len(line))
+                pb.update(pb.currval + len(line))
                 sys.stdout.flush()
 
                 if line.startswith("---"):
@@ -61,5 +62,7 @@ class Command(BaseCommand):
                 learn_string(line)
 
         pb.finish()
+
+        graph.save()
 
         self.stdout.write('I readed the log file')
