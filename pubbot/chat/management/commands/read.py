@@ -2,12 +2,11 @@
 import os
 import sys
 
-from progressbar import ProgressBar
+from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 
 from django.core.management.base import BaseCommand, CommandError
 
-from pubbot.chat.reading import learn_string
-from pubbot.chat.graph import graph
+from pubbot.chat.reading import Learner
 
 
 class Command(BaseCommand):
@@ -24,45 +23,44 @@ class Command(BaseCommand):
         if not os.path.exists(path):
             raise CommandError("No irc log found at %r" % path)
 
-        pb = ProgressBar(maxval=os.stat(path).st_size).start()
+        pb = ProgressBar(widgets=[Percentage(), Bar(), ETA(), FileTransferSpeed()], maxval=os.stat(path).st_size).start()
 
         ignored_nicks = options.get("ignored_nick", [])
 
-        with open(path) as fp:
-            for line in fp.readlines():
-                # Couple of problems with this approach.
-                #  1. len() doesn't give size in bytes
-                #  2. Ideally we'd set the size *after* each iteration
-                pb.update(pb.currval + len(line))
-                sys.stdout.flush()
+        with Learner() as learner:
+            with open(path) as fp:
+                for line in fp.readlines():
+                    # Couple of problems with this approach.
+                    #  1. len() doesn't give size in bytes
+                    #  2. Ideally we'd set the size *after* each iteration
+                    pb.update(pb.currval + len(line))
+                    sys.stdout.flush()
 
-                if line.startswith("---"):
-                    continue
+                    if line.startswith("---"):
+                        continue
 
-                if line[2] != ":":
-                    continue
+                    if line[2] != ":":
+                        continue
 
-                line = line[6:]
+                    line = line[6:]
 
-                # If this line doesn't start with < then there isn't a nick, so
-                # there isnt a chat line.
-                if not line.startswith("<"):
-                    continue
+                    # If this line doesn't start with < then there isn't a nick, so
+                    # there isnt a chat line.
+                    if not line.startswith("<"):
+                        continue
 
-                nick, line = line.split(">", 1)
+                    nick, line = line.split(">", 1)
 
-                # Is this nick blacklisted? (Best to ignore chatbot spam)
-                if nick.lower() in ignored_nicks:
-                    continue
+                    # Is this nick blacklisted? (Best to ignore chatbot spam)
+                    if nick.lower() in ignored_nicks:
+                        continue
 
-                # Does this line actually have sentences?
-                if " " not in line:
-                    continue
+                    # Does this line actually have sentences?
+                    if " " not in line:
+                        continue
 
-                learn_string(line)
+                    learner.learn_string(line)
 
         pb.finish()
-
-        graph.save()
 
         self.stdout.write('I readed the log file')

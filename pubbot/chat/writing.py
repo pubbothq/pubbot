@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import itertools
 import time
 
 from .tokenizer import tokenizer
-from .stemmer import stemmer
 from .scoring import scorers
-from .graph import graph
+from .models import Grouping
 
 
 def iteruntil(offset, iterable):
@@ -36,11 +34,11 @@ def iter_replies_from_tokens(tokens):
     # (Expected structure is STEM -> TOKEN -> GROUP -> GROUP -> END)
 
     seen = set()
-    for chain in iteruntil(0.5, graph.iter_random_chains(tokens)):
-        backwards = graph.iter_chain_backward(chain)
-        forwards = graph.iter_chain_forward(chain)
-        reply = tuple(backwards.next()) + tuple(forwards.next())
+    for chain in iteruntil(0.5, Grouping.iter_random_groupings(tokens)):
+        backwards = chain.get_complete_incoming_chains()
+        forwards = chain.get_complete_outgoing_chains()
 
+        reply = tuple(backwards.next()) + (chain, ) + tuple(forwards.next())
 
         if reply not in seen:
             yield reply
@@ -67,4 +65,4 @@ def reply(text):
     if best_reply is None:
         return "You make no sense"
 
-    return repr(best_reply)
+    return " ".join(t.token3.token for t in best_reply)

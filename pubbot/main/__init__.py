@@ -24,5 +24,8 @@ def setup_sqlite_connection(sender, connection, **kwargs):
     cursor.execute("PRAGMA temp_store = memory;")
     cursor.execute("PRAGMA synchronous = OFF;")
 
+    cursor.execute("PRAGMA cache_size = 0;")
+    cursor.execute("PRAGMA page_size = 4096;")
+
 
 connection_created.connect(setup_sqlite_connection)
