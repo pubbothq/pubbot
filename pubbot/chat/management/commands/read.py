@@ -6,7 +6,7 @@ from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 
 from django.core.management.base import BaseCommand, CommandError
 
-from pubbot.chat.reading import Trainer
+from pubbot.chat.training import Trainer
 
 
 class Command(BaseCommand):
