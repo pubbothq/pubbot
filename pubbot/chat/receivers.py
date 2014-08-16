@@ -20,7 +20,7 @@ from pubbot.chat.writing import reply
 
 
 @chat_receiver(r'^(?P<sentence>.*)$')
-def markov(sender, sentence, **kwargs):
+def mutter(sender, sentence, **kwargs):
     if not kwargs.get('direct', False) or random.random() < 0.005:
         return
 
