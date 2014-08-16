@@ -5,6 +5,9 @@ pubbot
 .. image:: https://travis-ci.org/pubbothq/pubbot.png?branch=master
    :target: https://travis-ci.org/#!/pubbothq/pubbot
 
+.. image:: https://coveralls.io/repos/pubbothq/pubbot/badge.png?branch=master
+    :target: https://coveralls.io/r/pubbothq/pubbot
+
 I am a rewrite of an old and slightly broken Twisted IRC bot. I'm still very rough.
 
 
