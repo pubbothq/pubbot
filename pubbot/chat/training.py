@@ -93,7 +93,7 @@ class Trainer(object):
 
     def learn_tokens(self, tokens):
         for cur in self.group_tokens(tokens):
-            self.get_grouping(cur)
+            self.get_grouping(*cur)
 
     def learn_string(self, text):
         try:

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-import itertools
 import random
 
 from django.db import models
@@ -77,7 +76,7 @@ class Grouping(models.Model):
 
         random.shuffle(groupings)
 
-        for grouping in itertools.cycle(groupings):
+        for grouping in groupings:
             yield grouping
 
     def is_start(self):

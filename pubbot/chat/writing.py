@@ -34,7 +34,7 @@ def iter_replies_from_tokens(tokens):
     # (Expected structure is STEM -> TOKEN -> GROUP -> GROUP -> END)
 
     seen = set()
-    for chain in iteruntil(0.5, Grouping.iter_random_groupings(tokens)):
+    for chain in iteruntil(0.5, itertools.cycle(Grouping.iter_random_groupings(tokens))):
         backwards = chain.get_complete_incoming_chains()
         forwards = chain.get_complete_outgoing_chains()
 
