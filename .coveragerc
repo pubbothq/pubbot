@@ -1,0 +1,8 @@
+[run]
+source = pubbot
+omit =
+    pubbot/tests/*
+    pubbot/*/tests/*
+    lib/*
+    src/*
+    setup.py
