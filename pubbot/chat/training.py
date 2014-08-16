@@ -19,7 +19,7 @@ from .tokenizer import tokenizer
 from .stemmer import stemmer
 
 
-class Learner(object):
+class Trainer(object):
 
     """
     An object to train the model with lines of text.

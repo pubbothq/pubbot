@@ -6,7 +6,7 @@ from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 
 from django.core.management.base import BaseCommand, CommandError
 
-from pubbot.chat.reading import Learner
+from pubbot.chat.reading import Trainer
 
 
 class Command(BaseCommand):
@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
         ignored_nicks = options.get("ignored_nick", [])
 
-        with Learner() as learner:
+        with Trainer() as trainer:
             with open(path) as fp:
                 for line in fp.readlines():
                     # Couple of problems with this approach.
@@ -59,7 +59,7 @@ class Command(BaseCommand):
                     if " " not in line:
                         continue
 
-                    learner.learn_string(line)
+                    trainer.learn_string(line)
 
         pb.finish()
 
