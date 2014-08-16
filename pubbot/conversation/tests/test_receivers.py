@@ -19,7 +19,15 @@ from pubbot.conversation import receivers
 
 
 class TestPullRequest(unittest.TestCase):
-    pass
+
+    def test_pull_request(self):
+        r1 = mock.Mock()
+        r1.json.return_value = {"title": "Added login failure events to security logger", "user": {"login": "boylea"}}
+
+        with mock.patch("requests.get") as get:
+            get.side_effect = [r1]
+            result = receivers.pull_request(None, content='https://github.com/django/django/pull/2013')
+            self.assertEqual(result['content'], '[ boylea: Added login failure events to security logger ]')
 
 
 class TestFight(unittest.TestCase):
