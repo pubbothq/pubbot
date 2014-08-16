@@ -15,3 +15,7 @@ progressbar==2.2
 
 # Testing stuff
 flake8
+
+# For coveralls
+coverage
+coveralls
