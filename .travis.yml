@@ -7,7 +7,7 @@ install:
   - mkdir $VIRTUAL_ENV/var
 
 script:
-  - python manage.py rebuild
+  - python manage.py migrate
   - python manage.py test
   - flake8 pubbot
 
