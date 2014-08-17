@@ -16,9 +16,6 @@ from UserDict import IterableUserDict
 import gevent
 import logging
 
-from django.conf import settings
-from django.utils.importlib import import_module
-
 from .state import State, Transition, Machine
 
 logger = logging.getLogger(__name__)

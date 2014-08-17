@@ -42,7 +42,7 @@ class LengthScorer(BaseScorer):
 
     def score(self, reply):
         if len(reply) < 5:
-            return 0
+            return 0.5
         if len(reply) > 20:
             return 0
         return len(reply)

@@ -19,7 +19,6 @@ import gevent
 
 from geventirc import replycode, message
 
-from pubbot.irc.models import Network, Room, User
 from pubbot.conversation import signals
 
 
@@ -94,106 +93,65 @@ class UserListHandler(object):
 
     commands = ['353', '366', 'JOIN', 'PART', 'KICK', 'QUIT']
 
-    def __init__(self):
+    def __init__(self, network):
+        self.network = network
         self.incoming = {}
-
-    def get_scene(self, client, channel):
-        return Room.objects.get(server__server=client.hostname, name=channel)
 
     def __call__(self, client, msg):
         if msg.command == '353':
-            channel = msg.params[2]
-            users = self.incoming.setdefault(channel, [])
+            channel = self.network[msg.params[2]]
+            users = self.incoming.setdefault(channel.name, [])
             users.extend(msg.params[3:])
 
         elif msg.command == '366':
-            channel = msg.params[1]
+            channel = self.network[msg.params[1]]
 
-            scene = self.get_scene(client, channel)
-
-            if channel not in self.incoming:
-                scene.participants.clear()
+            if channel.name not in self.incoming:
+                channel.users = []
                 return
 
-            # Eject user not present
-            users = [u.lstrip("@").lstrip("+") for u in self.incoming[channel]]
-            scene.participants.remove(
-                *scene.participants.exclude(name__in=users))
-
-            # Record user presence
-            users_from_db = [user.name for user in scene.participants.all()]
-            for user in self.incoming[channel]:
-                if user.startswith("@"):
-                    user = user[1:]
-                    # has_op = True
-                if user.startswith("+"):
-                    user = user[1:]
-                    # has_voice = True
-
-                if user not in users_from_db:
-                    print "Adding %s to %s" % (user, scene)
-                    try:
-                        u = scene.server.users.filter(name=user)[0]
-                    except (User.DoesNotExist, IndexError):
-                        u = User(name=user, network=scene.server)
-                        u.save()
-                    scene.participants.add(u)
-                    scene.save()
-
-            del self.incoming[channel]
+            channel.users = [u.lstrip("@").lstrip("+") for u in self.incoming[channel.name]]
+            del self.incoming[channel.name]
 
         elif msg.command == 'JOIN':
             user = msg.prefix.split("!")[0]
-            channel = msg.params[0]
+            channel = self.network[msg.params[0]]
 
-            scene = self.get_scene(client, channel)
-            if not scene.participants.filter(name=user).exists():
-                print "Adding %s" % user
-                try:
-                    u = scene.server.users.get(name=user)
-                except User.DoesNotExist:
-                    u = User(name=user, network=scene.server)
-                    u.save()
-                scene.participants.add(u)
-                scene.save()
+            channel.users.append(user)
 
             signals.join.send_robust(
                 sender=client,
-                scene_id=scene.pk,
-                user=user,
                 channel=channel,
+                user=user,
                 is_me=(user == client.nick),
             )
 
         elif msg.command == 'PART':
             user = msg.prefix.split("!")[0]
-            channel = msg.params[0]
+            channel = self.network[msg.params[0]]
             self.remove(client, channel, user, "leave")
 
         elif msg.command == 'KICK':
             kicker = msg.prefix.split("!")[0]
-            channel = msg.params[0]
+            channel = self.network[msg.params[0]]
             kicked = msg.params[1]
             self.remove(client, channel, kicked, 'kicked', kicker=kicker)
 
         elif msg.command == 'QUIT':
             user = msg.prefix.split("!")[0]
 
-            u = Network.objects.get(
-                server=client.hostname).users.get(name=user)
-            for scene in u.scenes.all():
-                self.remove(client, scene.name, user, "quit")
+            for room in self.network.values():
+                if user in room.users:
+                    self.remove(client, self.network[room], user, "quit")
 
     def remove(self, client, channel, user, type, **kwargs):
         print "Removing %s" % user
 
-        scene = self.get_scene(client, channel)
-        scene.participants.remove(*scene.participants.filter(name=user))
+        channel.users.remove(user)
 
         signals.leave.send_robust(
             sender=client,
             type=type,
-            scene_id=scene.pk,
             user=user,
             channel=channel,
             **kwargs
@@ -226,17 +184,6 @@ class ChannelHandler(object):
         if channel != self.channel.name:
             return
 
-        print msg
-
-        scene = Room.objects.get(server__server=client.hostname, name=channel)
-
-        # cache this with tuple of (hostname, room, name) ?
-        try:
-            participant = scene.participants.get(name=user)
-        except User.DoesNotExist:
-            print "User '%s' not in roster" % user
-            participant = None
-
         direct = False
         if ": " in content:
             user, msg = content.split(": ", 1)
@@ -246,10 +193,8 @@ class ChannelHandler(object):
 
         responses = signals.message.send_robust(
             sender=client,
-            scene_id=getattr(scene, "pk", None),
-            participant_id=getattr(participant, "pk", None),
             source=user,
-            channel=channel,
+            channel=self.channel,
             content=content,
             direct=direct,
         )

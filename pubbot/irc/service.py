@@ -36,6 +36,7 @@ class ChannelService(service.BaseService):
     def __init__(self, channel):
         super(ChannelService, self).__init__(channel.name)
         self.channel = channel
+        self.users = []
 
     def start(self):
         self.parent.client.add_handler(ChannelHandler(self))
@@ -69,7 +70,7 @@ class NetworkService(service.BaseService):
         else:
             self.client.add_handler(handlers.nick_in_use_handler, replycode.ERR_NICKNAMEINUSE)
 
-        self.client.add_handler(UserListHandler())
+        self.client.add_handler(UserListHandler(self))
         self.client.add_handler(InviteProcessor())
 
         # Channels to join

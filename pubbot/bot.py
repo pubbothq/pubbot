@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from UserDict import IterableUserDict
-import gevent
 import logging
 
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.utils.functional import LazyObject
 
-from .state import State, Transition, Machine
+from .service import BaseService
+
 
 logger = logging.getLogger(__name__)
 
@@ -58,4 +57,4 @@ class ConfiguredPubbotService(LazyObject):
         self._wrapped = PubbotService()
 
 
-bot = ConfiguredPubbotService()    
+bot = ConfiguredPubbotService()
