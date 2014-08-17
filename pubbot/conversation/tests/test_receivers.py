@@ -43,6 +43,30 @@ class TestPullRequest(unittest.TestCase):
             self.assertEqual(result['content'], '[ boylea: Added login failure events to security logger ]')
 
 
+class TestAppDotNet(unittest.TestCase):
+
+    def test_simple_post(self):
+        r1 = mock.Mock()
+        r1.json.return_value = {"data": {"text": "A test post", "user": {"username": "Jc2k"}}}
+
+        with mock.patch("requests.get") as get:
+            get.side_effect = [r1]
+            result = receivers.on_appdotnet_link(None, content='https://alpha.app.net/Jc2k/post/12345')
+            self.assertEqual(result['content'], '[ Jc2k: A test post ]')
+
+
+class TestImageSearch(unittest.TestCase):
+
+    def test_simple_image_search(self):
+        r1 = mock.Mock()
+        r1.json.return_value = {"responseData": {"results": [{"url": "http://localhost/funny.gif"}]}}
+
+        with mock.patch("requests.get") as get:
+            get.side_effect = [r1]
+            result = receivers.image_search(None, content='img me funny')
+            self.assertEqual(result['content'], 'http://localhost/funny.gif')
+
+
 class TestFight(unittest.TestCase):
 
     def test_fight(self):
@@ -55,3 +79,40 @@ class TestFight(unittest.TestCase):
             get.side_effect = [r1, r2]
             result = receivers.fight(None, content="fight: dog vs cat")
             self.assertEqual(result['content'], 'dog (1000) vs cat (100) -- dog wins!')
+
+
+class TestChristmas(unittest.TestCase):
+
+    def setUp(self):
+        self.today = (2010, 1, 1)
+        import datetime
+
+        class _datetime(datetime.datetime):
+            @classmethod
+            def today(cls):
+                return cls(*self.today)
+        self.patcher = mock.patch("pubbot.conversation.receivers.datetime")
+        self.patcher.start().datetime = _datetime
+
+    def tearDown(self):
+        self.patcher.stop()
+
+    def test_its_christmas(self):
+        self.today = (2014, 12, 25)
+        result = receivers.christmas(None, content="It's nearly christmas")
+        self.assertEqual(result['content'], "It's christmas \o/")
+
+    def test_its_nearly_christmas(self):
+        self.today = (2014, 12, 24)
+        result = receivers.christmas(None, content="It's nearly christmas")
+        self.assertEqual(result['content'], "only 1 days 'til Christmas!")
+
+    def test_im_fedup_of_christmas(self):
+        self.today = (2014, 12, 26)
+        result = receivers.christmas(None, content="It's nearly christmas")
+        self.assertEqual(result, None)
+
+    def test_not_the_season(self):
+        self.today = (2014, 1, 25)
+        result = receivers.christmas(None, content="It's nearly christmas")
+        self.assertEqual(result, None)
