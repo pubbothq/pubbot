@@ -34,26 +34,24 @@ logger = logging.getLogger(__name__)
 @receiver(join)
 # @rate_limited(1, 60)  # Only say hello once every 60s
 # @rate_limited(1, 24*60*60, group_by="user")  # Only say hello to a given user once a day
-def hello(sender, **kwargs):
-    if kwargs.get('is_me', False):
-        return
-
-    kwargs['scene'].say(random.choice([
-        "hi %s",
-        "lo %s",
-        "lo. how you doing, %s?",
-        "%s, we all love you",
-        "Help me, Obi Wan %s, you're my only hope",
-        "Wave %s, wave",
-        "Give us a smile %s",
-        "%s! We've missed you!",
-        "%s is in the room. I have a bad feeling about this.",
-        "ewwo %s",
-        "yo, %s",
-        "Greetings, %s",
-        "wotcha, %s",
-        "Frak, it's %s",
-    ]) % kwargs['user'])
+def hello(sender, user, channel, is_me, **kwargs):
+    if not is_me:
+        channel.msg(random.choice([
+            "hi %s",
+            "lo %s",
+            "lo. how you doing, %s?",
+            "%s, we all love you",
+            "Help me, Obi Wan %s, you're my only hope",
+            "Wave %s, wave",
+            "Give us a smile %s",
+            "%s! We've missed you!",
+            "%s is in the room. I have a bad feeling about this.",
+            "ewwo %s",
+            "yo, %s",
+            "Greetings, %s",
+            "wotcha, %s",
+            "Frak, it's %s",
+        ]) % user)
 
 
 @chat_receiver(r'https://twitter.com/(?P<account>[\d\w]+)/status/(?P<id>[\d]+)')
@@ -226,18 +224,16 @@ def fight(sender, word1, word2, **kwargs):
 
 
 @chat_receiver(r'^blame')
-def blame(sender, room, **kwargs):
-    return
-
+def blame(sender, channel, **kwargs):
     try:
-        nick = random.choice(room.nicks)
+        nick = random.choice(channel.users)
     except IndexError:
-        pass
+        nick = None
 
-    if nick.is_me:
+    if not nick: #nick.is_me:
         return {"content": "It's all my fault!"}
 
-    return {"content": "It's all %s's fault!" % nick.name}
+    return {"content": "It's all %s's fault!" % nick}
 
 
 @chat_receiver(r'christmas')
