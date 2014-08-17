@@ -107,30 +107,3 @@ class TaskService(BaseService):
 
     def run(self):
         raise NotImplementedError(self.run)
-
-
-class PubbotService(BaseService):
-
-    def __init__(self, name='pubbot'):
-        super(PubbotService, self).__init__(name)
-
-        for installed_app in settings.INSTALLED_APPS:
-            self.logger.info("Checking {installed_app} for receivers".format(installed_app=installed_app))
-            try:
-                import_module("%s.receivers" % installed_app)
-            except ImportError as e:
-                if str(e) != "No module named receivers":
-                    self.logger.exception(e)
-
-            self.logger.info("Checking {installed_app} for Service".format(installed_app=installed_app))
-            module_name = "%s.service" % installed_app
-            try:
-                module = import_module(module_name)
-            except ImportError as e:
-                if str(e) != "No module named service":
-                    self.logger.exception(e)
-                continue
-
-            if hasattr(module, 'Service'):
-                Service = getattr(module, 'Service')
-                self.add_child(Service(name=installed_app))
