@@ -230,7 +230,7 @@ def blame(sender, channel, **kwargs):
     except IndexError:
         nick = None
 
-    if not nick: #nick.is_me:
+    if not nick:  # nick.is_me:
         return {"content": "It's all my fault!"}
 
     return {"content": "It's all %s's fault!" % nick}
