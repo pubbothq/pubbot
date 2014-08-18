@@ -17,15 +17,14 @@ import re
 
 from pubbot.conversation import chat_receiver
 from pubbot.education.models import Education
+# from pubbot.ratelimit import is_rate_limited
 
 
 @chat_receiver(r".*")
+# @enforce_rate_limit("1/15s", limit_by=['user'])
+# @enforce_rate_limit("10/10m")
 def lookup_education_response(sender, **kwargs):
     replies = []
-
-    # FIXME: Stupid bug in match.py
-    if not kwargs['kind'].endswith('.chat'):
-        return
 
     # FIXME: Cache this... in memcache.. somewhere..?
     for module in Education.objects.all():

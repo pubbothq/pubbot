@@ -18,6 +18,19 @@ import mock
 from pubbot.conversation import receivers
 
 
+class TestHello(unittest.TestCase):
+
+    def test_hello(self):
+        channel = mock.Mock()
+        receivers.hello(None, "Freddy", channel, False)
+        self.assertTrue("Freddy" in channel.msg.call_args[0][0])
+
+    def test_no_hello(self):
+        channel = mock.Mock()
+        receivers.hello(None, "Freddy", channel, True)
+        self.assertEqual(channel.msg.called, False)
+
+
 class TestTwitterLink(unittest.TestCase):
 
     def test_twitter_link(self):

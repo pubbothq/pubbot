@@ -24,6 +24,7 @@ import requests
 from django.contrib.humanize.templatetags.humanize import intword
 from django.dispatch import receiver
 
+from pubbot.ratelimit import enforce_rate_limit
 from .signals import join
 from .utils import chat_receiver
 
@@ -32,8 +33,8 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(join)
-# @rate_limited(1, 60)  # Only say hello once every 60s
-# @rate_limited(1, 24*60*60, group_by="user")  # Only say hello to a given user once a day
+@enforce_rate_limit("1/60s")  # Only say hello once every 60s
+@enforce_rate_limit("1/d", limit_by=["user"])  # Only say hello to a given user once a day
 def hello(sender, user, channel, is_me, **kwargs):
     if not is_me:
         channel.msg(random.choice([
