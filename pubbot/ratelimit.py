@@ -1,6 +1,20 @@
+# Copyright 2014 the original author or authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from functools import wraps
 import inspect
+import time
 
 from django.core.cache import caches
 
@@ -61,13 +75,20 @@ def _get_key(fn, limit_by, *args, **kwargs):
     return ":".join(key)
 
 
-def is_rate_limited(freq, period, fn, limit_by=None, *args, **kwargs):
+def check_rate_limit(freq, period, fn, limit_by=None, *args, **kwargs):
     key = _get_key(fn, limit_by, *args, **kwargs)
 
-    key
-    caches['default']
+    hits = caches['default'].get(key, [])
 
-    return False
+    now = time.time()
+    while hits and (now - hits[0]) > period:
+        hits.pop(0)
+
+    hits.append(now)
+
+    caches['default'].set(key, hits)
+
+    return len(hits) > freq
 
 
 def track_rate_limit(rate, limit_by=None):
@@ -76,7 +97,7 @@ def track_rate_limit(rate, limit_by=None):
     def decorator(fn):
         @wraps(fn)
         def _inner(*args, **kwargs):
-            if is_rate_limited(freq, period, fn, limit_by, *args, **kwargs):
+            if check_rate_limit(freq, period, fn, limit_by, *args, **kwargs):
                 kwargs = dict(kwargs)
                 kwargs['rate_limited'] = True
             return fn(*args, **kwargs)
@@ -90,7 +111,7 @@ def enforce_rate_limit(rate, limit_by=None):
     def decorator(fn):
         @wraps(fn)
         def _inner(*args, **kwargs):
-            if is_rate_limited(freq, period, fn, limit_by, *args, **kwargs):
+            if check_rate_limit(freq, period, fn, limit_by, *args, **kwargs):
                 return
             return fn(*args, **kwargs)
         return _inner
