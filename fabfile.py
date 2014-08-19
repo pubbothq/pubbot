@@ -4,15 +4,20 @@ from fuselage.contrib.fabric import blueprint
 from fuselage.resources import *
 
 
-def template(path, ctx=None):
-    from jinja2 import Environment, FileSystemLoader
-    env = Environment(loader=FileSystemLoader(os.path.join(os.getcwd(), "files")))
-    return env.get_template(path).render(**(ctx or {})) + "\n"
+systemd_unit = """
+[Unit]
+Description = pubbot irc service
 
+[Service]
+ExecStart  = /usr/local/pubbot/bin/pubbot bot
+User       = pubbot
+Group      = pubbot
+Restart    = always
+RestartSec = 30
 
-def static(path):
-    with open(os.path.join(os.getcwd(), "files", path), "rb") as fp:
-        return fp.read()
+[Install]
+WantedBy = multi-user.target
+""".strip()
 
 
 @blueprint
@@ -73,4 +78,26 @@ def deploy(bundle):
         cwd='/var/local/pubbot/src',
         user='pubbot',
         watches=['/var/local/pubbot/src'],
+    )
+
+    yield File(
+        name="/etc/systemd/system/pubbot.service",
+        contents=systemd_unit,
+    )
+
+    # FIXME: Not entirely sure if this is required?
+    # FIXME: Need a similar enable command to start on boot?
+    yield Execute(
+        name="systemctl-daemon-reload",
+        command="systemctl daemon-reload",
+        watches=['/etc/systemd/system/pubbot.service'],
+    )
+
+    yield Execute(
+        name="systemctl-restart",
+        command="systemctl restart pubbot.service",
+        watches=[
+            "/var/local/pubbot/src",
+            "/etc/systemd/system/pubbot.service",
+        ]
     )
