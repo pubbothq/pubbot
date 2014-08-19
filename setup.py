@@ -28,4 +28,3 @@ setup(
       pubbot = pubbot.manage:main
       """
       )
-
