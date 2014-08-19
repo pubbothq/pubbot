@@ -17,47 +17,43 @@ import re
 
 from pubbot.conversation import chat_receiver
 from pubbot.education.models import Education
-# from pubbot.ratelimit import is_rate_limited
+from pubbot.ratelimit import enforce_rate_limit
 
 
-@chat_receiver(r".*")
-# @enforce_rate_limit("1/15s", limit_by=['user'])
-# @enforce_rate_limit("10/10m")
-def lookup_education_response(sender, **kwargs):
+@chat_receiver(r"^(?P<sentence>.*)$")
+def lookup_education_response(sender, user, sentence, **kwargs):
     replies = []
 
-    # FIXME: Cache this... in memcache.. somewhere..?
     for module in Education.objects.all():
         if module.regex:
             regex = module.trigger
         else:
             regex = r'\b%s\b' % re.escape(module.trigger)
 
-        # Does this line of text match the database?
-        result = re.search(regex, kwargs['content'].lower())
-        if not result:
-            continue
-
-        # Build a reply using common fields and values matched in regex
-        metadata = {'nick': kwargs['source']}
-        metadata.update(result.groupdict())
-        reply = module.response % metadata
-
-        # Collect all possible matches
-        replies.append((module, reply))
+        result = re.search(regex, sentence.lower())
+        if result:
+            replies.append((module, result.groupdict()))
 
     if len(replies) == 0:
         return
 
-    module, reply = random.choice(replies)
+    return choose_education_response(user, replies)
 
-    if random.random() >= module.probability:
+
+@enforce_rate_limit("1/15s", limit_by=['user'])
+@enforce_rate_limit("10/10m")
+def choose_education_response(user, responses, **kwargs):
+    response, args = random.choice(responses)
+
+    if random.random() >= response.probability:
         return
 
-    # Forget education over time, to combat spammers
-    # FIXME: Better approach welcome
-    module.probability /= 2.0
-    module.save()
+    # Build a reply using common fields and values matched in regex
+    metadata = {'nick': user}
+    metadata.update(kwargs)
+    metadata.update(args)
+
+    reply = response.response % metadata
 
     return {
         'content': reply,

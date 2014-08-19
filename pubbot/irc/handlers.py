@@ -201,6 +201,7 @@ class ChannelHandler(object):
         responses = signals.message.send_robust(
             sender=client,
             source=user,
+            user=user,
             channel=self.channel,
             content=content,
             direct=direct,
