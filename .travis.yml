@@ -7,8 +7,8 @@ install:
   - mkdir $VIRTUAL_ENV/var
 
 script:
-  - python manage.py migrate
-  - coverage run manage.py test
+  - pubbot migrate
+  - coverage run $(which pubbot) test
   - flake8 pubbot
 
 after_success:

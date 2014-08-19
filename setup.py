@@ -23,5 +23,9 @@ setup(
         'PyStemmer',
         'progressbar',
         ],
-    )
+      entry_points = """
+      [console_scripts]
+      pubbot = pubbot.manage:main
+      """
+      )
 
