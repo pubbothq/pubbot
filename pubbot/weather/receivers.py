@@ -1,6 +1,6 @@
 import requests
 import random
-from pubbot.conversation.tasks import mouth
+from pubbot.conversation import say
 from pubbot.weather.models import Point
 
 
@@ -21,7 +21,7 @@ def update_forecast():
             itswet=data['minutely']['summary'],
         )
 
-        mouth({
+        say({
             'content': content,
             'tags': [point.tag] if point.tag else [],
         })

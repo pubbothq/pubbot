@@ -144,6 +144,10 @@ INSTALLED_APPS = (
     'pubbot.quizbot',
     'pubbot.conversation',
     'pubbot.education',
+    'pubbot.tasty',
+    'pubbot.weather',
+    'pubbot.vcs',
+    'pubbot.trac',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

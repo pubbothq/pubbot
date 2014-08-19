@@ -107,6 +107,9 @@ class TestChristmas(unittest.TestCase):
         self.patcher = mock.patch("pubbot.conversation.receivers.datetime")
         self.patcher.start().datetime = _datetime
 
+        from django.core.cache import caches
+        caches['default'].clear()
+
     def tearDown(self):
         self.patcher.stop()
 
