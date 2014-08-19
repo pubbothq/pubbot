@@ -238,6 +238,7 @@ def blame(sender, channel, **kwargs):
 
 
 @chat_receiver(r'christmas')
+@enforce_rate_limit('1/d')
 def christmas(sender, **kwargs):
     today = datetime.datetime.today()
 

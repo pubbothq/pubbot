@@ -171,7 +171,7 @@ LOGGING = {
         'django.db.backends': {
             'handlers': ['console'],
             'propagate': True,
-            'level': 'CRITICAL',
+            'level': 'DEBUG',
         },
         '': {
             'handlers': ['console'],
