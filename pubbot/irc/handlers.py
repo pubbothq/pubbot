@@ -121,6 +121,11 @@ class UserListHandler(object):
 
             channel.users.append(user)
 
+            # De-bounce the user leaving immediately - like a bot ban.
+            gevent.sleep(1)
+            if user not in channel.users:
+                return
+
             signals.join.send_robust(
                 sender=client,
                 channel=channel,
