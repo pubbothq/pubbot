@@ -115,6 +115,8 @@ class UserListHandler(object):
 
         elif msg.command == 'JOIN':
             user = msg.prefix.split("!")[0]
+            if client.nick == user:
+                return
             channel = self.network[msg.params[0]]
 
             channel.users.append(user)
