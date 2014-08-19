@@ -9,7 +9,7 @@ systemd_unit = """
 Description = pubbot irc service
 
 [Service]
-ExecStart  = /varr/local/pubbot/bin/pubbot bot
+ExecStart  = /var/local/pubbot/bin/pubbot bot
 User       = pubbot
 Group      = pubbot
 Restart    = always
