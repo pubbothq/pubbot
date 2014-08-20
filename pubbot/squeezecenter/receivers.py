@@ -12,11 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+import time
+
 from django.utils import timezone
 from django.dispatch import receiver
+from django.core.cache import caches
+
+import gevent
 
 from pubbot.conversation import chat_receiver, say
 from . import signals
+
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(signals.song_started)
@@ -28,100 +37,112 @@ def current_song_notification(sender, **kwargs):
     })
 
 
+def get_current_skip():
+    return caches['default'].get("squeezecenter_skip", None)
+
+
+def set_current_skip(skip):
+    skip['last_update'] = time.time()
+    return caches['default'].set("squeezecenter_skip", skip)
+
+
+def timeout_current_skip():
+    skip = get_current_skip()
+    while skip:
+        staleness = 30 - (time.time() - skip['last_update'])
+        logger.debug("Checking if the skip is timed out - staleness is %r" % staleness)
+        if staleness <= 0:
+            logger.debug("The skip is timed out")
+            say({
+                'content': 'Vote timed out after 30 seconds',
+            })
+            # FIXME
+            return
+        logger.debug("%d seconds to timeout" % staleness)
+        gevent.sleep(staleness)
+        skip = get_current_skip()
+
+
 @chat_receiver(r'^skip(\s(?P<number>\d+))?$')
-def requested_skip(sender, number, **kwargs):
-    from .models import Skip
-    from pubbot.conversation.models import Participant
+def requested_skip(sender, number, user, **kwargs):
+    current_skip = get_current_skip()
+    created = False
 
-    try:
-        profile = Participant.objects.get(id=kwargs['participant_id'])
-    except KeyError as xxx_todo_changeme:
-        Participant.DoesNotExist = xxx_todo_changeme
-        profile = None
-
-    if not profile or not profile.profile:
-        return {
-            "content": "I don't know who you are",
-        }
-
-    try:
-        current_skip = Skip.objects.get(vote_ended__isnull=True)
-        if number:
+    if number and current_skip:
             return {
-                "content": "Skip already in progress; can't start another",
+                "content": "Vote already in progress; can't start another",
             }
-    except Skip.DoesNotExist:
-        current_skip = Skip(number=number or 1)
-        current_skip.save()
-        skip_timeout.apply_async(
-            (current_skip.id, ), countdown=Skip.VOTE_DURATION.seconds)
-    current_skip.skip(profile.profile)
 
-    if current_skip.needed > 0:
-        return {
-            "content": "Voted to skip. %d more votes required" %
-            current_skip.needed,
+    if not current_skip:
+        if not number:
+            number = 1
+
+        number = int(number)
+
+        if number <= 0:
+            return {
+                "content": "Don't be daft",
+            }
+
+        current_skip = {
+            "number": number,
+            "started_by": user,
+            "skip": set(),
+            "noskip": set(),
         }
+        created = True
+
+    return update_skip(current_skip, user, "skip", created)
 
 
 @chat_receiver(r'^noskip$')
-def requested_noskip(sender, **kwargs):
-    from .models import Skip
-    from pubbot.conversation.models import Participant
-
-    try:
-        profile = Participant.objects.get(id=kwargs['participant_id'])
-    except KeyError as xxx_todo_changeme1:
-        Participant.DoesNotExist = xxx_todo_changeme1
-        profile = None
-
-    if not profile or not profile.profile:
+def requested_noskip(sender, user, **kwargs):
+    current_skip = get_current_skip()
+    if not current_skip:
         return {
-            "content": "I don't know who you are",
+            "content": "There isn't a vote in progres..",
+        }
+    return update_skip(current_skip, user, "noskip", False)
+
+
+def update_skip(current_skip, user, skip_type, created):
+    skip_count = len(current_skip["skip"]) - len(current_skip["noskip"])
+    votes_needed = 3 - skip_count
+
+    # Don't let them both skip and noskip
+    opposite_skip_type = "skip" if skip_type == "noskip" else "noskip"
+    try:
+        current_skip[opposite_skip_type].remove(user)
+    except KeyError:
+        pass
+
+    # We use a set so they can only be in the list once..
+    current_skip[skip_type].add(user)
+
+    set_current_skip(current_skip)
+
+    if not created:
+        gevent.spawn(timeout_current_skip)
+
+    if votes_needed > 0:
+        logger.debug("%d more tracks needed to skip" % votes_needed)
+
+        return {
+            "content": "%s voted to %s! %d more votes required" % (user, skip_type, votes_needed),
         }
 
-    try:
-        current_skip = Skip.objects.get(vote_ended__isnull=True)
-    except Skip.DoesNotExist:
-        return {
-            "content": "There isn't a vote in progress.."
-        }
+    logger.debug("Skipping %d tracks" % current_skip["number"])
 
-    current_skip.noskip(profile.profile)
+    command("playlist index %d" % current_skip["number"])
 
     return {
-        "content": "Voted to not skip. %d more votes required" %
-        current_skip.needed,
+        "content": random.choice([
+            "Good riddance.",
+            "Yay.",
+            "Skippy skip skip..",
+            "Skippity skip skip..",
+        ])
     }
-
-
-def skip_timeout(skip_id):
-    from .models import Skip
-
-    try:
-        s = Skip.objects.get(id=skip_id)
-    except Skip.DoesNotExist:
-        return
-
-    if s.vote_ended:
-        return
-
-    s.vote_ended = timezone.now()
-    s.save()
-
-    say({
-        'content': 'Vote timed out after %d seconds' %
-        Skip.VOTE_DURATION.seconds,
-    })
-
-
-def skip(num_tracks):
-    if num_tracks == 0:
-        print "Asked to skip 0 tracks :("
-        return
-    sign = "+" if num_tracks > 0 else "-"
-    print "Calling command()"
-    command("playlist index %s%d" % (sign, num_tracks))
 
 
 def _escape(text):

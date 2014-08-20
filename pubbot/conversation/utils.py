@@ -43,6 +43,7 @@ def chat_receiver(regex, **kwargs):
 
 
 def say(content, **kwargs):
+    return
     from pubbot.irc.models import Room
     rooms = [kwargs.get('room', None)]
     if not rooms:
