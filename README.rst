@@ -19,7 +19,6 @@ To build me::
     git clone git://github.com/pubbothq/pubbot
     cd pubbot
     pip install -r requirements.txt
-    pubbot rebuild
 
 To do an incremental migration and collect static files::
 
