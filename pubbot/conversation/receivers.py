@@ -65,7 +65,7 @@ def twitter_link(sender, account, id, **kwargs):
 
     bs = BeautifulSoup(response.text)
     try:
-        tweet = bs.find_all("p", class_="tweet-text")[0].text
+        tweet = bs.select("div.permalink-tweet-container p.tweet-text")[0].text
     except Exception as e:
         logger.exception(e)
         return {

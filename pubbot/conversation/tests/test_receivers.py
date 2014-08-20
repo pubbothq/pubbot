@@ -35,7 +35,7 @@ class TestTwitterLink(unittest.TestCase):
 
     def test_twitter_link(self):
         r1 = mock.Mock()
-        r1.text = '<p class="tweet-text">.@elonmusk Just turned on my ice machine. I wonder if I own a bucket..</p>'
+        r1.text = '<div class="permalink-inner permalink-tweet-container"><div><p class="tweet-text">.@elonmusk Just turned on my ice machine. I wonder if I own a bucket..</p></div></div>'
         r1.status_code = 200
 
         with mock.patch("requests.get") as get:
