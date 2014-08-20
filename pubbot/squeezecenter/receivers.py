@@ -15,7 +15,6 @@
 import logging
 import time
 
-from django.utils import timezone
 from django.dispatch import receiver
 from django.core.cache import caches
 
