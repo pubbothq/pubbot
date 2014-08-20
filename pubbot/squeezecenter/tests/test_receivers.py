@@ -57,5 +57,5 @@ class TestSkipping(TestCase):
             time.time.return_value = 0
             receivers.set_current_skip({})
 
-        r = receivers.timeout_current_skip()
+        receivers.timeout_current_skip()
         # Hopefully it actually returns...
