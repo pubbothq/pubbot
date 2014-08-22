@@ -18,10 +18,14 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
+from pubbot.tasty.views import GalleryDetailView
+
+
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'pubbot.views.home', name='home'),
     # url(r'^pubbot/', include('pubbot.foo.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^gallery/', GalleryDetailView.as_view()),
 )

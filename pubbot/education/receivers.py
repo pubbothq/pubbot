@@ -37,7 +37,7 @@ def lookup_education_response(sender, user, sentence, **kwargs):
     if len(replies) == 0:
         return
 
-    return choose_education_response(user, replies)
+    return choose_education_response(user=user, responses=replies)
 
 
 @enforce_rate_limit("1/15s", limit_by=['user'])
