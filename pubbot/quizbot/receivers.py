@@ -28,4 +28,4 @@ def quizbot_request(sender, terms, **kwargs):
         logger.exception(e)
         return
 
-    return response['answer']
+    return {"content": response['answer']}
