@@ -17,7 +17,11 @@ def got_chat_link(sender, url, **kwargs):
 
 @chat_receiver(r'^(lastlink)|(last link)')
 def last_link_details(sender, **kwargs):
-    link = Link.objects.order_by('-first_seen')[0]
+    link = Link.objects.order_by('-first_seen').first()
+    if not link:
+        return {
+            'content': 'I don\'t know any links :(',
+        }
     return {
         'content': link.title or "URL isn't HTML or doesn't have a title tag",
     }
@@ -33,7 +37,7 @@ def process_link(url):
         l.save()
 
     l.content_type = r.headers.get("content-type", "")
-    l.content_size = r.headers.get("content-type", -1)
+    l.content_length = r.headers.get("content-length", -1)
     l.hostname = urlparse.urlparse(r.url).hostname
 
     if l.content_type.startswith("text/html"):
