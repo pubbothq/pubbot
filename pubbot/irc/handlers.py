@@ -19,6 +19,8 @@ import gevent
 
 from geventirc import replycode, message
 
+from django.utils.importlib import import_module
+
 from pubbot.conversation import signals
 
 
