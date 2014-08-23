@@ -56,7 +56,7 @@ class GhostHandler(object):
         client.nick = self.nick
 
 
-class BotInterfaceHandler(object):
+class FeedHandler(object):
 
     """
     Parse notifications from bots into internal messages
@@ -64,12 +64,11 @@ class BotInterfaceHandler(object):
 
     commands = ['PRIVMSG']
 
-    def __init__(self, botname, channels, regex, topic, kind):
+    def __init__(self, botname, channels, regex, topic, kind, signal):
         self.botname = botname
         self.channels = channels
-        self.regex = regex
-        self._regex = re.compile(regex)
-        self.kind = kind
+        self.regex = re.compile(regex)
+        self.signal = import_module(signal)
 
     def __call__(self, client, msg):
         if self.botname != msg.prefix.split("!")[0]:
@@ -83,10 +82,7 @@ class BotInterfaceHandler(object):
         if not results:
             return
 
-        # broadcast(
-        #     kind=self.kind,
-        #     **results.groupdict()
-        # )
+        self.signal.send_robust(**results.groupdict())
 
 
 class UserListHandler(object):
