@@ -16,13 +16,6 @@
 from . import signals
 
 
-class DebugHandler(object):
-
-    def __call__(self, conn, message):
-        # print message
-        pass
-
-
 class CurrentSongHandler(object):
 
     def __init__(self):
