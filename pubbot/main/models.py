@@ -18,14 +18,3 @@ from django.db import models
 class UserProfile(models.Model):
 
     email = models.EmailField(max_length=254)
-
-    def __unicode__(self):
-        if self.email:
-            return self.email
-
-        try:
-            return self.chat_accounts.all()[0].name
-        except IndexError:
-            pass
-
-        return "UserProfile<unlinked>"
