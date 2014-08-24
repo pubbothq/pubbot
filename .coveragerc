@@ -2,6 +2,7 @@
 source = pubbot
 omit =
     pubbot/tests/*
+    pubbot/tests.py
     pubbot/*/tests/*
     pubbot/*/tests.py
     lib/*
