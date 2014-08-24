@@ -18,25 +18,25 @@ class TestRateLimitUtils(unittest.TestCase):
 
     def test_get_rate_1_5m(self):
         rate = ratelimit._get_rate("1/5m")
-        self.assertEqual(rate, (1, 5*60))
+        self.assertEqual(rate, (1, 5 * 60))
 
     def test_get_rate_4_5h(self):
         rate = ratelimit._get_rate("4/5h")
-        self.assertEqual(rate, (4, 5*60*60))
+        self.assertEqual(rate, (4, 5 * 60 * 60))
 
     def test_get_rate_20_2d(self):
         rate = ratelimit._get_rate("20/2d")
-        self.assertEqual(rate, (20, 60*60*24*2))
+        self.assertEqual(rate, (20, 60 * 60 * 24 * 2))
 
     def test_not_a_rate(self):
         self.assertRaises(ValueError, ratelimit._get_rate, "1 every 2 seconds")
 
     def test_invalid_units(self):
         self.assertRaises(ValueError, ratelimit._get_rate, "1/5y")
- 
+
     def test_invalid_freq(self):
         self.assertRaises(ValueError, ratelimit._get_rate, "a/5s")
- 
+
     def test_invalid_period(self):
         self.assertRaises(ValueError, ratelimit._get_rate, "1/zh")
 
