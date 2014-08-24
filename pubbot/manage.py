@@ -16,11 +16,8 @@
 import os
 import sys
 
-try:
-    from gevent import monkey
-    monkey.patch_all()
-except ImportError:
-    pass
+from gevent import monkey
+monkey.patch_all()
 
 
 def main():
