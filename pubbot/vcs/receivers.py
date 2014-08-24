@@ -21,17 +21,15 @@ def ch1mp(sender, committer, repository, revision, path, message, **kwargs):
 def svnwoot(sender, revision, **kwargs):
     if revision in (1337, 1000, 2000, 1, 100, 200, 13337, 666, 700, 777, 501):
         say(
-            content="r%d - \o/",
-            at=0,
+            content="r%d - \o/" % revision,
         )
 
 
 @receiver(commit)
-def notlikely(sender, message, **kwargs):
+def notlikely(sender, message, committer, **kwargs):
     if 'final' in message.lower():
         say(
-            content="Final? Not likely, %(name)s",
-            at=0,
+            content="Final? Not likely, %s" % committer,
         )
 
 
@@ -43,10 +41,10 @@ def multikill(sender, committer, **kwargs):
 
     killer = cache.get("multikill_killer")
     if killer and killer != committer:
-        say({
-            'content': '%s ended the killing spree! poor %s' % (committer, killer),
-            'tags': ['multikill'],
-        })
+        say(
+            content='%s ended the killing spree! poor %s' % (committer, killer),
+            tags=['multikill'],
+        )
 
         cache.set("multikill_killer", committer)
         cache.set("multikill_kills", 1)
@@ -56,17 +54,17 @@ def multikill(sender, committer, **kwargs):
     cache.set("multikill_kills", kills)
 
     if kills == 2:
-        say({'content': "Double Kill", 'tags': ['multikill']})
+        say(content="Double Kill", tags=['multikill'])
     elif kills == 3:
-        say({'content': "Multi Kill", 'tags': ['multikill']})
+        say(content="Multi Kill", tags=['multikill'])
     elif kills == 4:
-        say({'content': "Ultra Kill", 'tags': ['multikill']})
+        say(content="Ultra Kill", tags=['multikill'])
         # play_sound("ultrakill.wav")
     elif kills == 5:
-        say({'content': "Megakill", 'tags': ['multikill']})
+        say(content="Megakill", tags=['multikill'])
         # play_sound("megakill.wav")
     elif kills == 6:
-        say({'content': "MONSTTTTTTTEEER KILLLLL", 'tags': ['multikill']})
+        say(content="MONSTTTTTTTEEER KILLLLL", tags=['multikill'])
         # play_sound("monsterkill.wav")
 
     # elif kills >= 10 and self.kills % 5 == 0:
