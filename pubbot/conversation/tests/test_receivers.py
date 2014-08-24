@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import os
 import unittest
 import mock
 
@@ -32,6 +34,12 @@ class TestHello(unittest.TestCase):
 
 
 class TestTwitterLink(unittest.TestCase):
+
+    def test_404(self):
+        with mock.patch("requests.get") as get:
+            get.return_value.status_code = 404
+            r = receivers.twitter_link(None, content="https://twitter.com/notch/status/500690106991513603")
+            self.assertEqual(r, None)
 
     def test_twitter_link(self):
         r1 = mock.Mock()
@@ -79,6 +87,31 @@ class TestImageSearch(unittest.TestCase):
             result = receivers.image_search(None, content='img me funny')
             self.assertEqual(result['content'], 'http://localhost/funny.gif')
 
+    def test_no_results(self):
+        r1 = mock.Mock()
+        r1.json.return_value = {"responseData": {"results": []}}
+
+        with mock.patch("requests.get") as get:
+            get.side_effect = [r1]
+            result = receivers.image_search(None, content='img me funny')
+            self.assertEqual(result['content'], "There are no images matching 'funny'")
+
+
+class TestDoge(unittest.TestCase):
+
+    def test_so_silly(self):
+        mock_content = json.loads(open(os.path.join(
+            os.path.dirname(__file__),
+            "test_receivers_doge_1.json"
+        )).read())
+
+        with mock.patch("requests.get") as get:
+            get.return_value.json.return_value = mock_content
+            with mock.patch("random.choice") as choice:
+                choice.side_effect = lambda x: x[0]
+                r = receivers.doge(None, content="so silly")
+                self.assertEqual(r['content'], 'much "playful"')
+
 
 class TestFight(unittest.TestCase):
 
@@ -92,6 +125,21 @@ class TestFight(unittest.TestCase):
             get.side_effect = [r1, r2]
             result = receivers.fight(None, content="fight: dog vs cat")
             self.assertEqual(result['content'], 'dog (1000) vs cat (100) -- dog wins!')
+
+
+class TestBlame(unittest.TestCase):
+
+    def test_no_nicks(self):
+        channel = mock.Mock()
+        channel.users = []
+        r = receivers.blame(None, content="blame", channel=channel)
+        self.assertEqual(r['content'], "It's all my fault!")
+
+    def test_1_nick(self):
+        channel = mock.Mock()
+        channel.users = ['fred']
+        r = receivers.blame(None, content="blame", channel=channel)
+        self.assertEqual(r['content'], "It's all fred's fault!")
 
 
 class TestChristmas(unittest.TestCase):
