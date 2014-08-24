@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-from django.utils import timezone
 from django.db import models
 
 from pubbot.main.models import UserProfile
@@ -38,9 +36,6 @@ class Song(models.Model):
 
 class Skip(models.Model):
 
-    VOTE_DURATION = datetime.timedelta(seconds=30)
-    VOTE_REQUIREMENT = 3
-
     vote_started = models.DateTimeField(auto_now_add=True)
     vote_ended = models.DateTimeField(blank=True, null=True)
     number = models.IntegerField(default=0)
@@ -49,34 +44,3 @@ class Skip(models.Model):
     skippers = models.ManyToManyField(UserProfile, related_name="+skippers+")
     noskippers = models.ManyToManyField(
         UserProfile, related_name="+noskippers+")
-
-    @property
-    def count(self):
-        return self.skippers.count() - self.noskippers.count()
-
-    @property
-    def needed(self):
-        return self.VOTE_REQUIREMENT - self.count
-
-    @property
-    def should_skip(self):
-        return self.needed <= 0
-
-    def noskip(self, user):
-        if self.vote_ended or timezone.now() >= self.vote_started + self.VOTE_DURATION:
-            return
-        self.skippers.remove(user)
-        self.noskippers.add(user)
-
-    def skip(self, user):
-        if self.vote_ended or timezone.now() >= self.vote_started + self.VOTE_DURATION:
-            return
-        self.noskippers.remove(user)
-        self.skippers.add(user)
-
-        if self.should_skip:
-            self.vote_ended = datetime.datetime.now()
-            self.save()
-
-            from pubbot.squeezecenter.tasks import skip
-            skip.delay(self.number)
