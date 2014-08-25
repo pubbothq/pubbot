@@ -26,7 +26,10 @@ class Scorers(object):
         self.scorers.append((weight, scorer))
 
     def score(self, reply):
-        return 1.0
+        score = 0
+        for weight, scorer in self.scorers:
+            score += scorer.score(reply)
+        return score
 
 
 class BaseScorer(object):
