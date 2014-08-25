@@ -3,14 +3,28 @@ import StringIO as StringIO
 
 from django.test import TestCase
 from django.core.management import call_command
+from django.core.management.base import CommandError
 
 from pubbot.chat.models import Token, Grouping
 
 
 class TestRead(TestCase):
 
+    def test_no_log_specified(self):
+        buf = StringIO.StringIO()
+        self.assertRaises(CommandError, call_command, 'read', stdout=buf)
+
+    def test_only_one_log_file(self):
+        buf = StringIO.StringIO()
+        self.assertRaises(CommandError, call_command, 'read', 'foo.log', 'bar.log', stdout=buf)
+
+    def test_logfile_not_found(self):
+        buf = StringIO.StringIO()
+        self.assertRaises(CommandError, call_command, 'read', 'foo.log', stdout=buf)
+
     def test_read_irssi_log(self):
         buf = StringIO.StringIO()
-        call_command('read', os.path.join(os.path.dirname(__file__), "test_management_commands_read.log"), stdout=buf)
+        call_command('read', os.path.join(os.path.dirname(__file__), "test_management_commands_read.log"), ignored_nick=['tom'], stdout=buf)
+        self.assertEqual(Token.objects.filter(token='ignored').count(), 0)
         self.assertEqual(Token.objects.count(), 11)
         self.assertEqual(Grouping.objects.count(), 13)

@@ -1,6 +1,7 @@
 
 import os
 import sys
+from optparse import make_option
 
 from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 
@@ -12,6 +13,16 @@ from pubbot.chat.training import Trainer
 class Command(BaseCommand):
     args = '<path>'
     help = 'Import the specified irc log into the chat brain'
+
+    option_list = BaseCommand.option_list + (
+        make_option(
+            '--ignored_nicks',
+            action='append',
+            dest='ignored_nicks',
+            default=[],
+            help="Don't import message by this nick"
+        ),
+    )
 
     def handle(self, *args, **options):
         if len(args) == 0:
@@ -49,7 +60,10 @@ class Command(BaseCommand):
                     if not line.startswith("<"):
                         continue
 
-                    nick, line = line.split(">", 1)
+                    nick, line = line[1:].split(">", 1)
+
+                    nick = nick.strip()
+                    line = line.strip()
 
                     # Is this nick blacklisted? (Best to ignore chatbot spam)
                     if nick.lower() in ignored_nicks:
