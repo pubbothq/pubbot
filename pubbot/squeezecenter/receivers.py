@@ -170,14 +170,14 @@ def doeswant(sender, doeswant, **kwargs):
 
 @chat_receiver(r'^doeswantlater (?P<doeswantlater>.*)')
 def doeswantlater(sender, doeswantlater, **kwargs):
-    command("playlist: addtracks track.titlesearch=%s" % _escape(doeswantlater))
+    command("playlist addtracks track.titlesearch=%s" % _escape(doeswantlater))
     return {"had_side_effect": True, }
 
 
 @chat_receiver(r'^random$')
-def random_song(sender, **kwargs):
+def random_song(sender, content, **kwargs):
     words = filter(lambda x: len(x) <= 4, open("/usr/share/dict/words").read().split("\n"))
-    doeswant(sender, random.choice(words), **kwargs)
+    doeswant(sender, content="doeswant " + random.choice(words), **kwargs)
     return {"had_side_effect": True, }
 
 

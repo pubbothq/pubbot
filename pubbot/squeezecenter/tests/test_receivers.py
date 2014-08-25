@@ -92,3 +92,38 @@ class TestSkipping(TestCase):
                 r = receivers.requested_skip(None, content="skip", user="pixel")
                 command.assert_called_with("playlist index 1")
         self.assertEqual(r['content'], "Good riddance.")
+
+
+class TestRemoteControl(TestCase):
+
+    def test_canhas(self):
+        with mock.patch("pubbot.squeezecenter.receivers.command") as command:
+            r = receivers.canhas(None, content='canhas blinkin lark')
+            command.assert_called_with("playlist loadtracks contributor.namesearch=blinkin+lark")
+        self.assertEqual(r['had_side_effect'], True)
+
+    def test_canhaslater(self):
+        with mock.patch("pubbot.squeezecenter.receivers.command") as command:
+            r = receivers.canhaslater(None, content='canhaslater blinkin lark')
+            command.assert_called_with("playlist addtracks contributor.namesearch=blinkin+lark")
+        self.assertEqual(r['had_side_effect'], True)
+
+    def test_doeswant(self):
+        with mock.patch("pubbot.squeezecenter.receivers.command") as command:
+            r = receivers.doeswant(None, content='doeswant at the start')
+            command.assert_called_with("playlist loadtracks track.titlesearch=at+the+start")
+        self.assertEqual(r['had_side_effect'], True)
+
+    def test_doeswantlater(self):
+        with mock.patch("pubbot.squeezecenter.receivers.command") as command:
+            r = receivers.doeswantlater(None, content='doeswantlater at the start')
+            command.assert_called_with("playlist addtracks track.titlesearch=at+the+start")
+        self.assertEqual(r['had_side_effect'], True)
+
+    def test_random_song(self):
+        with mock.patch("pubbot.squeezecenter.receivers.command") as command:
+            with mock.patch("random.choice") as choice:
+                choice.side_effect = lambda x: x[0]
+                r = receivers.random_song(None, content='random')
+            command.assert_called_with("playlist loadtracks track.titlesearch=A")
+        self.assertEqual(r['had_side_effect'], True)
