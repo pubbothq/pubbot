@@ -7,16 +7,6 @@ from pubbot.conversation import chat_receiver, say
 from pubbot.vcs.signals import commit
 
 
-@chat_receiver(r'\x0303(?P<committer>\w+) \x0302(?P<repository>[\w\d]+) \x0310r(?P<revision>\d+)(?P<message>.*)\x0314')
-def ch1mp(sender, committer, repository, revision, path, message, **kwargs):
-    commit.send_robust(
-        committer=committer,
-        repository=repository,
-        revision=int(revision),
-        message=message,
-    )
-
-
 @receiver(commit)
 def svnwoot(sender, revision, **kwargs):
     if revision in (1337, 1000, 2000, 1, 100, 200, 13337, 666, 700, 777, 501):
