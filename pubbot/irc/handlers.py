@@ -19,7 +19,7 @@ import gevent
 
 from geventirc import replycode, message
 
-from django.utils.importlib import import_module
+from django.utils.module_loading import import_string
 
 from pubbot.conversation import signals
 
@@ -66,11 +66,11 @@ class FeedHandler(object):
 
     commands = ['PRIVMSG']
 
-    def __init__(self, botname, channels, regex, topic, kind, signal):
+    def __init__(self, botname, channels, regex, signal):
         self.botname = botname
         self.channels = channels
         self.regex = re.compile(regex)
-        self.signal = import_module(signal)
+        self.signal = import_string(signal)
 
     def __call__(self, client, msg):
         if self.botname != msg.prefix.split("!")[0]:
@@ -80,11 +80,11 @@ class FeedHandler(object):
         if channel not in self.channels:
             return
 
-        results = self._regex.search(content)
+        results = self.regex.search(content)
         if not results:
             return
 
-        self.signal.send_robust(**results.groupdict())
+        self.signal.send_robust(None, **results.groupdict())
 
 
 class UserListHandler(object):
@@ -191,8 +191,8 @@ class ChannelHandler(object):
 
         direct = False
         if ": " in content:
-            user, msg = content.split(": ", 1)
-            if user == client.nick:
+            u, msg = content.split(": ", 1)
+            if u == client.nick:
                 direct = True
                 content = msg
 
