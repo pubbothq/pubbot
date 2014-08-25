@@ -29,11 +29,11 @@ logger = logging.getLogger(__name__)
 
 @receiver(signals.song_started)
 def current_song_notification(sender, **kwargs):
-    say({
-        'content': "%(title)s - %(artist)s (%(album)s)" % kwargs,
-        'tags': ['current_song_notification'],
-        'notice': True,
-    })
+    say(
+        content="%(title)s - %(artist)s (%(album)s)" % kwargs,
+        tags=['current_song_notification'],
+        notice=True,
+    )
 
 
 def get_current_skip():

@@ -6,6 +6,23 @@ from django.core.cache import caches
 from pubbot.squeezecenter import receivers
 
 
+class TestSongNotification(TestCase):
+
+    def test_notification(self):
+        with mock.patch("pubbot.squeezecenter.receivers.say") as say:
+            receivers.current_song_notification(
+                None,
+                title="At The Start",
+                album="Cometora",
+                artist="Blinkin Lark",
+            )
+            say.assert_called_with(
+                content="At The Start - Blinkin Lark (Cometora)",
+                tags=['current_song_notification'],
+                notice=True,
+            )
+
+
 class TestSkipping(TestCase):
 
     def setUp(self):
