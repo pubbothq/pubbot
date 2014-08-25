@@ -4,6 +4,7 @@ import unittest
 from django.core.cache import caches
 
 from pubbot import ratelimit
+from pubbot.state import Machine, State, Transition
 
 
 class TestRateLimitUtils(unittest.TestCase):
@@ -75,3 +76,84 @@ class TestRateLimitTracked(unittest.TestCase):
             self.assertEqual(True, example_2())
             time.return_value = 15
             self.assertEqual(False, example_2())
+
+
+class TestMachine(unittest.TestCase):
+
+    def test_duplicate_state(self):
+        try:
+            class M(Machine):
+                state = State(initial=True)
+
+            class Y(M):
+                state = State()
+        except RuntimeError:
+            return
+        self.fail("Did not detect duplicate state")
+
+    def test_duplicate_intial_state(self):
+        try:
+            class M(Machine):
+                state1 = State(initial=True)
+                state2 = State(initial=True)
+        except RuntimeError:
+            return
+        self.fail("Did not detect duplicate initial=True")
+
+    def test_no_initial_state(self):
+        try:
+            class M(Machine):
+                state1 = State()
+        except RuntimeError:
+            return
+        self.fail("Did not detect lack of initial=True")
+
+    def test_wait_for_invalid(self):
+        class M(Machine):
+            state = State(initial=True)
+        m = M()
+        self.assertRaises(RuntimeError, m.wait, "invalid_state")
+
+    def test_wait_for_state(self):
+        class M(Machine):
+            state = State(initial=True)
+        m = M()
+        m.wait("state")
+
+    def test_no_transition(self):
+        class M(Machine):
+            state1 = State(initial=True)
+            state2 = State()
+        m = M()
+        try:
+            with m.transition_to("state2"):
+                pass
+        except RuntimeError:
+            return
+        self.fail("Found a valid transition but shouldnt have")
+
+    def test_already_in_transition(self):
+        class M(Machine):
+            state1 = State(initial=True)
+            state2 = State()
+            transition = Transition("state1", "state2")
+
+        m = M()
+        try:
+            with m.transition_to("state2"):
+                with m.transition_to("state2"):
+                    pass
+        except RuntimeError:
+            return
+        self.fail("Nested transition was allowed")
+
+    def test_transition(self):
+        class M(Machine):
+            state1 = State(initial=True)
+            state2 = State()
+            transition = Transition("state1", "state2")
+
+        m = M()
+        with m.transition_to("state2"):
+            pass
+        self.assertEqual(m.state, "state2")

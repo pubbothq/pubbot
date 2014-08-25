@@ -93,6 +93,7 @@ class Machine(six.with_metaclass(MachineType)):
     def __init__(self):
         self.state = self.__initial_state__
         self._events = dict((state, Event()) for state in self.__states__)
+        self._events[self.state].set()
         self._in_transition = False
 
     def wait(self, state, timeout=None):
@@ -113,4 +114,4 @@ class Machine(six.with_metaclass(MachineType)):
             if new_state in t.to_states:
                 return TransitionContext(self, new_state)
 
-        raise RuntimeError("No valid transition from '{}' to '{}'".fomat(self.state, new_state))
+        raise RuntimeError("No valid transition from '{}' to '{}'".format(self.state, new_state))
