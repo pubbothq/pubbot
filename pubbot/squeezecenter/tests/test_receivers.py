@@ -71,8 +71,7 @@ class TestSkipping(TestCase):
 
     def test_timeout(self):
         with mock.patch("pubbot.squeezecenter.receivers.time") as time:
-            time.time.return_value = 0
-            receivers.set_current_skip({})
-
-        receivers.timeout_current_skip()
-        # Hopefully it actually returns...
+            with mock.patch("gevent.sleep"):
+                time.time.side_effect = [0, 0, 0, 0, 1000000]
+                receivers.set_current_skip({})
+                receivers.timeout_current_skip()

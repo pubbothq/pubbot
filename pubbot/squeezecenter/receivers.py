@@ -52,9 +52,9 @@ def timeout_current_skip():
         logger.debug("Checking if the skip is timed out - staleness is %r" % staleness)
         if staleness <= 0:
             logger.debug("The skip is timed out")
-            say({
-                'content': 'Vote timed out after 30 seconds',
-            })
+            say(
+                content='Vote timed out after 30 seconds',
+            )
             # FIXME
             return
         logger.debug("%d seconds to timeout" % staleness)
