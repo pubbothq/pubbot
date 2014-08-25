@@ -21,7 +21,7 @@ def update_forecast():
             itswet=data['minutely']['summary'],
         )
 
-        say({
-            'content': content,
-            'tags': [point.tag] if point.tag else [],
-        })
+        say(
+            content=content,
+            tags=[point.tag] if point.tag else [],
+        )
