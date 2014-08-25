@@ -38,7 +38,7 @@ class BaseScorer(object):
         pass
 
     def score(self, reply):
-        return NotImplementedError(self.score)
+        raise NotImplementedError(self.score)
 
 
 class LengthScorer(BaseScorer):
