@@ -35,7 +35,7 @@ class Education(models.Model):
             try:
                 re.compile(self.trigger)
             except:
-                raise ValidationError('Trigger must be a valid regex if regex checked')
+                raise ValidationError({'trigger': [ValidationError('Trigger must be a valid regex if regex checked')]})
 
     def __unicode__(self):
         return '%r -> %r' % (self.trigger, self.response)
