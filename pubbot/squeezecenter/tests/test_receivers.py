@@ -75,3 +75,20 @@ class TestSkipping(TestCase):
                 time.time.side_effect = [0, 0, 0, 0, 1000000]
                 receivers.set_current_skip({})
                 receivers.timeout_current_skip()
+
+    def test_create_skip(self):
+        with mock.patch("gevent.spawn"):
+            receivers.requested_skip(None, content="skip", user="fred")
+
+    def test_actually_skip(self):
+        receivers.set_current_skip({
+            "number": 1,
+            "skip": set(["fred", "tommy", "dave", "sarah"]),
+            "noskip": set(),
+        })
+        with mock.patch("random.choice") as choice:
+            choice.side_effect = lambda x: x[0]
+            with mock.patch("pubbot.squeezecenter.receivers.command") as command:
+                r = receivers.requested_skip(None, content="skip", user="pixel")
+                command.assert_called_with("playlist index 1")
+        self.assertEqual(r['content'], "Good riddance.")
