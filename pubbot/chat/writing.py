@@ -60,8 +60,6 @@ def reply(text):
             best_score = score
             best_reply = reply
 
-    print i + 1, "replies generated"
-
     if best_reply is None:
         return "You make no sense"
 

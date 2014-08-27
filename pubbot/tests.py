@@ -1,10 +1,12 @@
 import mock
 import unittest
+import gevent
 
 from django.core.cache import caches
 
 from pubbot import ratelimit
 from pubbot.state import Machine, State, Transition
+from pubbot.service import TaskService
 
 
 class TestRateLimitUtils(unittest.TestCase):
@@ -157,3 +159,21 @@ class TestMachine(unittest.TestCase):
         with m.transition_to("state2"):
             pass
         self.assertEqual(m.state, "state2")
+
+
+class TestSimpleTaskService(unittest.TestCase):
+
+    def test_repr(self):
+        t = TaskService("test_repr")
+        self.assertEqual(t.__repr__(), "Service(test_repr)")
+
+    def test_run(self):
+        class T(TaskService):
+            _outcome = 0
+
+            def run(self):
+                self._outcome = 1
+
+        t = T("test_run")
+        gevent.with_timeout(1, t.start_and_wait)
+        self.assertEqual(t._outcome, 1)

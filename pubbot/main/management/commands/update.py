@@ -21,6 +21,6 @@ class Command(BaseCommand):
     help = 'Apply any migrations to this site'
 
     def handle(self, *args, **options):
-        call_command('syncdb', interactive=False)
-        call_command('migrate', interactive=False)
-        call_command('collectstatic', interactive=False)
+        call_command('syncdb', interactive=False, stdout=self.stdout)
+        call_command('migrate', interactive=False, stdout=self.stdout)
+        call_command('collectstatic', interactive=False, stdout=self.stdout)

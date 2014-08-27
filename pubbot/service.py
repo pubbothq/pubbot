@@ -27,7 +27,7 @@ class ServiceState(Machine):
     running = State()
 
     starting = Transition(from_state='not_running', to_states=['running'])
-    stopping = Transition(from_state='running', to_states=['stopping'])
+    stopping = Transition(from_state='running', to_states=['not_running'])
 
 
 class BaseService(IterableUserDict, object):
@@ -77,13 +77,6 @@ class BaseService(IterableUserDict, object):
                 child.stop()
             self.stop_service()
 
-    def __enter__(self):
-        self.start()
-        return self
-
-    def __exit__(self, **exc):
-        self.stop()
-
     def start_service(self):
         pass
 
@@ -100,7 +93,7 @@ class TaskService(BaseService):
 
     def start_service(self):
         self._task = gevent.spawn(self.run)
-        self._task.link(self.stop)
+        self._task.link(lambda x: self.stop())
 
     def run(self):
         raise NotImplementedError(self.run)
