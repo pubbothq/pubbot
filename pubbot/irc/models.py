@@ -32,12 +32,3 @@ class Network(models.Model):
 class Room(models.Model):
     server = models.ForeignKey(Network, related_name="rooms")
     name = models.CharField(max_length=128)
-
-
-class User(models.Model):
-    network = models.ForeignKey(Network, related_name='users')
-    name = models.CharField(max_length=128)
-
-    @property
-    def is_me(self):
-        return self.name == self.network.nick

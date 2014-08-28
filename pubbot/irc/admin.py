@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from django.contrib import admin
-from pubbot.irc.models import Network, Room, User
+from pubbot.irc.models import Network, Room
 
 
 class RoomInline(admin.TabularInline):
@@ -28,4 +28,3 @@ class NetworkAdmin(admin.ModelAdmin):
 
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Room)
-admin.site.register(User)
