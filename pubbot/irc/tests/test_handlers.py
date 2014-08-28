@@ -144,6 +144,46 @@ class TestUserListHandler(unittest.TestCase):
                 user='tommy',
             )
 
+    def test_kick(self):
+        network = {"#example": mock.Mock()}
+        network['#example'].users = ['tommy']
+
+        u = UserListHandler(network)
+        msg = mock.Mock()
+        msg.command = 'KICK'
+        msg.prefix = "tommy!"
+        msg.params = ['#example', 'fred']
+
+        client = mock.Mock()
+        with mock.patch("pubbot.conversation.signals.leave") as leave:
+            u(client, msg)
+            leave.send_robust(
+                sender=client,
+                type="kick",
+                channel=network['#example'],
+                user='fred',
+            )
+
+    def test_quit(self):
+        network = {"#example": mock.Mock()}
+        network['#example'].users = ['tommy']
+
+        u = UserListHandler(network)
+        msg = mock.Mock()
+        msg.command = 'QUIT'
+        msg.prefix = "tommy!"
+        msg.params = []
+
+        client = mock.Mock()
+        with mock.patch("pubbot.conversation.signals.leave") as leave:
+            u(client, msg)
+            leave.send_robust(
+                sender=client,
+                type="quit",
+                channel=network['#example'],
+                user='fred',
+            )
+
 
 class TestChannelHandler(unittest.TestCase):
 

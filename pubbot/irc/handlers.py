@@ -147,12 +147,13 @@ class UserListHandler(object):
 
             for room in self.network.values():
                 if user in room.users:
-                    self.remove(client, self.network[room], user, "quit")
+                    self.remove(client, room, user, "quit")
 
     def remove(self, client, channel, user, type, **kwargs):
-        print "Removing %s" % user
-
-        channel.users.remove(user)
+        try:
+            channel.users.remove(user)
+        except ValueError:
+            pass
 
         signals.leave.send_robust(
             sender=client,
