@@ -99,12 +99,30 @@ class TestUserListHandler(unittest.TestCase):
         with mock.patch("gevent.sleep"):
             with mock.patch("pubbot.conversation.signals.join") as join:
                 u(client, msg)
-                join.send_robust(
+                join.send_robust.assert_called_with(
                     sender=client,
                     channel=network['#example'],
                     user='tommy',
                     is_me=False,
                 )
+
+    def test_join_self(self):
+        network = {"#example": mock.Mock()}
+        network['#example'].users = []
+
+        u = UserListHandler(network)
+        msg = mock.Mock()
+        msg.command = 'JOIN'
+        msg.prefix = "tommy!"
+        msg.params = ['#example']
+
+        client = mock.Mock()
+        client.nick = "tommy"
+
+        with mock.patch("gevent.sleep"):
+            with mock.patch("pubbot.conversation.signals.join") as join:
+                u(client, msg)
+                self.assertEqual(join.send_robust.called, 0)
 
     def test_part(self):
         network = {"#example": mock.Mock()}
