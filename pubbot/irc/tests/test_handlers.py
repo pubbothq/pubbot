@@ -35,7 +35,10 @@ class TestGhostHandler(unittest.TestCase):
 
 class TestFeedHandler(unittest.TestCase):
 
-    def test_feed(self):
+    def setUp(self):
+        dummy_signal.send_robust.reset_mock()
+
+    def handle(self, username, channel, message):
         f = FeedHandler(
             "fred", ["#example"],
             r'\x0303(?P<committer>\w+) \x0302(?P<repository>[\w\d]+) \x0310r(?P<revision>\d+) (?P<message>.*)\x0314',
@@ -44,11 +47,25 @@ class TestFeedHandler(unittest.TestCase):
 
         client = mock.Mock()
         msg = mock.Mock()
-        msg.prefix = "fred!"
-        msg.params = ["#example", '\x0303committer \x0302repository \x0310r100 message\x0314']
+        msg.prefix = username + "!"
+        msg.params = [channel, message]
         f(client, msg)
 
+    def test_feed(self):
+        self.handle("fred", "#example", "\x0303committer \x0302repository \x0310r100 message\x0314")
         dummy_signal.send_robust.assert_called_with(None, committer="committer", repository="repository", revision='100', message="message")
+
+    def test_name_doesn_match(self):
+        self.handle("tommy", "#example", "\x0303committer \x0302repository \x0310r100 message\x0314")
+        self.assertEqual(dummy_signal.send_robust.called, 0)
+
+    def test_channel_doesn_match(self):
+        self.handle("fred", "#example2", "\x0303committer \x0302repository \x0310r100 message\x0314")
+        self.assertEqual(dummy_signal.send_robust.called, 0)
+
+    def test_msg_doesnt_match(self):
+        self.handle("fred", "#example", "HELLO :)")
+        self.assertEqual(dummy_signal.send_robust.called, 0)
 
 
 class TestUserListHandler(unittest.TestCase):
