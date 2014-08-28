@@ -26,3 +26,6 @@ join = Signal(providing_args=["post", "request"])
 
 """ Sent when a user leaves a channel """
 leave = Signal(providing_args=["post", "request"])
+
+""" Sent when an app or service wants to say something """
+say = Signal(providing_args=["content", "tags", "action", "notice"])

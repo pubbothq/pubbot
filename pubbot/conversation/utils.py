@@ -42,26 +42,22 @@ def chat_receiver(regex, **kwargs):
     return _decorator
 
 
-def say(content, **kwargs):
-    return
-    from pubbot.irc.models import Room
-    rooms = [kwargs.get('room', None)]
-    if not rooms:
-        if 'tags' in kwargs:
-            rooms = Room.objects.filter(subscribes__name__in=kwargs['tags'])
-            if not rooms.exists():
-                rooms = Room.objects.filter(subscribes__name__in=['default'])
-            rooms = rooms.exclude(blocks__name__in=kwargs['tags'])
-        else:
-            rooms = Room.objects.filter(subscribes__name__in=['default'])
+def say(content, tags=None, **kwargs):
+    from pubbot.conversation.signals import say
 
-    if kwargs.get("action", False):
-        func_name = "action"
-    elif kwargs.get("notice", False):
-        func_name = "notice"
-    else:
-        func_name = "say"
+    responses = say.send_robust(
+        None,
+        content=content,
+        tags=tags,
+        **kwargs
+    )
 
-    for room in rooms.distinct():
-        # getattr(scene, func_name)(msg['content'])
-        logger.debug("Saying %r in %r via %r" % (content, room, func_name))
+    responses = [r for r in responses if not isinstance(r, Exception)]
+
+    if not any(responses):
+        say.send_robust(
+            None,
+            content=content,
+            tags=['default'],
+            **kwargs
+        )

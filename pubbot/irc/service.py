@@ -18,6 +18,7 @@ from geventirc.irc import Client
 from geventirc import handlers, replycode, message
 
 from pubbot import service
+from pubbot.conversation import signals
 from pubbot.irc.models import Network
 from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ChannelHandler, JoinHandler
 
@@ -37,10 +38,34 @@ class ChannelService(service.BaseService):
         super(ChannelService, self).__init__(channel.name)
         self.channel = channel
         self.users = []
+        self.subscribes_tags = set()
+        self.blocks_tags = set()
 
-    def start(self):
+    def start_service(self):
         self.parent.client.add_handler(ChannelHandler(self))
         self.parent.client.add_handler(JoinHandler(self.channel.name))
+        signals.say.connect(self._maybe_say)
+
+    def stop_service(self):
+        signals.say.disconnect(self._maybe_say)
+
+    def _maybe_say(self, sender, content, tags=None, action=False, notice=False):
+        tags = set(tags if tags else [])
+
+        if not self.blocks_tags.isdisjoint(tags):
+            return False
+
+        if self.subscribes_tags.isdisjoint(tags):
+            return False
+
+        if action:
+            self.action(content)
+        elif notice:
+            self.notice(content)
+        else:
+            self.msg(content)
+
+        return True
 
     def msg(self, message):
         self.parent.client.msg(self.channel.name, message.encode('utf-8'))
