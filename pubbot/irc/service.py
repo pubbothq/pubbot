@@ -49,7 +49,7 @@ class ChannelService(service.BaseService):
     def stop_service(self):
         signals.say.disconnect(self._maybe_say)
 
-    def _maybe_say(self, sender, content, tags=None, action=False, notice=False):
+    def _maybe_say(self, sender, content, tags=None, action=False, notice=False, **kwargs):
         tags = set(tags if tags else [])
 
         if not self.blocks_tags.isdisjoint(tags):
