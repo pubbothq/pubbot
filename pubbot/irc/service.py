@@ -114,7 +114,7 @@ class NetworkService(service.BaseService):
     def _ping_loop(self):
         while True:
             gevent.sleep(120)
-            self.client.send_message(message.Pong(self.client.nick))
+            self.client.send_message(message.Ping(self.client.nick))
 
 
 class Service(service.BaseService):
