@@ -28,6 +28,12 @@ from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, 
 logger = logging.getLogger(__name__)
 
 
+class Ping(message.Command):
+
+    def __init__(self, daemon, prefix=None):
+        super(Ping, self).__init__(daemon, prefix=prefix)
+
+
 class Notice(message.Command):
 
     def __init__(self, to, msg, prefix=None):
@@ -114,7 +120,7 @@ class NetworkService(service.BaseService):
     def _ping_loop(self):
         while True:
             gevent.sleep(120)
-            self.client.send_message(message.Ping(self.client.nick))
+            self.client.send_message(Ping(self.client.nick))
 
 
 class Service(service.BaseService):
