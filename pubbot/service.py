@@ -42,7 +42,7 @@ class BaseService(IterableUserDict, object):
     def add_child(self, child):
         if child.name in self.data:
             raise KeyError("Cannot have duplicate service name %r" % child.name)
-        self.disown_parent()
+        child.disown_parent()
         child.parent = self
         self.data[child.name] = child
 
@@ -65,6 +65,7 @@ class BaseService(IterableUserDict, object):
             self.start_service()
             for child in self.values():
                 child.start()
+                child.state.wait("running")
         self.logger.debug("Finished starting")
 
     def start_and_wait(self):
