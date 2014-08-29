@@ -19,6 +19,7 @@ from gevent import socket
 
 from pubbot import service
 from pubbot.squeezecenter import handlers
+from pubbot.utils import force_str, force_bytes
 
 
 class SqueezeCenterConnection(object):
@@ -84,7 +85,7 @@ class SqueezeCenterConnection(object):
             buf += data
             pos = buf.find("\n")
             while pos >= 0:
-                line = unquote_plus(buf[0:pos])
+                line = force_str(unquote_plus(buf[0:pos]))
                 parts = line.split(' ')
 
                 if len(parts) >= 3:
@@ -100,18 +101,9 @@ class SqueezeCenterConnection(object):
 
     def _send_loop(self):
         while True:
-            command = self._send_queue.get()
+            command = force_bytes(self._send_queue.get())
             try:
-                enc_cmd = command.decode('utf8')
-            except UnicodeDecodeError:
-                try:
-                    enc_cmd = command.decode('latin1')
-                except UnicodeDecodeError:
-                    continue
-
-            enc_cmd = enc_cmd.encode('utf8', 'ignore')
-            try:
-                self._socket.sendall(enc_cmd)
+                self._socket.sendall(command)
             except Exception:
                 gevent.spawn(self.reconnect)
                 return
