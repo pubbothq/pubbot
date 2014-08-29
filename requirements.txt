@@ -2,6 +2,7 @@
 --find-links https://www.djangoproject.com/download/1.7c3/tarball/#egg=Django-1.7c3
 
 beautifulsoup4==4.3.2
+contextlib2==0.4.0
 Django==1.7c3
 gevent==1.0.1
 greenlet==0.4.3
