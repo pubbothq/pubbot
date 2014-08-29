@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
         ignored_nicks = options.get("ignored_nick", [])
 
-        with Trainer() as trainer:
+        with Trainer(batch_mode=True) as trainer:
             with open(path) as fp:
                 for line in fp.readlines():
                     # Couple of problems with this approach.
