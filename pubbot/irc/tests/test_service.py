@@ -16,9 +16,10 @@ class TestIrcServiceAvailable(TestCase):
         n = Network.objects.create(server='localhost', port='1234', nick='fred', nickserv_password='password')
         Room.objects.create(server=n, name="#example")
 
-        with mock.patch("pubbot.irc.service.Client"):
-            s = Service("irc")
-            s.start()
-            s.state.wait("running")
+        with mock.patch("gevent.spawn"):
+            with mock.patch("pubbot.irc.service.Client"):
+                s = Service("irc")
+                s.start()
+                s.state.wait("running")
 
         s['localhost'].client.start.assert_called_with()

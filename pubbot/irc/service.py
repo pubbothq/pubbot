@@ -14,6 +14,8 @@
 
 import logging
 
+import gevent
+
 from geventirc.irc import Client
 from geventirc import handlers, replycode, message
 
@@ -103,6 +105,16 @@ class NetworkService(service.BaseService):
             self.add_child(ChannelService(room))
 
         self.client.start()
+
+        self._ping_loop_greenlet = gevent.spawn(self._ping_loop)
+
+    def stop_service(self):
+        self._ping_loop_greenlet.kill()
+
+    def _ping_loop(self):
+        while True:
+            gevent.sleep(120)
+            self.client.send_message(message.Pong(self.client.nick))
 
 
 class Service(service.BaseService):
