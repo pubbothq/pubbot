@@ -43,7 +43,7 @@ class TestIrcChannel(TestCase):
 
     def test_maybe_not_say(self):
         self.assertEqual(
-            self.s._maybe_say(None, 'Hello', tags=['serious',]),
+            self.s._maybe_say(None, 'Hello', tags=['serious']),
             False,
         )
         self.assertEqual(self.s.parent.client.msg.called, 0)
