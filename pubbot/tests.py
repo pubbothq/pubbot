@@ -7,6 +7,7 @@ from django.core.cache import caches
 from pubbot import ratelimit
 from pubbot.state import Machine, State, Transition
 from pubbot.service import TaskService
+from pubbot.utils import force_str, force_bytes
 
 
 class TestRateLimitUtils(unittest.TestCase):
@@ -177,3 +178,24 @@ class TestSimpleTaskService(unittest.TestCase):
         t = T("test_run")
         gevent.with_timeout(1, t.start_and_wait)
         self.assertEqual(t._outcome, 1)
+
+
+class TestUtils(unittest.TestCase):
+
+    def test_force_str_error(self):
+        self.assertRaises(ValueError, force_str, [])
+
+    def test_force_str_u(self):
+        self.assertTrue(isinstance(force_str(u"hello"), str))
+
+    def test_force_str_b(self):
+        self.assertTrue(isinstance(force_str(b"hello"), str))
+
+    def test_force_bytes_error(self):
+        self.assertRaises(ValueError, force_bytes, [])
+
+    def test_force_bytes_u(self):
+        self.assertTrue(isinstance(force_bytes(u"HELLO"), str))
+
+    def test_force_bytes_b(self):
+        self.assertTrue(isinstance(force_bytes(b"HELLO"), str))
