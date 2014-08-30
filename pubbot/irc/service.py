@@ -46,8 +46,8 @@ class ChannelService(service.BaseService):
         super(ChannelService, self).__init__(channel.name)
         self.channel = channel
         self.users = []
-        self.subscribes_tags = set()
-        self.blocks_tags = set()
+        self.subscribes_tags = set(t for t in channel.subscribes_tags.split(",") if t)
+        self.blocks_tags = set(t for t in channel.blocks_tags.split(",") if t)
 
     def start_service(self):
         self.parent.client.add_handler(ChannelHandler(self))
@@ -78,8 +78,8 @@ class ChannelService(service.BaseService):
     def msg(self, message):
         self.parent.client.msg(self.channel.name, message.encode('utf-8'))
 
-    def action(self, message):
-        self.parent.client.send_message(message.Me(self.channel.name, message.encode('utf-8')))
+    def action(self, content):
+        self.parent.client.send_message(message.Me(self.channel.name, content.encode('utf-8')))
 
     def notice(self, message):
         self.parent.client.send_message(Notice(self.channel.name, message.encode('utf-8')))

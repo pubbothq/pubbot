@@ -32,3 +32,6 @@ class Network(models.Model):
 class Room(models.Model):
     server = models.ForeignKey(Network, related_name="rooms")
     name = models.CharField(max_length=128)
+
+    subscribes_tags = models.TextField(blank=True)
+    blocks_tags = models.TextField(blank=True)
