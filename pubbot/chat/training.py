@@ -14,6 +14,7 @@
 
 from django.db import connection
 
+from pubbot.utils import force_bytes
 from .models import Token, Grouping
 from .tokenizer import tokenizer
 from .stemmer import stemmer
@@ -96,8 +97,5 @@ class Trainer(object):
             self.get_grouping(*cur)
 
     def learn_string(self, text):
-        try:
-            tokens = tokenizer.split(text.encode("utf-8"))
-        except UnicodeDecodeError:
-            return
+        tokens = tokenizer.split(force_bytes(text))
         return self.learn_tokens(tokens)
