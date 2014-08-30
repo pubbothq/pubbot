@@ -6,7 +6,7 @@ from django.core.cache import caches
 
 from pubbot import ratelimit
 from pubbot.state import Machine, State, Transition
-from pubbot.service import TaskService
+from pubbot.service import BaseService, TaskService
 from pubbot.utils import force_str, force_bytes
 
 
@@ -162,6 +162,43 @@ class TestMachine(unittest.TestCase):
         self.assertEqual(m.state, "state2")
 
 
+class TestBaseService(unittest.TestCase):
+
+    def test_parenting_and_deparenting(self):
+        p = BaseService("parent")
+        c = BaseService("child")
+        p.add_child(c)
+        self.assertEqual(len(p.keys()), 1)
+        c.disown_parent()
+        self.assertEqual(len(p.keys()), 0)
+
+    def test_remove_child_not_parent_of(self):
+        p = BaseService("parent")
+        c = BaseService("child")
+        self.assertRaises(KeyError, p.remove_child, c)
+
+    def test_double_add_child_fails(self):
+        p = BaseService("parent")
+        c = BaseService("child")
+        p.add_child(c)
+        self.assertRaises(KeyError, p.add_child, c)
+
+    def test_stop_service_with_child(self):
+        class C(BaseService):
+            _outcome = 0
+
+            def stop_service(self):
+                self._outcome = 1
+
+        p = BaseService("parent")
+        c = C("child")
+        p.add_child(c)
+        p.start()
+        self.assertEqual(c._outcome, 0)
+        p.stop()
+        self.assertEqual(c._outcome, 1)
+
+
 class TestSimpleTaskService(unittest.TestCase):
 
     def test_repr(self):
@@ -178,6 +215,9 @@ class TestSimpleTaskService(unittest.TestCase):
         t = T("test_run")
         gevent.with_timeout(1, t.start_and_wait)
         self.assertEqual(t._outcome, 1)
+
+    def test_run_not_impl(self):
+        self.assertRaises(NotImplementedError, TaskService("test").run)
 
 
 class TestUtils(unittest.TestCase):
