@@ -16,16 +16,14 @@ from django.db.backends.signals import connection_created
 
 
 def setup_sqlite_connection(sender, connection, **kwargs):
-    if connection.vendor != "sqlite":
-        return
+    if connection.vendor == "sqlite":
+        cursor = connection.cursor()
+        cursor.execute("PRAGMA journal_mode = truncate;")
+        cursor.execute("PRAGMA temp_store = memory;")
+        cursor.execute("PRAGMA synchronous = OFF;")
 
-    cursor = connection.cursor()
-    cursor.execute("PRAGMA journal_mode = truncate;")
-    cursor.execute("PRAGMA temp_store = memory;")
-    cursor.execute("PRAGMA synchronous = OFF;")
-
-    cursor.execute("PRAGMA cache_size = 0;")
-    cursor.execute("PRAGMA page_size = 4096;")
+        cursor.execute("PRAGMA cache_size = 0;")
+        cursor.execute("PRAGMA page_size = 4096;")
 
 
 connection_created.connect(setup_sqlite_connection)
