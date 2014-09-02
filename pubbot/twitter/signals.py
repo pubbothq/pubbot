@@ -15,7 +15,7 @@
 from django.dispatch import Signal
 
 # User got a tweet appear in their timeline
-tweet = Signal(signal_args=['screen_name', 'text'])
+tweet = Signal(providing_args=['screen_name', 'text'])
 
 # User deauthorises stream
 access_revoked = Signal()

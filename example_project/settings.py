@@ -136,6 +136,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'constance',
+    'constance.backends.database',
     'pubbot.web',
     'pubbot.main',
     'pubbot.irc',
@@ -185,5 +187,13 @@ LOGGING = {
         },
     },
 }
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    'TWITTER_TOKEN':        ('', 'Twitter token for accessing my twitter feed'),
+    'TWITTER_TOKEN_SECRET': ('', 'Token secret for accessing my twitter feed'),
+}
+
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
