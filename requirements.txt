@@ -1,9 +1,8 @@
 --find-links https://github.com/pubbothq/geventirc/archive/master.zip#egg=geventirc-0.1dev
---find-links https://www.djangoproject.com/download/1.7c3/tarball/#egg=Django-1.7c3
 
 beautifulsoup4==4.3.2
 contextlib2==0.4.0
-Django==1.7c3
+Django==1.7
 django-constance-updated==0.6.1
 django-picklefield==0.3.1
 gevent==1.0.1
