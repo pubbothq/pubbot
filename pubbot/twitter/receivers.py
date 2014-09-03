@@ -7,6 +7,10 @@ from pubbot.twitter.signals import tweet
 
 @receiver(tweet)
 def broadcast_tweet(self, text, user, **kwargs):
+    if config.TWITTER_BROADCAST_FOLLOW:
+        if user['screen_name'] not in config.TWITTER_BROADCAST_FOLLOW.split(","):
+            return
+
     say(
         content="\n".join([
             "https://twitter.com/%s/status/%s" % (user['screen_name'], id),
