@@ -15,8 +15,7 @@
 import re
 import logging
 
-from django.dispatch import receiver
-
+from pubbot.dispatch import receiver
 from .signals import message
 
 
@@ -45,24 +44,7 @@ def chat_receiver(regex, **kwargs):
 def say(content, tags=None, **kwargs):
     from pubbot.conversation.signals import say
 
-    responses = say.send_robust(
-        None,
-        content=content,
-        tags=tags,
-        **kwargs
-    )
+    if tags and any(say.send(content=content, tags=tags, **kwargs)):
+        return
 
-    filtered = []
-    for handler, response in responses:
-        if isinstance(response, Exception):
-            logger.exception(response)
-            continue
-        filtered.append(response)
-
-    if not any(filtered):
-        say.send_robust(
-            None,
-            content=content,
-            tags=['default'],
-            **kwargs
-        )
+    return say.send(content=content, tags=['default'], **kwargs)

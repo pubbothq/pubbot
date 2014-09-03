@@ -22,8 +22,8 @@ from bs4 import BeautifulSoup
 import requests
 
 from django.contrib.humanize.templatetags.humanize import intword
-from django.dispatch import receiver
 
+from pubbot.dispatch import receiver
 from pubbot.ratelimit import enforce_rate_limit
 from .signals import join
 from .utils import chat_receiver
@@ -66,8 +66,8 @@ def twitter_link(sender, account, id, **kwargs):
     bs = BeautifulSoup(response.text)
     try:
         tweet = bs.select("div.permalink-tweet-container p.tweet-text")[0].text
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
+        logger.exception("Failed to scrape twitter html")
         return {
             'content': 'Look it up yourself, twitter changed the API again',
             'useful': True,

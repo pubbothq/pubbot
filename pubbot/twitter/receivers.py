@@ -1,8 +1,7 @@
 
 from constance import config
 
-from django.dispatch import receiver
-
+from pubbot.dispatch import receiver
 from pubbot.conversation import say
 from pubbot.twitter.signals import tweet
 

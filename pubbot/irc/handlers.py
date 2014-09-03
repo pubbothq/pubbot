@@ -84,7 +84,7 @@ class FeedHandler(object):
         if not results:
             return
 
-        self.signal.send_robust(None, **results.groupdict())
+        self.signal.send(None, **results.groupdict())
 
 
 class UserListHandler(object):
@@ -124,7 +124,7 @@ class UserListHandler(object):
             if user not in channel.users:
                 return
 
-            signals.join.send_robust(
+            signals.join.send(
                 sender=client,
                 channel=channel,
                 user=user,
@@ -155,7 +155,7 @@ class UserListHandler(object):
         except ValueError:
             pass
 
-        signals.leave.send_robust(
+        signals.leave.send(
             sender=client,
             type=type,
             user=user,
@@ -169,7 +169,7 @@ class InviteProcessor(object):
     commands = ['INVITE']
 
     def __call__(self, client, msg):
-        signals.invite.send_robust(
+        signals.invite.send(
             sender=client,
             invited_to=msg.params[1],
             invited_by=msg.prefix.split("!")[0],
@@ -197,24 +197,14 @@ class ChannelHandler(object):
                 direct = True
                 content = msg
 
-        responses = signals.message.send_robust(
+        responses = list(signals.message.send(
             sender=client,
             source=user,
             user=user,
             channel=self.channel,
             content=content,
             direct=direct,
-        )
+        ))
 
-        valid_responses = []
-        for receiver, response in responses:
-            if not response:
-                continue
-            if isinstance(response, Exception):
-                print response
-                logger.exception(response)
-                continue
-            valid_responses.append(response)
-
-        if valid_responses:
-            self.channel.msg(valid_responses[0]['content'])
+        if responses:
+            self.channel.msg(responses[0][1]['content'])

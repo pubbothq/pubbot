@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.dispatch import Signal
+from pubbot.dispatch import Signal
 
 # User got a tweet appear in their timeline
 tweet = Signal(providing_args=['screen_name', 'text'])

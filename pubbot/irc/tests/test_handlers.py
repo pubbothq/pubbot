@@ -36,7 +36,7 @@ class TestGhostHandler(unittest.TestCase):
 class TestFeedHandler(unittest.TestCase):
 
     def setUp(self):
-        dummy_signal.send_robust.reset_mock()
+        dummy_signal.send.reset_mock()
 
     def handle(self, username, channel, message):
         f = FeedHandler(
@@ -53,19 +53,19 @@ class TestFeedHandler(unittest.TestCase):
 
     def test_feed(self):
         self.handle("fred", "#example", "\x0303committer \x0302repository \x0310r100 message\x0314")
-        dummy_signal.send_robust.assert_called_with(None, committer="committer", repository="repository", revision='100', message="message")
+        dummy_signal.send.assert_called_with(None, committer="committer", repository="repository", revision='100', message="message")
 
     def test_name_doesn_match(self):
         self.handle("tommy", "#example", "\x0303committer \x0302repository \x0310r100 message\x0314")
-        self.assertEqual(dummy_signal.send_robust.called, 0)
+        self.assertEqual(dummy_signal.send.called, 0)
 
     def test_channel_doesn_match(self):
         self.handle("fred", "#example2", "\x0303committer \x0302repository \x0310r100 message\x0314")
-        self.assertEqual(dummy_signal.send_robust.called, 0)
+        self.assertEqual(dummy_signal.send.called, 0)
 
     def test_msg_doesnt_match(self):
         self.handle("fred", "#example", "HELLO :)")
-        self.assertEqual(dummy_signal.send_robust.called, 0)
+        self.assertEqual(dummy_signal.send.called, 0)
 
 
 class TestUserListHandler(unittest.TestCase):
@@ -99,7 +99,7 @@ class TestUserListHandler(unittest.TestCase):
         with mock.patch("gevent.sleep"):
             with mock.patch("pubbot.conversation.signals.join") as join:
                 u(client, msg)
-                join.send_robust.assert_called_with(
+                join.send.assert_called_with(
                     sender=client,
                     channel=network['#example'],
                     user='tommy',
@@ -122,7 +122,7 @@ class TestUserListHandler(unittest.TestCase):
         with mock.patch("gevent.sleep"):
             with mock.patch("pubbot.conversation.signals.join") as join:
                 u(client, msg)
-                self.assertEqual(join.send_robust.called, 0)
+                self.assertEqual(join.send.called, 0)
 
     def test_part(self):
         network = {"#example": mock.Mock()}
@@ -137,7 +137,7 @@ class TestUserListHandler(unittest.TestCase):
         client = mock.Mock()
         with mock.patch("pubbot.conversation.signals.leave") as leave:
             u(client, msg)
-            leave.send_robust(
+            leave.send(
                 sender=client,
                 type="leave",
                 channel=network['#example'],
@@ -157,7 +157,7 @@ class TestUserListHandler(unittest.TestCase):
         client = mock.Mock()
         with mock.patch("pubbot.conversation.signals.leave") as leave:
             u(client, msg)
-            leave.send_robust(
+            leave.send(
                 sender=client,
                 type="kick",
                 channel=network['#example'],
@@ -177,7 +177,7 @@ class TestUserListHandler(unittest.TestCase):
         client = mock.Mock()
         with mock.patch("pubbot.conversation.signals.leave") as leave:
             u(client, msg)
-            leave.send_robust(
+            leave.send(
                 sender=client,
                 type="quit",
                 channel=network['#example'],
@@ -201,13 +201,11 @@ class TestChannelHandler(unittest.TestCase):
         msg.params = ["#example", 'fred: here is a test message']
 
         with mock.patch("pubbot.conversation.signals.message") as message:
-            message.send_robust.return_value = [
-                (None, None),
+            message.send.return_value = [
                 (None, {'content': "hello"}),
-                (None, RuntimeError()),
             ]
             c(client, msg)
-            message.send_robust.assert_called_with(
+            message.send.assert_called_with(
                 sender=client,
                 source="dave",
                 user="dave",

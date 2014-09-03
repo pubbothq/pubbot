@@ -24,8 +24,8 @@ def quizbot_request(sender, terms, **kwargs):
             params={'query': terms},
             headers={'User-Agent': USER_AGENT},
         ).json()
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
+        logger.exception("Exception fetching/decoding quizbot response")
         return
 
     return {"content": response['answer']}

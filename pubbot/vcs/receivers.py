@@ -1,8 +1,8 @@
 from datetime import date
 
 from django.core.cache import cache
-from django.dispatch import receiver
 
+from pubbot.dispatch import receiver
 from pubbot.conversation import say
 from pubbot.vcs.signals import commit
 

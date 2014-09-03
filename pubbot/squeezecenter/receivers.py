@@ -16,11 +16,11 @@ import logging
 import time
 import random
 
-from django.dispatch import receiver
 from django.core.cache import caches
 
 import gevent
 
+from pubbot.dispatch import receiver
 from pubbot.conversation import chat_receiver, say
 from . import signals
 

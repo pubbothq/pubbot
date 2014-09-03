@@ -35,7 +35,7 @@ class PubbotService(BaseService):
                 import_module("%s.receivers" % installed_app)
             except ImportError as e:
                 if str(e) != "No module named receivers":
-                    self.logger.exception(e)
+                    self.logger.exception("Error importing receivers for %r" % installed_app)
 
             self.logger.debug("Checking {installed_app} for Service".format(installed_app=installed_app))
             module_name = "%s.service" % installed_app
@@ -43,7 +43,7 @@ class PubbotService(BaseService):
                 module = import_module(module_name)
             except ImportError as e:
                 if str(e) != "No module named service":
-                    self.logger.exception(e)
+                    self.logger.exception("Error importing service for %r" % installed_app)
                 continue
 
             if hasattr(module, 'Service'):

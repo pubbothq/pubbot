@@ -42,7 +42,7 @@ The signal ``pubbot.conversation.signals.message`` is fired when a chat message
 is received. You can listen to it with the standard Django mechanisms,
 including the ``@receiver`` decorator::
 
-    from django.dispatch import receiver
+    from pubbot.dispatch import receiver
 
     @receiver(message)
     def my_receiver(signal, **kwargs):

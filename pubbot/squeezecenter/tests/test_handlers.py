@@ -35,7 +35,7 @@ class TestCurrentSongHandler(unittest.TestCase):
             c(conn, ["album", "Cometora"])
             c(conn, ["title", "At The Start"])
 
-            song_started.send_robust.assert_called_with(
+            song_started.send.assert_called_with(
                 sender=conn,
                 artist="Blinkin Lark",
                 album="Cometora",
@@ -51,6 +51,6 @@ class TestStopHandler(unittest.TestCase):
         with mock.patch("pubbot.squeezecenter.signals.music_stopped") as music_stopped:
             s(conn, ["playlist", "stop"])
 
-            music_stopped.send_robust.assert_called_with(
+            music_stopped.send.assert_called_with(
                 sender=conn,
             )

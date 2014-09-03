@@ -35,7 +35,7 @@ class CurrentSongHandler(object):
             setattr(self, message[0], message[1])
 
             if self.title and self.album and self.artist:
-                signals.song_started.send_robust(
+                signals.song_started.send(
                     sender=conn,
                     artist=self.artist,
                     album=self.album,
@@ -51,6 +51,6 @@ class StopHandler(object):
 
     def __call__(self, conn, message):
         if message[0] == 'playlist' and message[1] == 'stop':
-            signals.music_stopped.send_robust(
+            signals.music_stopped.send(
                 sender=conn,
             )

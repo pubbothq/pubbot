@@ -45,9 +45,9 @@ class Service(service.TaskService):
                 elif msg is Hangup:
                     self.logger.debug("Got hangup notification. Expecting reconnect.")
                 elif 'text' in msg and 'user' in msg:
-                    signals.tweet.send_robust(None, **msg)
+                    signals.tweet.send(None, **msg)
                 else:
-                    print msg
+                    self.logger.debug("Unhandled message: %r" % msg)
 
             self.logger.info("Lost connection to userstream.twitter.com. Reconnecting in 10s...")
             gevent.sleep(10)
