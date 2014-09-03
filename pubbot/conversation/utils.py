@@ -52,9 +52,14 @@ def say(content, tags=None, **kwargs):
         **kwargs
     )
 
-    responses = [r for r in responses if not isinstance(r, Exception)]
+    filtered = []
+    for handler, response in responses:
+        if isinstance(response, Exception):
+            logger.exception(response)
+            continue
+        filtered.append(response)
 
-    if not any(responses):
+    if not any(filtered):
         say.send_robust(
             None,
             content=content,
