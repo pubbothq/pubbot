@@ -23,6 +23,7 @@ from pubbot import service
 from pubbot.conversation import signals
 from pubbot.irc.models import Network
 from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ChannelHandler, JoinHandler
+from pubbot.utils import force_bytes
 
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ class Client(irc.Client):
             self.logger.debug('send: %r', command[:-2])
             try:
                 self._socket.sendall(command)
-            except Exception as e:
+            except Exception:
                 self.logger.exception("Client._send_loop failed")
                 gevent.spawn(self.reconnect)
                 return

@@ -1,4 +1,6 @@
 
+from constance import config
+
 from django.dispatch import receiver
 
 from pubbot.conversation import say
