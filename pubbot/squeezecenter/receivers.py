@@ -20,6 +20,7 @@ from django.core.cache import caches
 
 import gevent
 
+from pubbot.bot import bot
 from pubbot.dispatch import receiver
 from pubbot.conversation import chat_receiver, say
 from . import signals
@@ -183,4 +184,4 @@ def random_song(sender, content, **kwargs):
 
 def command(command):
     print "command: %s" % command
-    # app.squeezecenter.send(command)
+    bot['squeezecenter'].send(command)
