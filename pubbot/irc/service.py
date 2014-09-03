@@ -16,7 +16,7 @@ import logging
 
 import gevent
 
-from geventirc.irc import Client
+from geventirc import irc
 from geventirc import handlers, replycode, message
 
 from pubbot import service
@@ -26,6 +26,20 @@ from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, 
 
 
 logger = logging.getLogger(__name__)
+
+
+class Client(irc.Client):
+
+    def _send_loop(self):
+        while True:
+            command = force_bytes(self._send_queue.get())
+            self.logger.debug('send: %r', command[:-2])
+            try:
+                self._socket.sendall(command)
+            except Exception as e:
+                self.logger.exception("Client._send_loop failed")
+                gevent.spawn(self.reconnect)
+                return
 
 
 class Ping(message.Command):
