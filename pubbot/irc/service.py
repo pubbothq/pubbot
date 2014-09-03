@@ -90,13 +90,13 @@ class ChannelService(service.BaseService):
         return True
 
     def msg(self, message):
-        self.parent.client.msg(self.channel.name, message.encode('utf-8'))
+        self.parent.client.msg(self.channel.name, message)
 
     def action(self, content):
-        self.parent.client.send_message(message.Me(self.channel.name, content.encode('utf-8')))
+        self.parent.client.send_message(message.Me(self.channel.name))
 
     def notice(self, message):
-        self.parent.client.send_message(Notice(self.channel.name, message.encode('utf-8')))
+        self.parent.client.send_message(Notice(self.channel.name, message))
 
 
 class NetworkService(service.BaseService):
