@@ -9,7 +9,7 @@ from pubbot.twitter.signals import tweet
 @receiver(tweet)
 def broadcast_tweet(sender, text, user, id_str, **kwargs):
     if config.TWITTER_BROADCAST_FOLLOW:
-        if user['screen_name'] not in config.TWITTER_BROADCAST_FOLLOW.split(","):
+        if user['screen_name'].lower() not in config.TWITTER_BROADCAST_FOLLOW.lower().split(","):
             return
 
     say(
