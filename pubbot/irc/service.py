@@ -93,7 +93,7 @@ class ChannelService(service.BaseService):
         self.parent.client.msg(self.channel.name, message)
 
     def action(self, content):
-        self.parent.client.send_message(message.Me(self.channel.name))
+        self.parent.client.send_message(message.Me(self.channel.name, content))
 
     def notice(self, message):
         self.parent.client.send_message(Notice(self.channel.name, message))
