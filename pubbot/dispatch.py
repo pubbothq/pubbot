@@ -27,6 +27,8 @@ class Signal(dispatch.Signal):
 
     def send(self, sender=None, **kwargs):
         logger.debug("%r: send called with kwargs = %r" % (self.__class__, kwargs))
+
+        responses = []
         for handler, response in self.send_robust(sender, **kwargs):
             if not response:
                 logger.debug("%r: ignored signal" % receiver)
@@ -42,4 +44,6 @@ class Signal(dispatch.Signal):
                 )
                 continue
 
-            yield (handler, response)
+            responses.append((handler, response))
+
+        return responses
