@@ -2,7 +2,7 @@ import time
 
 from constance import config
 import gevent
-from github3 import gh, GitHubError
+from github3 import GitHub, GitHubError
 
 from pubbot import service
 
@@ -79,8 +79,10 @@ class Service(service.BaseService):
     def __init__(self, *args, **kwargs):
         super(Service, self).__init__(*args, **kwargs)
 
-        # FIXME: Support credentials
-        self.gh = gh
+        if config.GITHUB_TOKEN:
+            self.gh = GitHub(token=config.GITHUB_TOKEN)
+        else:
+            self.gh = GitHub()
 
         if config.GITHUB_FOLLOW_ORGS:
             for org in config.GITHUB_FOLLOW_ORGS.split(","):
