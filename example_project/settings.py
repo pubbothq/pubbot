@@ -194,6 +194,7 @@ CONSTANCE_CONFIG = {
     'TWITTER_TOKEN':        ('', 'Twitter token for accessing my twitter feed'),
     'TWITTER_TOKEN_SECRET': ('', 'Token secret for accessing my twitter feed'),
     'TWITTER_BROADCAST_FOLLOW': ('', 'List of usernames to track (my twitter account must follow them too). By default i\'ll broadcast my entire feed into irc'),
+    'GITHUB_FOLLOW_ORGS': ('', 'The GitHub orgs to report on'),
 }
 
 
