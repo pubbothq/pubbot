@@ -197,14 +197,25 @@ class ChannelHandler(object):
                 direct = True
                 content = msg
 
-        responses = list(signals.message.send(
+        responses = signals.message.send(
             sender=client,
             source=user,
             user=user,
             channel=self.channel,
             content=content,
             direct=direct,
-        ))
+        )
 
-        if responses:
+        def sortfun(args):
+            receiver, response = args
+            weight = response.get('weight', 0)
+            if response.get('has_side_effect', False):
+                return 1000 + weight
+            if response.get('useful', False):
+                return 100 + weight
+            return weight
+
+        responses.sort(key=sortfun, reverse=True)
+
+        if responses and 'content' in responses[0][1]:
             self.channel.msg(responses[0][1]['content'])
