@@ -16,6 +16,7 @@ import logging
 
 from django import dispatch
 from django.dispatch import receiver
+from django.dispatch.dispatcher import NO_RECEIVERS
 
 
 __all__ = ["Signal", "receiver"]
@@ -28,22 +29,20 @@ class Signal(dispatch.Signal):
     def send(self, sender=None, **kwargs):
         logger.debug("%r: send called with kwargs = %r" % (self.__class__, kwargs))
 
+        # We can't use send_robust directly as it is unable to give us
+        # Exception.__traceback__ until Django 1.8
         responses = []
-        for handler, response in self.send_robust(sender, **kwargs):
-            if not response:
-                logger.debug("%r: ignored signal" % receiver)
+        if not self.receivers or self.sender_receivers_cache.get(sender) is NO_RECEIVERS:
+            return responses
+
+        for receiver in self._live_receivers(sender):
+            try:
+                response = receiver(signal=self, sender=sender, **kwargs)
+            except Exception:
+                logger.exception("Receiver failed")
                 continue
 
-            if isinstance(response, Exception):
-                logger.error(
-                    "%r: raised exception" % receiver, exc_info=(
-                        response.__class__,
-                        response,
-                        response.__traceback__,
-                    ),
-                )
-                continue
-
-            responses.append((handler, response))
+            if response:
+                responses.append((receiver, response))
 
         return responses
