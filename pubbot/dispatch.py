@@ -35,14 +35,14 @@ class Signal(dispatch.Signal):
         if not self.receivers or self.sender_receivers_cache.get(sender) is NO_RECEIVERS:
             return responses
 
-        for receiver in self._live_receivers(sender):
+        for handler in self._live_receivers(sender):
             try:
-                response = receiver(signal=self, sender=sender, **kwargs)
+                response = handler(signal=self, sender=sender, **kwargs)
             except Exception:
                 logger.exception("Receiver failed")
                 continue
 
             if response:
-                responses.append((receiver, response))
+                responses.append((handler, response))
 
         return responses
