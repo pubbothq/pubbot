@@ -94,6 +94,12 @@ def deploy(bundle):
     )
 
     yield Execute(
+        name="systemctl-enable-pubbot",
+        command="systemctl enable /etc/systemd/system/pubbot.service",
+        creates="/etc/systemd/system/multi-user.target.wants/pubbot.service",
+        )
+
+    yield Execute(
         name="systemctl-restart",
         command="systemctl restart pubbot.service",
         watches=[
