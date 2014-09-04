@@ -184,4 +184,4 @@ def random_song(sender, content, **kwargs):
 
 def command(command):
     print "command: %s" % command
-    bot['squeezecenter'].send(command)
+    bot['pubbot.squeezecenter'].client.send(command)
