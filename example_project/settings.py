@@ -149,6 +149,7 @@ INSTALLED_APPS = (
     'pubbot.tasty',
     'pubbot.weather',
     'pubbot.vcs',
+    'pubbot.github',
     'pubbot.twitter',
     'pubbot.trac',
 )
