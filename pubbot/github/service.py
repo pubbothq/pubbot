@@ -92,11 +92,14 @@ class OrganizationEventsService(service.TaskService):
             iterable.refresh()
 
     def run(self):
-        org = self.parent.gh.organization(self.name)
-        for event in self.iter_new_events(org.iter_events()):
-            signal = self.handlers.get(event.type)
+        #org = self.parent.gh.organization(self.name)
+        #for event in self.iter_new_events(org.iter_events()):
+        user = self.parent.gh.user()
+        for event in self.iter_new_events(user.iter_org_events(self.name)):
+            signal = self.handlers.get(event.type, None)
             if not signal:
                 self.logger.info("Unhandled event: %s" % event.to_json())
+                continue
             signal.send(payload=event.payload)
 
 
