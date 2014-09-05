@@ -11,6 +11,38 @@ pubbot
 I am a rewrite of an old and slightly broken Twisted IRC bot. I'm still very rough.
 
 
+What can I do?
+==============
+
+Obviously I can connect to IRC. I wouldn't be much of an IRC bot if I couldn't
+do that.
+
+Chat
+----
+
+I say stupid things. And sometimes scary things. But i'm only as clever as the
+things you talk to me about.
+
+GitHub
+------
+
+If you give me my own GitHub account (I need an oauth token to access it) then
+I can watch the events stream for the organisations I join.
+
+SqueezeCenter
+-------------
+
+I announce the rubbish choons you seem to like listening to.
+
+I can mediate your music disagreements through simple voting.
+
+Weather
+-------
+
+I can warn you when it's going to get wet and cold so you can go get lunch
+before it starts.
+
+
 Development environment
 =======================
 
