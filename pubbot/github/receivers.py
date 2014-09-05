@@ -1,4 +1,3 @@
-
 import os
 import itertools
 
@@ -15,7 +14,7 @@ def push_to_commit(sender, payload, **kwargs):
             continue
 
         commit.send(
-            revision=c['id'],
+            revision=c['sha'],
             message=c['message'],
             committer=c['committer']['username'],
         )
@@ -23,17 +22,17 @@ def push_to_commit(sender, payload, **kwargs):
 
 @receiver(push)
 def push_to_chat(sender, payload, **kwargs):
-    fmt = '\x0303%(author)s \x0302%(repname)s \x0310r%(rev)s\x0314\x0f: %(msg)s'
+    fmt = '\x0303%(author)s \x0302%(repname)s \x0310r%(rev)s\x0314%(prefix)s%(changes)s\x0f: %(msg)s'
 
-    payload = payload.payload
     repname = '/'.join(payload.repo)
+    payload = payload.payload
 
     for commit in payload.get('comments', [])[:4]:
         if not commit["distinct"]:
             continue
 
         author = commit['author']['name']
-        rev = commit['id'][:6]
+        rev = commit['sha'][:6]
         msg = commit['message']
 
         trailer = ' ...'
