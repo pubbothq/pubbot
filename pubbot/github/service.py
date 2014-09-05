@@ -79,7 +79,7 @@ class OrganizationEventsService(service.TaskService):
                     while events:
                         last_event = events.pop()
                         yield last_event
-                most_recent = last_event.id
+                    most_recent = last_event.id
 
             poll_interval = int(iterable.last_response.headers.get("X-Poll-Interval", 0))
             if poll_interval > 0:

@@ -181,6 +181,11 @@ LOGGING = {
             'propagate': True,
             'level': 'CRITICAL',
         },
+        'requests.packages.urllib3.connectionpool': {
+            'handlers': ['console'],
+            'level': 'CRITICAL',
+            'propagate': True,
+        },
         'github3': {
             'handlers': ['console'],
             'level': 'CRITICAL',
