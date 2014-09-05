@@ -58,9 +58,8 @@ class OrganizationEventsService(service.TaskService):
                 # Buffer the events in order. We can't yield immediately otherwise
                 # the stream will be yielded out of order - which would suck.
                 # We buffer until we see an ID we recognise. This avoids dupes.
-                for event in self.iter_events(iterable):
+                for event in self.iter_events(iterable, only_take_one=not include_recent):
                     if event.id == most_recent:
-                        self.logger.debug("Event %s already seen. No need to fetch rest of stream" % event.id)
                         break
                     events.append(event)
 
@@ -80,8 +79,10 @@ class OrganizationEventsService(service.TaskService):
                 if include_recent or most_recent:
                     while events:
                         last_event = events.pop()
+                        most_recent = last_event.id
                         yield last_event
-                    most_recent = last_event.id
+                else:
+                    most_recent = events[0].id
 
             poll_interval = int(iterable.last_response.headers.get("X-Poll-Interval", 0))
             if poll_interval > 0:
