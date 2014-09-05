@@ -22,7 +22,7 @@ def push_to_commit(sender, payload, **kwargs):
 
 @receiver(push)
 def push_to_chat(sender, payload, **kwargs):
-    fmt = '\x0303%(author)s \x0302%(repname)s \x0310r%(rev)s\x0314%(prefix)s%(changes)s\x0f: %(msg)s'
+    fmt = '\x0303%(author)s \x0302%(repname)s \x0310r%(rev)s\x0314\x0f: %(msg)s'
 
     repname = '/'.join(payload.repo)
     payload = payload.payload
