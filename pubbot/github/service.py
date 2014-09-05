@@ -5,9 +5,28 @@ import gevent
 from github3 import GitHub, GitHubError
 
 from pubbot import service
+from pubbot.github import signals
 
 
 class OrganizationEventsService(service.TaskService):
+
+    handlers = {
+        'CommitCommentEvent': signals.commit_comment,
+        'CreateEvent': signals.create,
+        'DeleteEvent': signals.delete,
+        'GollumEvent': signals.gollum,
+        'IssueCommentEvent': signals.issue_comment,
+        'IssuesEvent': signals.issues,
+        'MemberEvent': signals.member,
+        'PublicEvent': signals.public,
+        'PullRequestEvent': signals.pull_request,
+        'PullRequestReviewCommentEvent': signals.pull_request_review_comment,
+        'PushEvent': signals.push,
+        'ReleaseEvent': signals.release,
+        'StatusEvent': signals.status,
+        'TeamAddEvent': signals.team_add,
+        'WatchEvent': signals.watch,
+    }
 
     def is_rate_limited(self, response):
         return int(response.headers.get("X-RateLimit-Remaining", 0)) <= 0
@@ -71,7 +90,10 @@ class OrganizationEventsService(service.TaskService):
     def run(self):
         org = self.parent.gh.organization(self.name)
         for event in self.iter_new_events(org.iter_events()):
-            self.logger.info(event)
+            signal = self.handlers.get(event.type)
+            if not signal:
+                self.logger.info("Unhandled event: %s" % event.to_json())
+            signal.send(payload=event.payload)
 
 
 class Service(service.BaseService):

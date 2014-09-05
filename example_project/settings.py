@@ -181,6 +181,16 @@ LOGGING = {
             'propagate': True,
             'level': 'CRITICAL',
         },
+        'github3': {
+            'handlers': ['console'],
+            'level': 'CRITICAL',
+            'propagate': True,
+        },
+        'pubbot.github': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
         '': {
             'handlers': ['console'],
             'level': 'DEBUG',
@@ -188,6 +198,7 @@ LOGGING = {
         },
     },
 }
+
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
