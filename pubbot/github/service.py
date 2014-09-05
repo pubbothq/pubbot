@@ -100,7 +100,7 @@ class OrganizationEventsService(service.TaskService):
             if not signal:
                 self.logger.info("Unhandled event: %s" % event.to_json())
                 continue
-            signal.send(payload=event.payload)
+            signal.send(payload=event)
 
 
 class Service(service.BaseService):
