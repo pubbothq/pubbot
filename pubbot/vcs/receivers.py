@@ -2,6 +2,7 @@ from datetime import date
 
 from django.core.cache import cache
 
+from pubbot import ratelimit
 from pubbot.dispatch import receiver
 from pubbot.conversation import say
 from pubbot.vcs.signals import commit
@@ -24,6 +25,7 @@ def notlikely(sender, message, committer, **kwargs):
 
 
 @receiver(commit)
+@ratelimit.enforce_rate_limit("1/5s")
 def multikill(sender, committer, **kwargs):
     if date.today().weekday() > 4:
         # No cheeky weekend killing sprees! ;-)
