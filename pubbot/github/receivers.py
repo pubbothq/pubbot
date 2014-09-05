@@ -10,7 +10,7 @@ from .signals import push
 
 @receiver(push)
 def push_to_commit(sender, payload, **kwargs):
-    for c in payload['payload'].get('commits', []):
+    for c in payload.payload.get('commits', []):
         if not c['distinct']:
             continue
 
@@ -25,8 +25,8 @@ def push_to_commit(sender, payload, **kwargs):
 def push_to_chat(sender, payload, **kwargs):
     fmt = '\x0303%(author)s \x0302%(repname)s \x0310r%(rev)s\x0314\x0f: %(msg)s'
 
-    payload = payload['payload']
-    repname = payload['repo']['name']
+    payload = payload.payload
+    repname = '/'.join(payload.repo)
 
     for commit in payload.get('comments', [])[:4]:
         if not commit["distinct"]:
