@@ -27,7 +27,7 @@ def push_to_chat(sender, payload, **kwargs):
     repname = '/'.join(payload.repo)
     payload = payload.payload
 
-    for commit in payload.get('comments', [])[:4]:
+    for commit in payload.get('commits', [])[:4]:
         if not commit["distinct"]:
             continue
 
