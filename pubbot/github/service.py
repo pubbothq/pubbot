@@ -35,7 +35,7 @@ class OrganizationEventsService(service.TaskService):
         ttr = int(response.headers.get("X-RateLimit-Reset", 0)) - time.time()
         return max(ttr, 0)
 
-    def iter_events(self, iter):
+    def iter_events(self, iter, only_take_one=False):
         """
         This is an awkward construction to avoid iterating over an event stream that is a 304 :/
         """
@@ -43,6 +43,8 @@ class OrganizationEventsService(service.TaskService):
         if iter.last_response.status_code == 304:
             return
         yield first_event
+        if only_take_one:
+            return
         while True:
             yield next(iter)
 
