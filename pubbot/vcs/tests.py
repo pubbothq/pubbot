@@ -41,6 +41,7 @@ class TestMultiKill(TestCase):
         self.date.today.return_value.weekday.return_value = 2
         self.say = _("pubbot.vcs.receivers.say")
         self.cache = caches['default']
+        self.cache.clear()
 
     def cleanUp(self):
         [stop() for stop in self.patchers]

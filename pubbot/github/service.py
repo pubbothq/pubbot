@@ -92,8 +92,8 @@ class OrganizationEventsService(service.TaskService):
             iterable.refresh()
 
     def run(self):
-        #org = self.parent.gh.organization(self.name)
-        #for event in self.iter_new_events(org.iter_events()):
+        # org = self.parent.gh.organization(self.name)
+        # for event in self.iter_new_events(org.iter_events()):
         user = self.parent.gh.user()
         for event in self.iter_new_events(user.iter_org_events(self.name)):
             signal = self.handlers.get(event.type, None)

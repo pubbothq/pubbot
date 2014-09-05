@@ -1,6 +1,3 @@
-import os
-import itertools
-
 from pubbot.conversation import say
 from pubbot.dispatch import receiver
 from pubbot.vcs.signals import commit
@@ -27,13 +24,13 @@ def push_to_chat(sender, payload, **kwargs):
     repname = '/'.join(payload.repo)
     payload = payload.payload
 
-    for commit in payload.get('commits', [])[:4]:
-        if not commit["distinct"]:
+    for c in payload.get('commits', [])[:4]:
+        if not c["distinct"]:
             continue
 
-        author = commit['author']['name']
-        rev = commit['sha'][:6]
-        msg = commit['message']
+        author = c['author']['name']
+        rev = c['sha'][:6]
+        msg = c['message']
 
         trailer = ' ...'
         ircmsg = fmt % locals()
@@ -41,5 +38,5 @@ def push_to_chat(sender, payload, **kwargs):
 
         say(
             content=ircmsg,
-            tags=['github:'+repname],
+            tags=['github:' + repname],
         )
