@@ -16,7 +16,7 @@ def push_to_commit(sender, payload, **kwargs):
         commit.send(
             revision=c['sha'],
             message=c['message'],
-            committer=c['committer']['username'],
+            committer=c['author']['name'],
         )
 
 
