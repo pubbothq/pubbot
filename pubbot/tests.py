@@ -4,10 +4,29 @@ import gevent
 
 from django.core.cache import caches
 
+from pubbot import dispatch
 from pubbot import ratelimit
 from pubbot.state import Machine, State, Transition
 from pubbot.service import BaseService, TaskService
 from pubbot.utils import force_str, force_bytes
+
+
+class TestDispatch(unittest.TestCase):
+
+    def test_dispatch(self):
+        test_signal = dispatch.Signal()
+        a = mock.Mock()
+        b = mock.Mock()
+        b.side_effect = RuntimeError("Fake error")
+
+        test_signal.connect(b)
+        test_signal.connect(a)
+
+        retval = test_signal.send(hello="hello")
+        self.assertEqual(retval[0], (a, a.return_value))
+        self.assertEqual(len(retval), 1)
+
+        a.assert_called_with(signal=test_signal, sender=None, hello="hello")
 
 
 class TestRateLimitUtils(unittest.TestCase):
