@@ -21,6 +21,7 @@ def push_to_commit(sender, payload, **kwargs):
 def push_to_chat(sender, payload, **kwargs):
     fmt = '\x0303%(author)s \x0302%(repname)s \x0310%(rev)s\x0314\x0f: %(msg)s'
 
+    org, rep = payload.repo
     repname = '/'.join(payload.repo)
     payload = payload.payload
 
@@ -38,5 +39,5 @@ def push_to_chat(sender, payload, **kwargs):
 
         say(
             content=ircmsg,
-            tags=['github:' + repname],
+            tags=['github:' + repname, 'github:' + org],
         )
