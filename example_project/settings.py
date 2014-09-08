@@ -138,6 +138,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'constance',
     'constance.backends.database',
+    'pubbot.beat',
     'pubbot.web',
     'pubbot.main',
     'pubbot.irc',

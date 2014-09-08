@@ -40,5 +40,5 @@ class TestPushToChat(unittest.TestCase):
 
             say.assert_called_with(
                 content="\x0303Pubbot \x0302pubbothq/pubbot \x0310abc\x0314\x0f: hello ...",
-                tags=['github:pubbothq/pubbot']
+                tags=['github:pubbothq/pubbot', 'github:pubbothq']
             )
