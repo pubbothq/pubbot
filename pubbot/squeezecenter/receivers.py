@@ -47,6 +47,10 @@ def set_current_skip(skip):
     return caches['default'].set("squeezecenter_skip", skip)
 
 
+def delete_current_skip():
+    return caches['default'].delete("squeezecenter_skip")
+
+
 def timeout_current_skip():
     skip = get_current_skip()
     while skip:
@@ -54,10 +58,10 @@ def timeout_current_skip():
         logger.debug("Checking if the skip is timed out - staleness is %r" % staleness)
         if staleness <= 0:
             logger.debug("The skip is timed out")
+            delete_current_skip()
             say(
                 content='Vote timed out after 30 seconds',
             )
-            # FIXME
             return
         logger.debug("%d seconds to timeout" % staleness)
         gevent.sleep(staleness)
@@ -122,7 +126,7 @@ def update_skip(current_skip, user, skip_type, created):
 
     set_current_skip(current_skip)
 
-    if not created:
+    if created:
         gevent.spawn(timeout_current_skip)
 
     if votes_needed > 0:
@@ -133,6 +137,8 @@ def update_skip(current_skip, user, skip_type, created):
         }
 
     logger.debug("Skipping %d tracks" % current_skip["number"])
+
+    delete_current_skip()
 
     command("playlist index %d" % current_skip["number"])
 
