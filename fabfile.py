@@ -21,7 +21,7 @@ WantedBy = multi-user.target
 
 
 @blueprint
-def deploy(bundle):
+def deploy(bundle, **kwargs):
     yield Group(name="pubbot")
 
     yield User(
