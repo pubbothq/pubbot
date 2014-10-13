@@ -21,8 +21,11 @@ from .models import Grouping, Token
 
 
 def iteruntil(offset, iterable):
+    gen = iterable()
+    yield gen.next()
     until = time.time() + offset
-    return itertools.takewhile(lambda x: until > time.time(), iterable)
+    while until > time.time():
+        yield gen.next()
 
 
 def iter_replies_from_tokens(tokens):
