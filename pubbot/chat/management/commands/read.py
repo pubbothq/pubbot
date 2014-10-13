@@ -73,7 +73,6 @@ class Command(BaseCommand):
                         if " " not in l:
                             continue
 
-
                     # Is this nick blacklisted? (Best to ignore chatbot spam)
                     if nick.lower() in ignored_nicks:
                         continue

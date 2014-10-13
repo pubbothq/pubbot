@@ -13,7 +13,10 @@
 # limitations under the License.
 
 import itertools
+import random
 import time
+
+from django.db.models import Max
 
 from .tokenizer import tokenizer
 from .scoring import scorers
@@ -31,8 +34,8 @@ def iteruntil(offset, iterable):
 def iter_replies_from_tokens(tokens):
     tokens = set(tokens)
     if not tokens:
-        max_ = model.objects.aggregate(Max('id')).values()[0]
-        tokens = [Token.objects.filter(id__gte=max_*random.random()).first().token]
+        max_ = Token.objects.aggregate(Max('id')).values()[0]
+        tokens = [Token.objects.filter(id__gte=max_ * random.random()).first().token]
 
     # Do a graph search to get group nodes from tokens and stems
     # (Expected structure is STEM -> TOKEN -> GROUP -> GROUP -> END)
