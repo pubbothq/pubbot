@@ -56,7 +56,7 @@ def reply(text):
     for i, reply in enumerate(iter_replies_from_tokens(tokens)):
         score = scorers.score(reply)
 
-        if score > best_score:
+        if not best_score or score > best_score:
             best_score = score
             best_reply = reply
 
