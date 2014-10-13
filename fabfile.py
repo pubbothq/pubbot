@@ -35,13 +35,11 @@ def deploy(bundle):
     yield Directory(
         name='/var/local/pubbot',
         owner='pubbot',
-        group='pubbot',
         )
 
     yield Directory(
         name='/var/local/pubbot/var',
         owner='pubbot',
-        group='pubbot',
         )
 
     yield Package(name="git-core")
@@ -50,7 +48,6 @@ def deploy(bundle):
 
 
     yield Execute(
-        name='virtualenv',
         command='virtualenv /var/local/pubbot',
         creates='/var/local/pubbot/bin/pip',
         user='pubbot',
@@ -65,7 +62,6 @@ def deploy(bundle):
         )
 
     yield Execute(
-        name='pip-install',
         command='/var/local/pubbot/bin/pip install -r /var/local/pubbot/src/requirements.txt',
         cwd='/var/local/pubbot/src',
         user='pubbot',
@@ -73,7 +69,6 @@ def deploy(bundle):
     )
 
     yield Execute(
-        name='migrate',
         command='/var/local/pubbot/bin/pubbot update',
         cwd='/var/local/pubbot/src',
         user='pubbot',
@@ -85,22 +80,17 @@ def deploy(bundle):
         contents=systemd_unit,
     )
 
-    # FIXME: Not entirely sure if this is required?
-    # FIXME: Need a similar enable command to start on boot?
     yield Execute(
-        name="systemctl-daemon-reload",
         command="systemctl daemon-reload",
         watches=['/etc/systemd/system/pubbot.service'],
     )
 
     yield Execute(
-        name="systemctl-enable-pubbot",
         command="systemctl enable /etc/systemd/system/pubbot.service",
         creates="/etc/systemd/system/multi-user.target.wants/pubbot.service",
         )
 
     yield Execute(
-        name="systemctl-restart",
         command="systemctl restart pubbot.service",
         watches=[
             "/var/local/pubbot/src",
