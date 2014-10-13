@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import os
+import platform
 import subprocess
+import tempfile
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured

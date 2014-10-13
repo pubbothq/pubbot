@@ -53,7 +53,7 @@ class Stream(object):
 
         self.rate = 16000
         self.frames_per_buffer = 1024
-        #FIXME: What are the units of rate / frames_per_buffer
+        # FIXME: What are the units of rate / frames_per_buffer
         self.period = self.rate / self.frames_per_buffer
 
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -120,8 +120,8 @@ class Stream(object):
                 started = True
                 count = 0
 
-	    # self.period represents about a second of data - as soon as we
-	    # reach that we can return a wav
+            # self.period represents about a second of data - as soon as we
+            # reach that we can return a wav
             if started and count >= self.period:
                 self.logger.debug("Stopped listening as you finished blabbing")
                 break

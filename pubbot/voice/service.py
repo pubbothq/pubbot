@@ -14,11 +14,11 @@
 
 from __future__ import absolute_import
 
-import gevent
-
 from pubbot import service
+from pubbot.conversation.signals import message
 from .say import voice
 from .listen import speech_to_text
+from .ear import Device
 
 
 class Service(service.TaskService):

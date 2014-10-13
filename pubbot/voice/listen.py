@@ -27,26 +27,25 @@ class Listener(object):
 
     @classmethod
     def available(cls):
-        raise NotImplementedError(self.available)
+        raise NotImplementedError(cls.available)
 
     def process(self, stream):
         """ Given a stream of audio, returns a listen of possible interpretations """
         raise NotImplementedError(self.process)
 
 
-class PocksetSphinxListener(Listener):
+class PocketSphinxListener(Listener):
 
     def __init__(self):
         self.decoder = pocketsphinx.Decoder(
-            hmm=hmm_dir,
-            lm=lmd,
-            dict=dictd,
-            logfn,
+            hmm="/usr/share/pocketsphinx/model/hmm/wsj1",
+            lm="/usr/share/pocketsphinx/model/lm/wsj/wlist5o.3e-7.vp.tg.lm.DMP",
+            dict="/usr/share/pocketsphinx/model/lm/wsj/wlist5o.dic",
         )
 
     @classmethod
     def available(cls):
-        return pocketsphinx != None
+        return pocketsphinx is not None
 
     def process(self, stream):
         # FIXME: Investigate decode_raw
