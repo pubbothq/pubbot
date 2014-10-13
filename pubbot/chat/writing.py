@@ -17,7 +17,7 @@ import time
 
 from .tokenizer import tokenizer
 from .scoring import scorers
-from .models import Grouping
+from .models import Grouping, Token
 
 
 def iteruntil(offset, iterable):
@@ -28,7 +28,8 @@ def iteruntil(offset, iterable):
 def iter_replies_from_tokens(tokens):
     tokens = set(tokens)
     if not tokens:
-        raise StopIteration()
+        max_ = model.objects.aggregate(Max('id')).values()[0]
+        tokens = [Token.objects.filter(id__gte=max_*random.random()).first().token]
 
     # Do a graph search to get group nodes from tokens and stems
     # (Expected structure is STEM -> TOKEN -> GROUP -> GROUP -> END)
