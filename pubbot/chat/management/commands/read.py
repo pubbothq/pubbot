@@ -65,6 +65,15 @@ class Command(BaseCommand):
                     nick = nick.strip()
                     line = line.strip()
 
+                    # Try to find directed messages. Grr.
+                    # So treat: pubbot: hello boy
+                    # As: hello boy
+                    if ":" in line:
+                        l, r = line.split(":", 1)
+                        if " " not in l:
+                            continue
+
+
                     # Is this nick blacklisted? (Best to ignore chatbot spam)
                     if nick.lower() in ignored_nicks:
                         continue
