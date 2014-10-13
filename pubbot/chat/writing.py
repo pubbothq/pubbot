@@ -24,11 +24,10 @@ from .models import Grouping, Token
 
 
 def iteruntil(offset, iterable):
-    gen = iterable()
-    yield gen.next()
+    yield iterable.next()
     until = time.time() + offset
     while until > time.time():
-        yield gen.next()
+        yield iterable.next()
 
 
 def iter_replies_from_tokens(tokens):
