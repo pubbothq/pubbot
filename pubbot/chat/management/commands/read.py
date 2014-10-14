@@ -8,6 +8,7 @@ from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 from django.core.management.base import BaseCommand, CommandError
 
 from pubbot.chat.training import Trainer
+from pubbot.chat.brain import brain
 
 
 class Command(BaseCommand):
@@ -38,8 +39,10 @@ class Command(BaseCommand):
 
         ignored_nicks = options.get("ignored_nick", [])
 
-        with Trainer(batch_mode=True) as trainer:
-            with open(path) as fp:
+        trainer = Trainer()
+        brain.client.flushdb()
+
+        with open(path) as fp:
                 for line in fp.readlines():
                     # Couple of problems with this approach.
                     #  1. len() doesn't give size in bytes
