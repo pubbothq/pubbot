@@ -40,9 +40,8 @@ def iter_replies_from_tokens(tokens):
     if stokens:
         tokens = stokens
     tokens = list(tokens)
-    print tokens
 
-    for chain, score in iteruntil(0.5, iter(lambda: brain.get_chain_from_tokens(tokens), None)):
+    for chain, score in iteruntil(0.5, brain.get_chains_from_tokens(tokens)):
         yield chain
 
 
