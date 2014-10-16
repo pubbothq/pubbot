@@ -54,7 +54,7 @@ class TestSkipping(TestCase):
             "skip": set(),
         })
         r = receivers.requested_skip(None, content="skip", user="fred")
-        self.assertEqual(r['content'], "fred voted to skip! 4 more votes required")
+        self.assertEqual(r['content'], "fred voted to skip! 2 more votes required")
 
     def test_change_vote_to_noskip(self):
         receivers.set_current_skip({
@@ -63,7 +63,7 @@ class TestSkipping(TestCase):
             "noskip": set(),
         })
         r = receivers.requested_noskip(None, content="noskip", user="fred")
-        self.assertEqual(r['content'], "fred voted to noskip! 2 more votes required")
+        self.assertEqual(r['content'], "fred voted to noskip! 4 more votes required")
 
     def test_noskip_novote(self):
         r = receivers.requested_noskip(None, content="noskip", user="fred")
@@ -90,7 +90,7 @@ class TestSkipping(TestCase):
             choice.side_effect = lambda x: x[0]
             with mock.patch("pubbot.squeezecenter.receivers.command") as command:
                 r = receivers.requested_skip(None, content="skip", user="pixel")
-                command.assert_called_with("playlist index 1")
+                command.assert_called_with("playlist index +1")
         self.assertEqual(r['content'], "Good riddance.")
 
 
