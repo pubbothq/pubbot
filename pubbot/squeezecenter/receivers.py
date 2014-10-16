@@ -111,9 +111,6 @@ def requested_noskip(sender, user, **kwargs):
 
 
 def update_skip(current_skip, user, skip_type, created):
-    skip_count = len(current_skip["skip"]) - len(current_skip["noskip"])
-    votes_needed = 3 - skip_count
-
     # Don't let them both skip and noskip
     opposite_skip_type = "skip" if skip_type == "noskip" else "noskip"
     try:
@@ -129,6 +126,9 @@ def update_skip(current_skip, user, skip_type, created):
     if created:
         gevent.spawn(timeout_current_skip)
 
+    skip_count = len(current_skip["skip"]) - len(current_skip["noskip"])
+    votes_needed = 3 - skip_count
+
     if votes_needed > 0:
         logger.debug("%d more tracks needed to skip" % votes_needed)
 
@@ -140,7 +140,7 @@ def update_skip(current_skip, user, skip_type, created):
 
     delete_current_skip()
 
-    command("playlist index %d" % current_skip["number"])
+    command("playlist index +%d" % current_skip["number"])
 
     return {
         "content": random.choice([
