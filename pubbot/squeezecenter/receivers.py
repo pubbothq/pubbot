@@ -23,6 +23,7 @@ import gevent
 from pubbot.bot import bot
 from pubbot.dispatch import receiver
 from pubbot.conversation import chat_receiver, say
+from pubbot import ratelimit
 from . import signals
 
 
@@ -69,6 +70,7 @@ def timeout_current_skip():
 
 
 @chat_receiver(r'^skip(\s(?P<number>\d+))?$')
+@ratelimit.enforce_rate_limit("1/30s", limit_by=['user'])
 def requested_skip(sender, number, user, **kwargs):
     current_skip = get_current_skip()
     created = False
