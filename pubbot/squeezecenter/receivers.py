@@ -74,9 +74,9 @@ def requested_skip(sender, number, user, **kwargs):
     created = False
 
     if number and current_skip:
-            return {
-                "content": "Vote already in progress; can't start another",
-            }
+        return {
+            "content": "Vote already in progress; can't start another",
+        }
 
     if not current_skip:
         if not number:
