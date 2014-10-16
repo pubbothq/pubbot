@@ -25,7 +25,8 @@ def mutter(sender, sentence, **kwargs):
         return
 
     return {
-        'content': reply(sentence)
+        'content': reply(sentence),
+        'weight': -999,
     }
 
 
