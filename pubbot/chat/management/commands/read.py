@@ -7,7 +7,6 @@ from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
 
 from django.core.management.base import BaseCommand, CommandError
 
-from pubbot.chat.training import Trainer
 from pubbot.chat.brain import brain
 
 
@@ -46,7 +45,6 @@ class Command(BaseCommand):
 
         ignored_nicks = options.get("ignored_nick", [])
 
-        trainer = Trainer()
         brain.client.flushdb()
 
         with open(path) as fp:
@@ -93,7 +91,7 @@ class Command(BaseCommand):
                     if " " not in line:
                         continue
 
-                    trainer.learn_string(line)
+                    brain.store_string(line)
 
         pb.finish()
 

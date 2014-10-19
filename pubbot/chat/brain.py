@@ -5,7 +5,9 @@ import json
 from django.utils.functional import SimpleLazyObject
 import redis
 
+from pubbot.utils import force_str
 from .stemmer import stemmer
+from .tokenizer import tokenizer
 
 
 def group_tokens(tokens):
@@ -42,6 +44,13 @@ class Brain(object):
             self.client.sadd(self.FORWARD_KEY % (a, b), c)
             self.client.sadd(self.BACKWARD_KEY % (c, b), a)
             self.client.incr(self.GROUP_KEY % (a, b, c))
+
+    def store_string(self, text):
+        try:
+            tokens = tokenizer.split(force_str(text))
+            return self.learn_tokens(tokens)
+        except UnicodeError:
+            pass
 
     def get_chains_from_tokens(self, tokens):
         tokens = [stemmer.stem(token) for token in tokens]
