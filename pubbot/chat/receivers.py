@@ -33,4 +33,4 @@ def mutter(sender, sentence, **kwargs):
 def learn(sender, sentence, **kwargs):
     if kwargs.get('direct', False):
         return
-    trainer.store_string(sentence)
+    brain.store_string(sentence)

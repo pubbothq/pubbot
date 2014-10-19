@@ -62,7 +62,7 @@ class Brain(object):
     def store_string(self, text):
         try:
             tokens = tokenizer.split(force_str(text))
-            return self.learn_tokens(tokens)
+            return self.store_tokens(tokens)
         except UnicodeError:
             pass
 

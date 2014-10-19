@@ -3,7 +3,7 @@ import os
 import sys
 from optparse import make_option
 
-from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
+from progressbar import ProgressBar, Percentage, Bar, ETA
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -41,8 +41,6 @@ class Command(BaseCommand):
         if not os.path.exists(path):
             raise CommandError("No irc log found at %r" % path)
 
-        pb = ProgressBar(widgets=[Percentage(), Bar(), ETA(), FileTransferSpeed()], maxval=os.stat(path).st_size).start()
-
         ignored_nicks = options.get("ignored_nick", [])
 
         brain.client.flushdb()
@@ -50,11 +48,11 @@ class Command(BaseCommand):
         with open(path) as fp:
                 start_at = int(options.get('start_at', 0))
                 lines = fp.readlines()[start_at:]
+
+                pb = ProgressBar(widgets=[Percentage(), Bar(), ETA()], maxval=len(lines)).start()
+
                 for line in lines:
-                    # Couple of problems with this approach.
-                    #  1. len() doesn't give size in bytes
-                    #  2. Ideally we'd set the size *after* each iteration
-                    pb.update(pb.currval + len(line))
+                    pb.update(pb.currval + 1)
                     sys.stdout.flush()
 
                     if line.startswith("---"):
