@@ -19,6 +19,12 @@ RestartSec = 30
 WantedBy = multi-user.target
 """.strip()
 
+apt_preferences_redis = """
+Package: redis-server
+Pin: release n=wheezy-backports
+Pin-Priority: 900
+""".strip()
+
 
 @blueprint
 def deploy(bundle, **kwargs):
@@ -46,6 +52,25 @@ def deploy(bundle, **kwargs):
     yield Package(name="python-dev")
     yield Package(name="python-virtualenv")
 
+    yield File(
+        name="/etc/apt/preferences.d/redis-server",
+        contents=apt_preferences_redis,
+    )
+
+    yield File(
+        name="/etc/apt/sources.list.d/wheezy-backports",
+        contents="deb http://ftp.debian.org/debian wheezy-backports main contrib non-free",
+    )
+
+    yield Execute(
+        command="apt-get update",
+        watches=[
+            "/etc/apt/preferences.d/redis-server",
+            "/etc/apt/sources.list.d/wheezy-backports",
+        ]
+    )
+
+    yield Package(name="redis-server")
 
     yield Execute(
         command='virtualenv /var/local/pubbot',

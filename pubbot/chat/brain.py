@@ -48,7 +48,11 @@ class Brain(object):
     def get_chains_from_tokens(self, tokens):
         while True:
             token = random.choice(tokens)
-            results = json.loads(self.client.eval(self.generate_sentence, 0, token, 10))
+            try:
+                results = json.loads(self.client.eval(self.generate_sentence, 0, token, 10), "utf-8")
+            except UnicodeError:
+                continue
+
             for result in results:
                 yield result["chain"], result["score"]
 

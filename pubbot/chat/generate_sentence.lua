@@ -19,7 +19,7 @@ for i = 1, tonumber(ARGV[2]) do
     for key, token in pairs(base_chain) do
         chain[key] = token
     end
-    local score = base_score
+    local score = base_score or 0
     local val = nil
 
     if not starts_chain then
@@ -27,7 +27,7 @@ for i = 1, tonumber(ARGV[2]) do
             val = redis.call("SRANDMEMBER", "B_" .. chain[2] .. "_" .. chain[1])
             if not val or val=='' then break end
             table.insert(chain, 1, val)
-            score = score + redis.call("GET", "G_" .. chain[1] .. "_" .. chain[2] .. "_" .. chain[3])
+            score = score + tonumber(redis.call("GET", "G_" .. chain[1] .. "_" .. chain[2] .. "_" .. chain[3]) or 0)
         end
     end
     if not ends_chain then
@@ -35,7 +35,7 @@ for i = 1, tonumber(ARGV[2]) do
             val = redis.call("SRANDMEMBER", "F_" .. chain[#chain - 1] .. "_" .. chain[#chain])
             if not val or val=='' then break end
             table.insert(chain, val)
-            score = score + redis.call("GET", "G_" .. chain[1] .. "_" .. chain[2] .. "_" .. chain[3])
+            score = score + tonumber(redis.call("GET", "G_" .. chain[1] .. "_" .. chain[2] .. "_" .. chain[3]) or 0)
         end
     end
 

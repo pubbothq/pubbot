@@ -42,7 +42,7 @@ def iter_replies_from_tokens(tokens):
     tokens = list(tokens)
 
     for chain, score in iteruntil(0.5, brain.get_chains_from_tokens(tokens)):
-        yield chain
+        yield chain, score
 
 
 def reply(text):
@@ -54,13 +54,11 @@ def reply(text):
     i = 0
 
     for i, reply in enumerate(iter_replies_from_tokens(tokens)):
-        score = scorers.score(reply)
+        score = scorers.score(*reply)
 
         if not best_score or score > best_score:
             best_score = score
-            best_reply = reply
-
-    print i
+            best_reply = reply[0]
 
     if best_reply is None:
         return "You make no sense"

@@ -23,6 +23,13 @@ class Command(BaseCommand):
             default=[],
             help="Don't import message by this nick"
         ),
+        make_option(
+            '--start-at',
+            action='store',
+            dest='start_at',
+            default=1,
+            help="Start at line <x>",
+        ),
     )
 
     def handle(self, *args, **options):
@@ -43,7 +50,9 @@ class Command(BaseCommand):
         brain.client.flushdb()
 
         with open(path) as fp:
-                for line in fp.readlines():
+                start_at = int(options.get('start_at', 0))
+                lines = fp.readlines()[start_at:]
+                for line in lines:
                     # Couple of problems with this approach.
                     #  1. len() doesn't give size in bytes
                     #  2. Ideally we'd set the size *after* each iteration
