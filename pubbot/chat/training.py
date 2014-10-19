@@ -16,6 +16,7 @@ from pubbot.utils import force_str
 from .tokenizer import tokenizer
 from .brain import brain
 
+
 class Trainer(object):
 
     """

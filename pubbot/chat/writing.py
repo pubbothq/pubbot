@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import itertools
 import os
-import random
 import time
-
-from django.db.models import Max
 
 from .tokenizer import tokenizer
 from .scoring import scorers
@@ -33,6 +29,7 @@ def iteruntil(offset, iterable):
     until = time.time() + offset
     while until > time.time():
         yield iterable.next()
+
 
 def iter_replies_from_tokens(tokens):
     tokens = set(tokens)

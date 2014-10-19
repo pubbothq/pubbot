@@ -1,4 +1,9 @@
-local random_grouping = string.sub(redis.call("SRANDMEMBER", "T_" .. ARGV[1]), 3)
+local random_grouping = redis.call("SRANDMEMBER", "T_" .. ARGV[1])
+if not random_grouping then
+    return "[]"
+end
+random_grouping = string.sub(random_grouping, 3)
+
 local base_chain = {}
 for token in string.gmatch(random_grouping, '([^_]+)') do
     table.insert(base_chain, token)

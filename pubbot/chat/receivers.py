@@ -34,5 +34,5 @@ def learn(sender, sentence, **kwargs):
     if kwargs.get('direct', False):
         return
 
-    with Trainer() as trainer:
-        trainer.learn_string(sentence)
+    trainer = Trainer()
+    trainer.learn_string(sentence)
