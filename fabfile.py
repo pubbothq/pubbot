@@ -25,6 +25,37 @@ Pin: release n=wheezy-backports
 Pin-Priority: 900
 """.strip()
 
+redis_launchd = """
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>KeepAlive</key>
+    <dict>
+      <key>SuccessfulExit</key>
+      <false/>
+    </dict>
+    <key>Label</key>
+    <string>homebrew.mxcl.redis</string>
+    <key>UserName</key>
+    <string>pubbot</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/opt/redis/bin/redis-server</string>
+      <string>/usr/local/etc/redis.conf</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>/usr/local/var</string>
+    <key>StandardErrorPath</key>
+    <string>/usr/local/var/log/redis.log</string>
+    <key>StandardOutPath</key>
+    <string>/usr/local/var/log/redis.log</string>
+  </dict>
+</plist>
+""".strip()
+
 
 @blueprint
 def deploy(bundle, **kwargs):
@@ -122,3 +153,58 @@ def deploy(bundle, **kwargs):
             "/etc/systemd/system/pubbot.service",
         ]
     )
+
+
+@blueprint
+def deploy_osx(bundle, **kwargs):
+    yield Execute(
+        command="brew install redis",
+        creates="/usr/local/bin/redis-server",
+    )
+    yield File(
+        name="/Library/LaunchDaemons/homebrew.mxcl.redis.plist",
+        contents=redis_launchd,
+    )
+    yield Execute(
+        command="launchctl load /Library/LaunchDaemons/homebrew.mxcl.redis.plist",
+        watches=["/Library/LaunchDaemons/homebrew.mxcl.redis.plist"],
+    )
+
+    yield Execute(
+        command="easy_install virtualenv",
+        creates="/usr/local/bin/virtualenv",
+    )
+
+    yield Execute(
+        command='virtualenv /Users/pubbot/pubbot',
+        creates='/Users/pubbot/pubbot/bin/pip',
+        user='pubbot',
+        )
+
+    yield Directory(
+        name='/Users/pubbot/pubbot/var',
+        owner='pubbot',
+    )
+
+    yield Checkout(
+        name='/Users/pubbot/pubbot/src',
+        repository='git://github.com/pubbothq/pubbot',
+        scm="git",
+        user='pubbot',
+        branch='master',
+        )
+
+    yield Execute(
+        command='/Users/pubbot/pubbot/bin/pip install -r /Users/pubbot/pubbot/src/requirements.txt',
+        cwd='/Users/pubbot/pubbot/src',
+        user='pubbot',
+        watches=['/Users/pubbot/pubbot/src'],
+    )
+
+    yield Execute(
+        command='/Users/pubbot/pubbot/bin/pubbot update',
+        cwd='/Users/pubbot/pubbot/src',
+        user='pubbot',
+        watches=['/Users/pubbot/pubbot/src'],
+    )
+
