@@ -70,7 +70,7 @@ class Command(BaseCommand):
 
                     nick, line = line[1:].split(">", 1)
 
-                    nick = nick.strip()
+                    nick = nick.strip().lstrip("@")
                     line = line.strip()
 
                     # Try to find directed messages. Grr.
