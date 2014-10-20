@@ -57,6 +57,38 @@ redis_launchd = """
 """.strip()
 
 
+pubbot_launchd = """
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>KeepAlive</key>
+    <dict>
+      <key>SuccessfulExit</key>
+      <false/>
+    </dict>
+    <key>Label</key>
+    <string>io.unrouted.pubbot</string>
+    <key>UserName</key>
+    <string>pubbot</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Users/pubbot/pubbot/bin/pubbot</string>
+      <string>bot</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>/Users/pubbot/pubbot</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/pubbot.log</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/pubbot.log</string>
+  </dict>
+</plist>
+""".strip()
+
+
 @blueprint
 def deploy(bundle, **kwargs):
     yield Group(name="pubbot")
@@ -208,3 +240,17 @@ def deploy_osx(bundle, **kwargs):
         watches=['/Users/pubbot/pubbot/src'],
     )
 
+    yield File(
+        name="/Library/LaunchDaemons/io.unrouted.pubbot.plist",
+        contents=pubbot_launchd,
+    )
+    yield Execute(
+        commands=[
+            "sh -c 'launchctl unload /Library/LaunchDaemons/io.unrouted.pubbot.plist || true'",
+            "launchctl load /Library/LaunchDaemons/io.unrouted.pubbot.plist",
+        ],
+        watches=[
+            "/Users/pubbot/pubbot/src",
+            "/Library/LaunchDaemons/io.unrouted.pubbot.plist",
+        ],
+    )
