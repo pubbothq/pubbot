@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import itertools
-import random
+import os
 import time
-
-from django.db.models import Max
 
 from .tokenizer import tokenizer
 from .scoring import scorers
-from .models import Grouping, Token
+from .brain import brain
+
+
+with open(os.path.join(os.path.dirname(__file__), "stopwords.txt")) as fp:
+    STOP_WORDS = set(fp.read().split("\n"))
 
 
 def iteruntil(offset, iterable):
@@ -32,23 +33,13 @@ def iteruntil(offset, iterable):
 
 def iter_replies_from_tokens(tokens):
     tokens = set(tokens)
-    if not tokens:
-        max_ = Token.objects.aggregate(Max('id')).values()[0]
-        tokens = [Token.objects.filter(id__gte=max_ * random.random()).first().token]
+    stokens = tokens.difference(STOP_WORDS)
+    if stokens:
+        tokens = stokens
+    tokens = list(tokens)
 
-    # Do a graph search to get group nodes from tokens and stems
-    # (Expected structure is STEM -> TOKEN -> GROUP -> GROUP -> END)
-
-    seen = set()
-    for chain in iteruntil(0.5, itertools.cycle(Grouping.iter_random_groupings(tokens))):
-        backwards = chain.get_complete_incoming_chains()
-        forwards = chain.get_complete_outgoing_chains()
-
-        reply = tuple(backwards.next()) + (chain, ) + tuple(forwards.next())
-
-        if reply not in seen:
-            yield reply
-            seen.add(reply)
+    for chain, score in iteruntil(0.5, brain.get_chains_from_tokens(tokens)):
+        yield chain, score
 
 
 def reply(text):
@@ -60,13 +51,13 @@ def reply(text):
     i = 0
 
     for i, reply in enumerate(iter_replies_from_tokens(tokens)):
-        score = scorers.score(reply)
+        score = scorers.score(*reply)
 
         if not best_score or score > best_score:
             best_score = score
-            best_reply = reply
+            best_reply = reply[0]
 
     if best_reply is None:
         return "You make no sense"
 
-    return " ".join(t.token3.token for t in best_reply)
+    return " ".join(t for t in best_reply)

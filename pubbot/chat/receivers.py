@@ -15,8 +15,8 @@
 import random
 
 from pubbot.conversation import chat_receiver
-from pubbot.chat.training import Trainer
 from pubbot.chat.writing import reply
+from pubbot.chat.brain import brain
 
 
 @chat_receiver(r'^(?P<sentence>.*)$')
@@ -34,6 +34,4 @@ def mutter(sender, sentence, **kwargs):
 def learn(sender, sentence, **kwargs):
     if kwargs.get('direct', False):
         return
-
-    with Trainer() as trainer:
-        trainer.learn_string(sentence)
+    brain.store_string(sentence)

@@ -3,11 +3,11 @@ import os
 import sys
 from optparse import make_option
 
-from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
+from progressbar import ProgressBar, Percentage, Bar, ETA
 
 from django.core.management.base import BaseCommand, CommandError
 
-from pubbot.chat.training import Trainer
+from pubbot.chat.brain import brain
 
 
 class Command(BaseCommand):
@@ -22,6 +22,13 @@ class Command(BaseCommand):
             default=[],
             help="Don't import message by this nick"
         ),
+        make_option(
+            '--start-at',
+            action='store',
+            dest='start_at',
+            default=1,
+            help="Start at line <x>",
+        ),
     )
 
     def handle(self, *args, **options):
@@ -34,17 +41,18 @@ class Command(BaseCommand):
         if not os.path.exists(path):
             raise CommandError("No irc log found at %r" % path)
 
-        pb = ProgressBar(widgets=[Percentage(), Bar(), ETA(), FileTransferSpeed()], maxval=os.stat(path).st_size).start()
-
         ignored_nicks = options.get("ignored_nick", [])
 
-        with Trainer(batch_mode=True) as trainer:
-            with open(path) as fp:
-                for line in fp.readlines():
-                    # Couple of problems with this approach.
-                    #  1. len() doesn't give size in bytes
-                    #  2. Ideally we'd set the size *after* each iteration
-                    pb.update(pb.currval + len(line))
+        brain.client.flushdb()
+
+        with open(path) as fp:
+                start_at = int(options.get('start_at', 0))
+                lines = fp.readlines()[start_at:]
+
+                pb = ProgressBar(widgets=[Percentage(), Bar(), ETA()], maxval=len(lines)).start()
+
+                for line in lines:
+                    pb.update(pb.currval + 1)
                     sys.stdout.flush()
 
                     if line.startswith("---"):
@@ -81,7 +89,7 @@ class Command(BaseCommand):
                     if " " not in line:
                         continue
 
-                    trainer.learn_string(line)
+                    brain.store_string(line)
 
         pb.finish()
 

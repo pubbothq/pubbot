@@ -25,8 +25,8 @@ class Scorers(object):
     def add(self, weight, scorer):
         self.scorers.append((weight, scorer))
 
-    def score(self, reply):
-        score = 0
+    def score(self, reply, frequency_score):
+        score = frequency_score or 0
         for weight, scorer in self.scorers:
             score += scorer.score(reply)
         return score
