@@ -41,7 +41,7 @@ class Command(BaseCommand):
         if not os.path.exists(path):
             raise CommandError("No irc log found at %r" % path)
 
-        ignored_nicks = options.get("ignored_nick", [])
+        ignored_nicks = options.get("ignored_nicks", [])
 
         brain.client.flushdb()
 
