@@ -153,6 +153,7 @@ INSTALLED_APPS = (
     'pubbot.github',
     'pubbot.twitter',
     'pubbot.trac',
+    'pubbot.giphy',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
