@@ -3,12 +3,12 @@ Created on 3 Dec 2014
 
 '''
 import logging
-import requests
 from pubbot.conversation import chat_receiver
 
 import giphypop
 
 logger = logging.getLogger(__name__)
+
 
 @chat_receiver('^gifme:\\s+(?P<terms>.*)')
 def giphy_request(sender, terms, **kwargs):
