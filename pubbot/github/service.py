@@ -95,12 +95,17 @@ class OrganizationEventsService(service.TaskService):
         # org = self.parent.gh.organization(self.name)
         # for event in self.iter_new_events(org.iter_events()):
         user = self.parent.gh.user()
-        for event in self.iter_new_events(user.iter_org_events(self.name)):
-            signal = self.handlers.get(event.type, None)
-            if not signal:
-                self.logger.info("Unhandled event: %s" % event.to_json())
-                continue
-            signal.send(payload=event)
+        # FIXME: It would be nice to make all TaskServices restartable...
+        while True:
+            try:
+                for event in self.iter_new_events(user.iter_org_events(self.name)):
+                    signal = self.handlers.get(event.type, None)
+                    if not signal:
+                        self.logger.info("Unhandled event: %s" % event.to_json())
+                        continue
+                    signal.send(payload=event)
+            except Exception:
+                self.logger.exception("Unhandled exception iterating over github results. Restarting.")
 
 
 class Service(service.BaseService):
