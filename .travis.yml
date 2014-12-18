@@ -2,11 +2,18 @@ language: python
 python:
   - "2.7"
 
+sudo: false
+
+cache:
+  directories:
+    - $HOME/wheelhouse
+
 services:
   - redis-server
 
 install:
-  - pip install -r requirements.txt
+  - pip wheel --find-links=$HOME/wheelhouse -r requirements.txt --wheel-dir=$HOME/wheelhouse
+  - pip install --no-index --find-links=$HOME/wheelhouse -r requirements.txt
   - mkdir $VIRTUAL_ENV/var
 
 script:
