@@ -17,7 +17,6 @@ setup(
         'gevent',
         'greenlet',
         'geventirc',
-        'gunicorn',
         'requests',
         'beautifulsoup4',
         'PyStemmer',
