@@ -41,11 +41,12 @@ def new_sslwrap(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=
 if not hasattr(_ssl, 'sslwrap'):
     _ssl.sslwrap = new_sslwrap
 
+
 def patch(foo):
     def _(*args, **kwargs):
         for k in ('server_hostname', '_context'):
             if k in kwargs:
-                del kwargs
+                del kwargs[k]
         return foo(*args, **kwargs)
     return _
 
