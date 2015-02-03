@@ -16,6 +16,45 @@
 import os
 import sys
 
+import inspect
+__ssl__ = __import__('ssl')
+
+try:
+    _ssl = __ssl__._ssl
+except AttributeError:
+    _ssl = __ssl__._ssl2
+
+
+def new_sslwrap(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=__ssl__.CERT_NONE, ssl_version=__ssl__.PROTOCOL_SSLv23, ca_certs=None, ciphers=None):
+    context = __ssl__.SSLContext(ssl_version)
+    context.verify_mode = cert_reqs or __ssl__.CERT_NONE
+    if ca_certs:
+        context.load_verify_locations(ca_certs)
+    if certfile:
+        context.load_cert_chain(certfile, keyfile)
+    if ciphers:
+        context.set_ciphers(ciphers)
+
+    caller_self = inspect.currentframe().f_back.f_locals['self']
+    return context._wrap_socket(sock, server_side=server_side, ssl_sock=caller_self)
+
+if not hasattr(_ssl, 'sslwrap'):
+    _ssl.sslwrap = new_sslwrap
+
+def patch(foo):
+    def _(*args, **kwargs):
+        for k in ('server_hostname', '_context'):
+            if k in kwargs:
+                del kwargs
+        return foo(*args, **kwargs)
+    return _
+
+try:
+    from gevent._ssl2 import SSLSocket
+except ImportError:
+    from gevent.ssl import SSLSocket
+SSLSocket.__init__ = patch(SSLSocket.__init__)
+
 from gevent import monkey
 monkey.patch_all()
 
