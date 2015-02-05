@@ -25,21 +25,21 @@ class TestIrcChannel(TestCase):
             self.s._maybe_say(None, 'Hello', tags=['default']),
             True,
         )
-        self.s.parent.client.msg.assert_called_with("#example", "Hello")
+        self.s.parent.client.privmsg.assert_called_with("#example", "Hello")
 
     def test_maybe_say_action(self):
         self.assertEqual(
             self.s._maybe_say(None, 'Hello', tags=['default'], action=True),
             True,
         )
-        self.assertEqual(self.s.parent.client.send_message.called, 1)
+        self.assertEqual(self.s.parent.client.action.called, 1)
 
     def test_maybe_say_notice(self):
         self.assertEqual(
             self.s._maybe_say(None, 'Hello', tags=['default'], notice=True),
             True,
         )
-        self.assertEqual(self.s.parent.client.send_message.called, 1)
+        self.assertEqual(self.s.parent.client.notice.called, 1)
 
     def test_maybe_not_say(self):
         self.assertEqual(
