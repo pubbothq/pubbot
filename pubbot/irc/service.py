@@ -1,4 +1,4 @@
-# Copyright 2008-2013 the original author or authors
+# Copyright 2008-2015 the original author or authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,43 +16,111 @@ import logging
 
 import gevent
 
-from geventirc import irc
-from geventirc import handlers, replycode, message
+import irc.bot
+import irc.strings
 
 from pubbot import service
 from pubbot.conversation import signals
 from pubbot.irc.models import Network
-from pubbot.irc.handlers import GhostHandler, UserListHandler, InviteProcessor, ChannelHandler, JoinHandler
-from pubbot.utils import force_bytes
 
 
 logger = logging.getLogger(__name__)
 
 
-class Client(irc.Client):
+"""
+class JoinHandler(object):
 
-    def _send_loop(self):
-        while True:
-            command = force_bytes(self._send_queue.get())
-            self.logger.debug('send: %r', command[:-2])
-            try:
-                self._socket.sendall(command)
-            except Exception:
-                self.logger.exception("Client._send_loop failed")
-                gevent.spawn(self.reconnect)
-                return
+    commands = ['001']
 
+    def __init__(self, channel):
+        self.channel = channel
 
-class Ping(message.Command):
-
-    def __init__(self, daemon, prefix=None):
-        super(Ping, self).__init__(daemon, prefix=prefix)
+    def __call__(self, client, msg):
+        gevent.sleep(5)
+        client.msg('ChanServ', 'unban %s' % (self.channel, ))
+        gevent.sleep(10)
+        client.send_message(message.Join(self.channel))
+"""
 
 
-class Notice(message.Command):
+class Bot(irc.bot.SingleServerIRCBot):
 
-    def __init__(self, to, msg, prefix=None):
-        super(Notice, self).__init__([to, msg], prefix=prefix)
+    def __init__(self, nickname, server, port, service):
+        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
+        self.service = service
+
+    def do_ghost(self):
+        self.connection.privmsg(
+            'nickserv',
+            'ghost %s %s' % (self.service.network.nick, self.service.network.nickserv_password),
+        )
+
+    def do_join(self):
+        for channel in self.service.hannels:
+            self.connection.join(channel.name)
+
+    def on_mode(self, c, e):
+        pass
+
+    def on_invite(self, c, e):
+        signals.invite.send(
+            sender=self,
+            invited_to=e.arguments[0],
+            invited_by=e.source.nick,
+        )
+
+    def on_nicknameinuse(self, c, e):
+        if self.service.network.nickserv_password:
+            self.do_ghost()
+        else:
+            c.nick(c.get_nickname() + "_")
+
+    def on_welcome(self, c, e):
+        if self.service.network.nickserv_password:
+            self.do_ghost()
+        else:
+            self.do_join()
+
+    def on_privmsg(self, c, e):
+        self.do_command(e, e.arguments[0])
+
+    def on_pubmsg(self, c, e):
+        content = e.arguments[0]
+        channel = e.target
+        user = e.source
+
+        if channel not in self.service.channels:
+            return
+
+        direct = False
+        if ": " in content:
+            u, msg = content.split(":", 1)
+            if u.lower() == self.connection.get_nickname().lower():
+                direct = True
+                content = msg.lstrip()
+
+        responses = signals.message.send(
+            sender=self,
+            source=user,
+            user=user,
+            channel=self.channel,
+            content=content,
+            direct=direct,
+        )
+
+        def sortfun(args):
+            receiver, response = args
+            weight = response.get('weight', 0)
+            if response.get('has_side_effect', False):
+                return 1000 + weight
+            if response.get('useful', False):
+                return 100 + weight
+            return weight
+
+        responses.sort(key=sortfun, reverse=True)
+
+        if responses and 'content' in responses[0][1]:
+            self.privmsg(channel, responses[0][1]['content'])
 
 
 class ChannelService(service.BaseService):
@@ -65,8 +133,6 @@ class ChannelService(service.BaseService):
         self.blocks_tags = set(t for t in channel.blocks_tags.split(",") if t)
 
     def start_service(self):
-        self.parent.client.add_handler(ChannelHandler(self))
-        self.parent.client.add_handler(JoinHandler(self.channel.name))
         signals.say.connect(self._maybe_say)
 
     def stop_service(self):
@@ -91,13 +157,13 @@ class ChannelService(service.BaseService):
         return True
 
     def msg(self, message):
-        self.parent.client.msg(self.channel.name, message)
+        self.parent.client.privmsg(self.channel.name, message)
 
     def action(self, content):
-        self.parent.client.send_message(message.Me(self.channel.name, content))
+        self.parent.client.action(self.channel.name, content)
 
     def notice(self, message):
-        self.parent.client.send_message(Notice(self.channel.name, message))
+        self.parent.client.notice(self.channel.name, message)
 
 
 class NetworkService(service.BaseService):
@@ -105,37 +171,14 @@ class NetworkService(service.BaseService):
     def __init__(self, network):
         super(NetworkService, self).__init__(network.server)
         self.network = network
-
-    def start_service(self):
-        self.logger.info("Connecting to '%s' on port '%d'" % (self.network.server, int(self.network.port)))
-        self.client = Client(self.network.server, self.network.nick, port=str(self.network.port), ssl=self.network.ssl)
-
-        self.client.add_handler(handlers.print_handler)
-        self.client.add_handler(handlers.ping_handler, 'PING')
-
-        if self.network.nickserv_password:
-            self.client.add_handler(GhostHandler(self.network.nick, self.network.nickserv_password))
-        else:
-            self.client.add_handler(handlers.nick_in_use_handler, replycode.ERR_NICKNAMEINUSE)
-
-        self.client.add_handler(UserListHandler(self))
-        self.client.add_handler(InviteProcessor())
-
-        # Channels to join
         for room in self.network.rooms.all():
             self.add_child(ChannelService(room))
 
-        self.client.start()
+    def start_service(self):
+        self.logger.info("Connecting to '%s' on port '%d'" % (self.network.server, int(self.network.port)))
 
-        self._ping_loop_greenlet = gevent.spawn(self._ping_loop)
-
-    def stop_service(self):
-        self._ping_loop_greenlet.kill()
-
-    def _ping_loop(self):
-        while True:
-            gevent.sleep(120)
-            self.client.send_message(Ping(self.client.nick))
+        self.client = Bot(self.network.nick, self.network.server, int(self.network.port), self)
+        gevent.spawn(self.client.start)
 
 
 class Service(service.BaseService):
