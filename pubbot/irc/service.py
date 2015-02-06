@@ -68,7 +68,11 @@ class Bot(irc.bot.SingleServerIRCBot):
             self.connection.join(channel.name)
 
     def on_mode(self, c, e):
-        pass
+        print "=======>"
+        print e.source.nick
+        print e.target
+        print e.arguments
+        print "<======="
 
     def on_invite(self, c, e):
         signals.invite.send(
