@@ -53,7 +53,7 @@ class Bot(irc.bot.SingleServerIRCBot):
             [(server, port)],
             nickname,
             nickname,
-            ssl_factory=irc.connection.Factory(wrapper=ssl.wrap_socket),
+            connect_factory=irc.connection.Factory(wrapper=ssl.wrap_socket),
         )
         self.service = service
 
