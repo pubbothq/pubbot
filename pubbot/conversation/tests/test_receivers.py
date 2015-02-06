@@ -108,9 +108,9 @@ class TestDoge(unittest.TestCase):
         with mock.patch("requests.get") as get:
             get.return_value.json.return_value = mock_content
             with mock.patch("random.choice") as choice:
-                choice.side_effect = lambda x: x[0]
+                choice.side_effect = lambda x: sorted(x)[0]
                 r = receivers.doge(None, content="so silly")
-                self.assertEqual(r['content'], 'much "playful"')
+                self.assertEqual(r['content'], 'many "playful"')
 
 
 class TestFight(unittest.TestCase):
