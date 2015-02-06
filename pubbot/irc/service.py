@@ -13,11 +13,13 @@
 # limitations under the License.
 
 import logging
+import ssl
 
 import eventlet
 
 import irc.bot
 import irc.strings
+import irc.connection
 
 from pubbot import service
 from pubbot.conversation import signals
@@ -46,7 +48,13 @@ class JoinHandler(object):
 class Bot(irc.bot.SingleServerIRCBot):
 
     def __init__(self, nickname, server, port, service):
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
+        irc.bot.SingleServerIRCBot.__init__(
+            self,
+            [(server, port)],
+            nickname,
+            nickname,
+            ssl_factory=irc.connection.Factory(wrapper=ssl.wrap_socket),
+        )
         self.service = service
 
     def do_ghost(self):
