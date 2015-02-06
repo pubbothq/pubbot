@@ -131,7 +131,7 @@ class Bot(irc.bot.SingleServerIRCBot):
         responses.sort(key=sortfun, reverse=True)
 
         if responses and 'content' in responses[0][1]:
-            self.privmsg(channel, responses[0][1]['content'])
+            self.connection.privmsg(channel, responses[0][1]['content'])
 
 
 class ChannelService(service.BaseService):
@@ -168,7 +168,7 @@ class ChannelService(service.BaseService):
         return True
 
     def msg(self, message):
-        self.parent.client.privmsg(self.channel.name, message)
+        self.parent.client.connection.privmsg(self.channel.name, message)
 
     def action(self, content):
         self.parent.client.action(self.channel.name, content)
