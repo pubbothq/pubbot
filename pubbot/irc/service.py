@@ -171,10 +171,10 @@ class ChannelService(service.BaseService):
         self.parent.client.connection.privmsg(self.channel.name, message)
 
     def action(self, content):
-        self.parent.client.action(self.channel.name, content)
+        self.parent.client.connection.action(self.channel.name, content)
 
     def notice(self, message):
-        self.parent.client.notice(self.channel.name, message)
+        self.parent.client.connection.notice(self.channel.name, message)
 
 
 class NetworkService(service.BaseService):
