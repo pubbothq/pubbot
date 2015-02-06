@@ -19,7 +19,7 @@ uritemplate.py=0.3.0
 # Install our main egg
 -e .
 
-# Testing stuff
+# Testing stuff
 flake8
 
 # For coveralls
