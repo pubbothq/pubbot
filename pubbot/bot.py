@@ -31,10 +31,11 @@ class PubbotService(BaseService):
 
         for installed_app in settings.INSTALLED_APPS:
             self.logger.debug("Checking {installed_app} for receivers".format(installed_app=installed_app))
+            import_str = "%s.receivers" % installed_app
             try:
-                import_module("%s.receivers" % installed_app)
+                import_module(import_str)
             except ImportError as e:
-                if str(e) != "No module named receivers":
+                if str(e) != "No module named '{}'".format(import_str):
                     self.logger.exception("Error importing receivers for %r" % installed_app)
 
             self.logger.debug("Checking {installed_app} for Service".format(installed_app=installed_app))
@@ -42,7 +43,7 @@ class PubbotService(BaseService):
             try:
                 module = import_module(module_name)
             except ImportError as e:
-                if str(e) != "No module named service":
+                if str(e) != "No module named '{}'".format(module_name):
                     self.logger.exception("Error importing service for %r" % installed_app)
                 continue
 

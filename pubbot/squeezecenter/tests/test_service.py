@@ -55,7 +55,7 @@ class TestSqueezeCenterConnection(unittest.TestCase):
 
     def test_recv_loop(self):
         self.conn.start()
-        self.conn._socket.recv.side_effect = ["data data bar\n", "data data ", "foo\n", BaseException()]
+        self.conn._socket.recv.side_effect = [b"data data bar\n", b"data data ", b"foo\n", BaseException()]
         try:
             self.conn._recv_loop()
         except BaseException:
