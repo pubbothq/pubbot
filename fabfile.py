@@ -45,12 +45,12 @@ def deploy(bundle, **kwargs):
 
     yield Package(name="gcc")
     yield Package(name="git-core")
-    yield Package(name="python-dev")
-    yield Package(name="python-virtualenv")
+    yield Package(name="python3-dev")
+    yield Package(name="python3-virtualenv")
     yield Package(name="redis-server")
 
     yield Execute(
-        command='virtualenv /var/local/pubbot',
+        command='virtualenv --python /usr/bin/python3 /var/local/pubbot',
         creates='/var/local/pubbot/bin/pip',
         user='pubbot',
         )
