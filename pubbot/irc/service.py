@@ -29,22 +29,6 @@ from pubbot.irc.models import Network
 logger = logging.getLogger(__name__)
 
 
-"""
-class JoinHandler(object):
-
-    commands = ['001']
-
-    def __init__(self, channel):
-        self.channel = channel
-
-    def __call__(self, client, msg):
-        eventlet.sleep(5)
-        client.msg('ChanServ', 'unban %s' % (self.channel, ))
-        eventlet.sleep(10)
-        client.send_message(message.Join(self.channel))
-"""
-
-
 class Bot(irc.bot.SingleServerIRCBot):
 
     def __init__(self, nickname, server, port, service):
@@ -92,13 +76,23 @@ class Bot(irc.bot.SingleServerIRCBot):
         else:
             self.do_join()
 
-    def on_privmsg(self, c, e):
-        self.do_command(e, e.arguments[0])
+    # def on_privmsg(self, c, e):
+    #     self.do_command(e, e.arguments[0])
+
+    def on_join(self, c, e):
+        if e.target not in self.service:
+            return
+        signals.join.send(
+            sender=self,
+            user=e.source.nick,
+            channel=self.service[e.target],
+            is_me=e.source.nick == c.get_nickname(),
+        )
 
     def on_pubmsg(self, c, e):
         content = e.arguments[0]
         channel = e.target
-        user = e.source
+        user = e.source.nick
 
         if channel not in self.service:
             return
@@ -139,9 +133,12 @@ class ChannelService(service.BaseService):
     def __init__(self, channel):
         super(ChannelService, self).__init__(channel.name)
         self.channel = channel
-        self.users = []
         self.subscribes_tags = set(t for t in channel.subscribes_tags.split(",") if t)
         self.blocks_tags = set(t for t in channel.blocks_tags.split(",") if t)
+
+    @property
+    def users(self):
+        return list(self.parent.client.channels[self.name].users())
 
     def start_service(self):
         signals.say.connect(self._maybe_say)
