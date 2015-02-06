@@ -64,7 +64,7 @@ class Bot(irc.bot.SingleServerIRCBot):
         )
 
     def do_join(self):
-        for channel in self.service.hannels:
+        for channel in self.service.channels:
             self.connection.privmsg("ChanServ", "unban {}".format(channel))
             eventlet.sleep(1)
             self.connection.join(channel.name)
