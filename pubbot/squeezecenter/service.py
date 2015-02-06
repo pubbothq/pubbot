@@ -16,6 +16,7 @@ from urllib import unquote_plus
 import eventlet.queue
 import eventlet
 import socket
+import greenlet
 
 from pubbot import service
 from pubbot.squeezecenter import handlers
