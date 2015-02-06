@@ -86,7 +86,7 @@ class SqueezeCenterConnection(object):
                 eventlet.spawn(self.reconnect)
 
             buf += data
-            pos = buf.find("\n")
+            pos = buf.find(b"\n")
             while pos >= 0:
                 line = force_str(unquote_plus(buf[0:pos]))
                 parts = line.split(' ')
