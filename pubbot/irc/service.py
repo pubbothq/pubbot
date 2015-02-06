@@ -65,14 +65,13 @@ class Bot(irc.bot.SingleServerIRCBot):
 
     def do_join(self):
         for channel in self.service.hannels:
+            self.connection.privmsg("ChanServ", "unban {}".format(channel))
+            eventlet.sleep(1)
             self.connection.join(channel.name)
 
-    def on_mode(self, c, e):
-        print "=======>"
-        print e.source.nick
-        print e.target
-        print e.arguments
-        print "<======="
+    def on_umode(self, c, e):
+        if e.arguments[0] == "+R" and e.target == self.service.network.nick:
+            eventlet.spawn(self.do_join)
 
     def on_invite(self, c, e):
         signals.invite.send(
