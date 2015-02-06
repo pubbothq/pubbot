@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from urllib import unquote_plus
+from urllib.parse import unquote_plus
 import eventlet.queue
 import eventlet
 import socket

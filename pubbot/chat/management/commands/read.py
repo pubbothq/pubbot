@@ -3,8 +3,6 @@ import os
 import sys
 from optparse import make_option
 
-from progressbar import ProgressBar, Percentage, Bar, ETA
-
 from django.core.management.base import BaseCommand, CommandError
 
 from pubbot.chat.brain import brain
@@ -49,10 +47,7 @@ class Command(BaseCommand):
                 start_at = int(options.get('start_at', 0))
                 lines = fp.readlines()[start_at:]
 
-                pb = ProgressBar(widgets=[Percentage(), Bar(), ETA()], maxval=len(lines)).start()
-
                 for line in lines:
-                    pb.update(pb.currval + 1)
                     sys.stdout.flush()
 
                     if line.startswith("---"):
@@ -90,7 +85,5 @@ class Command(BaseCommand):
                         continue
 
                     brain.store_string(line)
-
-        pb.finish()
 
         self.stdout.write('I readed the log file')

@@ -1,5 +1,5 @@
 import unittest
-import mock
+from unittest import mock
 import contextlib2 as contextlib
 
 from pubbot.squeezecenter import service
@@ -75,8 +75,8 @@ class TestSqueezeCenterConnection(unittest.TestCase):
             pass
 
         self.conn._socket.sendall.assert_has_calls([
-            mock.call("data data bar\n"),
-            mock.call("data data foo\n"),
+            mock.call(b"data data bar\n"),
+            mock.call(b"data data foo\n"),
         ])
 
 

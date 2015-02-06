@@ -37,5 +37,5 @@ class Education(models.Model):
             except:
                 raise ValidationError({'trigger': [ValidationError('Trigger must be a valid regex if regex checked')]})
 
-    def __unicode__(self):
+    def __str__(self):
         return '%r -> %r' % (self.trigger, self.response)

@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import unittest
 import eventlet.timeout
 
@@ -254,7 +254,7 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(ValueError, force_bytes, [])
 
     def test_force_bytes_u(self):
-        self.assertTrue(isinstance(force_bytes(u"HELLO"), str))
+        self.assertTrue(isinstance(force_bytes(u"HELLO"), bytes))
 
     def test_force_bytes_b(self):
-        self.assertTrue(isinstance(force_bytes(b"HELLO"), str))
+        self.assertTrue(isinstance(force_bytes(b"HELLO"), bytes))

@@ -15,7 +15,7 @@
 import re
 import random
 import datetime
-from urllib import quote
+from urllib.parse import quote
 import logging
 
 from bs4 import BeautifulSoup
@@ -84,7 +84,7 @@ def pull_request(sender, user, repo, id, **kwargs):
     url = 'https://api.github.com/repos/%(user)s/%(repo)s/pulls/%(id)s' % locals()
 
     pull = requests.get(url).json()
-    title = pull['title'].encode('ascii', 'replace')
+    title = pull['title']
     name = pull['user']['login']
 
     return {
@@ -97,7 +97,7 @@ def pull_request(sender, user, repo, id, **kwargs):
 def on_appdotnet_link(sender, account, id, **kwargs):
     res = requests.get('https://alpha-api.app.net/stream/0/posts/%s' %
                        id).json()
-    tweet = res['data']['text'].encode('ascii', 'replace')
+    tweet = res['data']['text']
     screen_name = res['data']['user']['username']
     return {
         'content': '[ %s: %s ]' % (screen_name, tweet),
@@ -183,7 +183,7 @@ def doge(sender, prefix, word, **kwargs):
                         if match.group(2):
                             synonyms |= set(match.group(2).split(', '))
                     break
-            synonyms = set(map(unicode.strip, synonyms))
+            synonyms = set(map(str.strip, synonyms))
             synonyms = list(filter(lambda x: ' ' not in x, synonyms))
             if not synonyms:
                 continue

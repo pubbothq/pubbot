@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from UserDict import IterableUserDict
+from collections import UserDict
 import eventlet
 import logging
 
@@ -30,7 +30,7 @@ class ServiceState(Machine):
     stopping = Transition(from_state='running', to_states=['not_running'])
 
 
-class BaseService(IterableUserDict, object):
+class BaseService(UserDict, object):
 
     def __init__(self, name):
         self.name = name

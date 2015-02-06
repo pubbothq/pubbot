@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import unittest
 
 from pubbot.quizbot.receivers import quizbot_request

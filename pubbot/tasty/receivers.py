@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import urlparse
+from urllib import parse
 
 from bs4 import BeautifulSoup
 import requests
@@ -38,7 +38,7 @@ def process_link(url):
 
     l.content_type = r.headers.get("content-type", "")
     l.content_length = r.headers.get("content-length", -1)
-    l.hostname = urlparse.urlparse(r.url).hostname
+    l.hostname = parse.urlparse(r.url).hostname
 
     if l.content_type.startswith("text/html"):
         soup = BeautifulSoup(requests.get(r.url).text)

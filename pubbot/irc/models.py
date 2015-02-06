@@ -25,7 +25,7 @@ class Network(models.Model):
         max_length=1024, blank=True, null=True)
     nickserv_certfp = models.TextField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.server
 
 

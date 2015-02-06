@@ -26,7 +26,7 @@ def chat_receiver(regex, **kwargs):
     """
     A decorator that hooks up a function to the pubbot.conversation.signals.message signal
     """
-    if isinstance(regex, basestring):
+    if isinstance(regex, str):
         regex = re.compile(regex)
 
     def _decorator(func):

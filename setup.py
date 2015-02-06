@@ -20,7 +20,6 @@ setup(
         'irc',
         'beautifulsoup4',
         'PyStemmer',
-        'progressbar',
         ],
       entry_points = """
       [console_scripts]

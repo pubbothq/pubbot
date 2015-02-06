@@ -186,10 +186,9 @@ def doeswantlater(sender, doeswantlater, **kwargs):
 @chat_receiver(r'^random$')
 def random_song(sender, content, **kwargs):
     words = filter(lambda x: len(x) <= 4, open("/usr/share/dict/words").read().split("\n"))
-    doeswant(sender, content="doeswant " + random.choice(words), **kwargs)
+    doeswant(sender, content="doeswant " + random.choice(list(words)), **kwargs)
     return {"had_side_effect": True, }
 
 
 def command(command):
-    print "command: %s" % command
     bot['pubbot.squeezecenter'].client.send(command)

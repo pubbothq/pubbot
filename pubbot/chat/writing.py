@@ -25,10 +25,10 @@ with open(os.path.join(os.path.dirname(__file__), "stopwords.txt")) as fp:
 
 
 def iteruntil(offset, iterable):
-    yield iterable.next()
+    yield next(iterable)
     until = time.time() + offset
     while until > time.time():
-        yield iterable.next()
+        yield next(iterable)
 
 
 def iter_replies_from_tokens(tokens):

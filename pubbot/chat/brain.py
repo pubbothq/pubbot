@@ -27,14 +27,14 @@ from .tokenizer import tokenizer
 def group_tokens(tokens):
     a = ""
     b = ""
-    c = tokens.next()
+    c = next(tokens)
     yield (a, b, c)
 
     while c:
         a = b
         b = c
         try:
-            c = tokens.next()
+            c = next(tokens)
         except StopIteration:
             c = ""
         yield (a, b, c)
@@ -71,7 +71,7 @@ class Brain(object):
         while tokens:
             token = random.choice(tokens)
             try:
-                results = json.loads(self.client.eval(self.generate_sentence, 0, token, 10), "utf-8")
+                results = json.loads(force_str(self.client.eval(self.generate_sentence, 0, token, 10)))
             except UnicodeError:
                 continue
 

@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import unittest
 
 from pubbot.squeezecenter.handlers import CurrentSongHandler, StopHandler
