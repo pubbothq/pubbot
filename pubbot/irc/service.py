@@ -114,7 +114,7 @@ class Bot(irc.bot.SingleServerIRCBot):
             sender=self,
             source=user,
             user=user,
-            channel=self.channel,
+            channel=self.service[channel],
             content=content,
             direct=direct,
         )
