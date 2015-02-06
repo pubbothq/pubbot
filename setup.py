@@ -14,7 +14,7 @@ setup(
     install_requires=[
         'six',
         'Django',
-        'gevent',
+        'eventlet',
         'greenlet',
         'requests',
         'irc',

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import six
-from gevent.event import Event
+from eventlet.event import Event
 
 
 class State(object):
@@ -40,10 +40,10 @@ class TransitionContext(object):
 
     def __exit__(self, *exc):
         if self.machine.state in self.machine._events:
-            self.machine._events[self.machine.state].clear()
+            self.machine._events[self.machine.state].reset()
         self.machine.state = self.new_state
         self.machine._in_transition = False
-        self.machine._events[self.machine.state].set()
+        self.machine._events[self.machine.state].send('')
 
 
 class MachineType(type):
@@ -93,13 +93,13 @@ class Machine(six.with_metaclass(MachineType)):
     def __init__(self):
         self.state = self.__initial_state__
         self._events = dict((state, Event()) for state in self.__states__)
-        self._events[self.state].set()
+        self._events[self.state].send('')
         self._in_transition = False
 
     def wait(self, state, timeout=None):
         if state not in self._events:
             raise RuntimeError("Unable to wait for '{}'".format(state))
-        self._events[state].wait(timeout)
+        self._events[state].wait()
 
     def transition_to(self, new_state):
         if self._in_transition:

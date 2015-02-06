@@ -1,7 +1,7 @@
 import time
 
 from constance import config
-import gevent
+import eventlet
 from github3 import GitHub, GitHubError
 
 from pubbot import service
@@ -68,7 +68,7 @@ class OrganizationEventsService(service.TaskService):
                     sleep_time = self.seconds_till_ratelimit_reset(e.response)
                     if sleep_time > 0:
                         self.logger.debug("Sleeping for %d seconds (rate limit hit)" % (sleep_time, ))
-                        gevent.sleep(sleep_time)
+                        eventlet.sleep(sleep_time)
                         continue
                 raise
 
@@ -87,7 +87,7 @@ class OrganizationEventsService(service.TaskService):
             poll_interval = int(iterable.last_response.headers.get("X-Poll-Interval", 0))
             if poll_interval > 0:
                 self.logger.debug("Sleeping for %d seconds (due to X-Poll-Interval)" % (poll_interval, ))
-                gevent.sleep(poll_interval)
+                eventlet.sleep(poll_interval)
 
             iterable.refresh()
 

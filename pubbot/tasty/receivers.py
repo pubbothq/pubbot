@@ -4,7 +4,7 @@ import urlparse
 
 from bs4 import BeautifulSoup
 import requests
-import gevent
+import eventlet
 
 from pubbot.tasty.models import Link
 from pubbot.conversation import chat_receiver
@@ -12,7 +12,7 @@ from pubbot.conversation import chat_receiver
 
 @chat_receiver(r'''(?xi)\b(?P<url>(?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''')
 def got_chat_link(sender, url, **kwargs):
-    gevent.spawn(process_link, url)
+    eventlet.spawn(process_link, url)
 
 
 @chat_receiver(r'^(lastlink)|(last link)')

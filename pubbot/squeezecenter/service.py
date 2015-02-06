@@ -13,9 +13,9 @@
 # limitations under the License.
 
 from urllib import unquote_plus
-import gevent.queue
-import gevent.pool
-from gevent import socket
+import eventlet.queue
+import eventlet
+import socket
 
 from pubbot import service
 from pubbot.squeezecenter import handlers
@@ -29,9 +29,9 @@ class SqueezeCenterConnection(object):
         self.port = port
 
         self._socket = None
-        self._recv_queue = gevent.queue.Queue()
-        self._send_queue = gevent.queue.Queue()
-        self._group = gevent.pool.Group()
+        self._recv_queue = eventlet.queue.Queue()
+        self._send_queue = eventlet.queue.Queue()
+        self._group = []
 
         self.handlers = []
 
@@ -42,18 +42,20 @@ class SqueezeCenterConnection(object):
 
         self.send('listen 1')
 
-        self._group.spawn(self._send_loop)
-        self._group.spawn(self._process_loop)
-        self._group.spawn(self._recv_loop)
+        self._group.append(eventlet.spawn(self._send_loop))
+        self._group.append(eventlet.spawn(self._process_loop))
+        self._group.append(eventlet.spawn(self._recv_loop))
 
     def send(self, command):
         self._send_queue.put('%s\n' % command)
 
     def join(self):
-        self._group.join()
+        # self._group.join()
+        pass
 
     def stop(self):
-        self._group.kill()
+        for t in self._group:
+            t.kill()
         if self._socket is not None:
             self._socket.shutdown(2)
             self._socket.close()
@@ -64,7 +66,7 @@ class SqueezeCenterConnection(object):
         self.join()
         if flush:
             self._send_queue.queue.clear()
-        gevent.sleep(delay)
+        eventlet.sleep(delay)
         self.start()
 
     def add_handler(self, handler):
@@ -77,10 +79,10 @@ class SqueezeCenterConnection(object):
         while True:
             try:
                 data = self._socket.recv(512)
-            except gevent.GreenletExit:
+            except greenlet.GreenletExit:
                 raise
             except Exception:
-                gevent.spawn(self.reconnect)
+                eventlet.spawn(self.reconnect)
 
             buf += data
             pos = buf.find("\n")
@@ -105,14 +107,14 @@ class SqueezeCenterConnection(object):
             try:
                 self._socket.sendall(command)
             except Exception:
-                gevent.spawn(self.reconnect)
+                eventlet.spawn(self.reconnect)
                 return
 
     def _process_loop(self):
         while True:
             data = self._recv_queue.get()
             for handler in self.handlers:
-                self._group.spawn(handler, self, data)
+                self._group.append(eventlet.spawn(handler, self, data))
 
 
 class Service(service.BaseService):

@@ -2,8 +2,8 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.handlers.wsgi import WSGIHandler
 
-from gevent import wsgi
-from gevent.pool import Pool
+import eventlet
+from eventlet import wsgi
 
 from pubbot import service
 
@@ -28,21 +28,12 @@ class Service(service.TaskService):
         self.addr = addr
         self.port = port
 
-        if getattr(settings, "WEB_POOL", None):
-            try:
-                self.pool_size = int(settings.WEB_POOL)
-            except ValueError:
-                raise ImproperlyConfigured("'WEB_POOL' must be an integer")
-        else:
-            self.pool_size = None
-
     def run(self):
-        self.logger.debug("Getting WSGI application")
-        app = WSGIHandler()
+        self.logger.debug("Serving WSGI")
+        wsgi.server(eventlet.listen((self.addr, self.port)), WSGIHandler())
 
         pool = Pool(self.pool_size) if self.pool_size else None
         self.logger.debug("Prerparing  WSGI server")
         server = wsgi.WSGIServer((self.addr, self.port), app, spawn=pool)
 
-        self.logger.debug("Serving WSGI requests")
         server.serve_forever()

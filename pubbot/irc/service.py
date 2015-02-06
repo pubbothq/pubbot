@@ -14,7 +14,7 @@
 
 import logging
 
-import gevent
+import eventlet
 
 import irc.bot
 import irc.strings
@@ -36,9 +36,9 @@ class JoinHandler(object):
         self.channel = channel
 
     def __call__(self, client, msg):
-        gevent.sleep(5)
+        eventlet.sleep(5)
         client.msg('ChanServ', 'unban %s' % (self.channel, ))
-        gevent.sleep(10)
+        eventlet.sleep(10)
         client.send_message(message.Join(self.channel))
 """
 
@@ -178,7 +178,7 @@ class NetworkService(service.BaseService):
         self.logger.info("Connecting to '%s' on port '%d'" % (self.network.server, int(self.network.port)))
 
         self.client = Bot(self.network.nick, self.network.server, int(self.network.port), self)
-        gevent.spawn(self.client.start)
+        eventlet.spawn(self.client.start)
 
 
 class Service(service.BaseService):

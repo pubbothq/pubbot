@@ -18,7 +18,7 @@ import random
 
 from django.core.cache import caches
 
-import gevent
+import eventlet
 
 from pubbot.bot import bot
 from pubbot.dispatch import receiver
@@ -65,7 +65,7 @@ def timeout_current_skip():
             )
             return
         logger.debug("%d seconds to timeout" % staleness)
-        gevent.sleep(staleness)
+        eventlet.sleep(staleness)
         skip = get_current_skip()
 
 
@@ -126,7 +126,7 @@ def update_skip(current_skip, user, skip_type, created):
     set_current_skip(current_skip)
 
     if created:
-        gevent.spawn(timeout_current_skip)
+        eventlet.spawn(timeout_current_skip)
 
     skip_count = len(current_skip["skip"]) - len(current_skip["noskip"])
     votes_needed = 3 - skip_count

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from UserDict import IterableUserDict
-import gevent
+import eventlet
 import logging
 
 from .state import State, Transition, Machine
@@ -93,7 +93,7 @@ class TaskService(BaseService):
     """ A service that runs a function and when that function returns the service stops """
 
     def start_service(self):
-        self._task = gevent.spawn(self.run)
+        self._task = eventlet.spawn(self.run)
         self._task.link(lambda x: self.stop())
 
     def run(self):

@@ -1,6 +1,6 @@
 import mock
 import unittest
-import gevent
+import eventlet.timeout
 
 from django.core.cache import caches
 
@@ -232,7 +232,7 @@ class TestSimpleTaskService(unittest.TestCase):
                 self._outcome = 1
 
         t = T("test_run")
-        gevent.with_timeout(1, t.start_and_wait)
+        eventlet.timeout.with_timeout(1, t.start_and_wait)
         self.assertEqual(t._outcome, 1)
 
     def test_run_not_impl(self):

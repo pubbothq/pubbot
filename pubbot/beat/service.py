@@ -1,6 +1,6 @@
 import time
 from croniter import croniter
-import gevent
+import eventlet
 from pubbot.service import TaskService
 
 
@@ -17,7 +17,7 @@ class ScheduledTask(object):
 
     def maybe_apply(self):
         if self.due < time.time():
-            gevent.spawn(self.task)
+            eventlet.spawn(self.task)
             self.refresh()
             return True
 
@@ -50,4 +50,4 @@ class Service(TaskService):
             ttb = next_due - time.time()
             self.logger.debug("Time-to-beat is %r" % ttb)
 
-            gevent.sleep(max(ttb, 0))
+            eventlet.sleep(max(ttb, 0))

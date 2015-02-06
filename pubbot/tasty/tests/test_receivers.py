@@ -23,22 +23,22 @@ class TestTastyReceivers(TestCase):
         self.assertEqual(r['content'], "GitHub")
 
     def test_got_chat_link(self):
-        with mock.patch("gevent.spawn") as spawn:
+        with mock.patch("eventlet.spawn") as spawn:
             receivers.got_chat_link(None, content="I really like http://google.com fonts")
         spawn.assert_called_with(receivers.process_link, "http://google.com")
 
     def test_got_chat_link_http(self):
-        with mock.patch("gevent.spawn") as spawn:
+        with mock.patch("eventlet.spawn") as spawn:
             receivers.got_chat_link(None, content="http://google.com")
         spawn.assert_called_with(receivers.process_link, "http://google.com")
 
     def test_got_chat_link_ssl(self):
-        with mock.patch("gevent.spawn") as spawn:
+        with mock.patch("eventlet.spawn") as spawn:
             receivers.got_chat_link(None, content="https://google.com")
         spawn.assert_called_with(receivers.process_link, "https://google.com")
 
     def test_got_chat_link_no_protocol(self):
-        with mock.patch("gevent.spawn") as spawn:
+        with mock.patch("eventlet.spawn") as spawn:
             receivers.got_chat_link(None, content="www.google.com")
         spawn.assert_called_with(receivers.process_link, "www.google.com")
 

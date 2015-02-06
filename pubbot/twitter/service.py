@@ -5,7 +5,7 @@ from constance import config
 from twitter.oauth import OAuth
 from twitter.stream import TwitterStream, Timeout, HeartbeatTimeout, Hangup
 
-import gevent
+import eventlet
 
 from pubbot import service
 from . import signals
@@ -50,4 +50,4 @@ class Service(service.TaskService):
                     self.logger.debug("Unhandled message: %r" % msg)
 
             self.logger.info("Lost connection to userstream.twitter.com. Reconnecting in 10s...")
-            gevent.sleep(10)
+            eventlet.sleep(10)
