@@ -29,11 +29,5 @@ class Service(service.TaskService):
         self.port = port
 
     def run(self):
-        self.logger.debug("Serving WSGI")
+        self.logger.debug("Handling WSGI requests")
         wsgi.server(eventlet.listen((self.addr, self.port)), WSGIHandler())
-
-        pool = Pool(self.pool_size) if self.pool_size else None
-        self.logger.debug("Prerparing  WSGI server")
-        server = wsgi.WSGIServer((self.addr, self.port), app, spawn=pool)
-
-        server.serve_forever()
