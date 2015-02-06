@@ -76,7 +76,7 @@ class SqueezeCenterConnection(object):
             handler.start(self)
 
     def _recv_loop(self):
-        buf = ''
+        buf = b''
         while True:
             try:
                 data = self._socket.recv(512)
