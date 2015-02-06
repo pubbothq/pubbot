@@ -100,7 +100,7 @@ class SqueezeCenterConnection(object):
                     pass
 
                 buf = buf[pos + 1:]
-                pos = buf.find("\n")
+                pos = buf.find(b"\n")
 
     def _send_loop(self):
         while True:
