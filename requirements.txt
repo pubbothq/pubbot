@@ -3,7 +3,7 @@ contextlib2==0.5.5
 croniter==0.3.17
 Django==1.11.2
 django-constance==2.0.0
-django-picklefield==0.3.2
+django-picklefield==1.0.0
 eventlet==0.21.0
 giphypop==0.3
 github3.py==0.9.6
