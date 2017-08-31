@@ -1,6 +1,6 @@
 beautifulsoup4==4.6.0
 contextlib2==0.5.5
-croniter==0.3.17
+croniter==0.3.18
 Django==1.11.4
 django-constance==2.0.0
 django-picklefield==1.0.0
