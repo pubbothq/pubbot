@@ -1,7 +1,7 @@
 beautifulsoup4==4.3.2
 contextlib2==0.4.0
 croniter==0.3.5
-Django==1.7.1
+Django==1.11.20
 django-constance==1.0.1
 django-picklefield==0.3.1
 eventlet==0.16.1
