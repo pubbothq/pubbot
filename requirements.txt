@@ -1,5 +1,5 @@
 beautifulsoup4==4.8.0
-contextlib2==0.5.5
+contextlib2==0.6.0
 croniter==0.3.30
 Django==2.2.5
 django-constance==2.4.0
