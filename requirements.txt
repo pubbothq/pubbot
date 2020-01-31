@@ -11,7 +11,7 @@ greenlet==0.4.15
 irc==18.0.0
 requests==2.22.0
 PyStemmer==1.3.0
-redis==3.3.11
+redis==3.4.0
 simplejson==3.17.0
 twitter==1.18.0
 uritemplate.py==3.0.2
