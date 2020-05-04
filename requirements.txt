@@ -1,7 +1,7 @@
 beautifulsoup4==4.9.0
 contextlib2==0.6.0.post1
 croniter==0.3.31
-Django==3.0.5
+Django==3.0.6
 django-constance==2.6.0
 django-picklefield==2.1.1
 eventlet==0.25.2
