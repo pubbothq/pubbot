@@ -4,7 +4,7 @@ croniter==1.0.12
 Django==3.2.1
 django-constance==2.8.0
 django-picklefield==3.0.1
-eventlet==0.30.3
+eventlet==0.31.0
 giphypop==0.3
 github3.py==2.0.0
 greenlet==1.0.0
