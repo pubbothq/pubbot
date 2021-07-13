@@ -9,7 +9,7 @@ giphypop==0.3
 github3.py==2.0.0
 greenlet==1.1.0
 irc==19.0.1
-requests==2.25.1
+requests==2.26.0
 PyStemmer==2.0.1
 redis==3.5.3
 simplejson==3.17.3
